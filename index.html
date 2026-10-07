@@ -262,6 +262,89 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
   .ban circle,.ban path,.scribble path,.strike,.nope-ico .thing{transition-delay:0s !important}
   .flow .node,.flow .bulb{transition-delay:0s !important}
 }
+
+/* ---------- alkalmazás oldalak: belépés, foglalás, Foglalásaim, admin ---------- */
+[hidden]{display:none !important}
+/* ezeken az oldalakon a 3D háttér áll, helyette sima színátmenet */
+.app-mode #scene{display:none}
+.app-mode body{background:radial-gradient(120% 70% at 75% 0%, #26306a 0%, var(--night) 60%) fixed}
+button.btn-ghost{background:transparent}
+.nav ul .navbtn{appearance:none;background:none;border:0;padding:.3rem 0;display:inline-block;line-height:inherit;vertical-align:baseline;color:var(--muted);font:500 .95rem var(--body);cursor:pointer;transition:color .2s}
+.nav ul .navbtn:hover{color:var(--paper)}
+.app-sec{min-height:85vh;padding-bottom:clamp(4rem,10vh,6rem)}
+.muted{color:var(--muted)}
+.card{max-width:580px;margin-top:2.5rem;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;padding:clamp(1.4rem,4vw,2.5rem)}
+.card.wide{max-width:none}
+.card h2{font-size:clamp(1.8rem,4vw,2.6rem);max-width:none}
+.tabs{display:flex;gap:.3rem;padding:.3rem;border:1px solid var(--line);border-radius:999px;margin-bottom:1.75rem;width:max-content;max-width:100%}
+.tabs button{appearance:none;border:0;background:none;color:var(--muted);font:600 .95rem var(--body);padding:.55rem 1.15rem;border-radius:999px;cursor:pointer;min-height:42px}
+.tabs button[aria-selected="true"]{background:var(--lantern);color:var(--ink)}
+.form{display:grid;gap:1.15rem}
+.form .btn{justify-self:start}
+.field label,.field .lbl{display:block;font-weight:600;margin-bottom:.4rem}
+.field input,.field select{width:100%;min-height:48px;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--lantern);box-shadow:0 0 0 3px rgba(242,194,48,.2)}
+.hint{color:var(--muted);font-size:.9rem;margin:.35rem 0 0}
+.check{display:flex;gap:.75rem;align-items:flex-start;font-size:.97rem;cursor:pointer}
+.check input{width:20px;height:20px;margin:.2rem 0 0;accent-color:var(--lantern);flex:none}
+.linkbtn{appearance:none;background:none;border:0;padding:0;color:var(--lantern);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;justify-self:start}
+.pkg-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;border:0;padding:0;margin:0;min-width:0}
+.pkg-pick legend{font-weight:600;margin-bottom:.4rem;padding:0}
+.pkg-pick div{position:relative}
+.pkg-pick input{position:absolute;opacity:0;pointer-events:none}
+.pkg-pick label{display:block;height:100%;border:1.5px solid var(--line);border-radius:16px;padding:.85rem .5rem;cursor:pointer;text-align:center;transition:border-color .2s, background .2s}
+.pkg-pick label:hover{border-color:rgba(244,241,234,.4)}
+.pkg-pick b{display:block;font-family:var(--display);font-size:1.3rem;font-weight:700}
+.pkg-pick span{color:var(--muted);font-size:.85rem}
+.pkg-pick input:checked + label{border-color:var(--lantern);background:rgba(242,194,48,.14)}
+.pkg-pick input:focus-visible + label{outline:3px solid var(--lantern);outline-offset:2px}
+.msg{border-radius:14px;padding:.8rem 1rem;font-size:.97rem}
+.msg.err{background:rgba(232,118,74,.15);border:1px solid rgba(232,118,74,.55)}
+.msg.ok{background:rgba(242,194,48,.12);border:1px solid rgba(242,194,48,.45)}
+.done p{color:var(--muted)}
+.done .sum{color:var(--paper);font-size:1.2rem;border-left:3px solid var(--lantern);padding-left:1rem}
+.btn-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.5rem}
+.bk-list{list-style:none;margin:0;padding:0;display:grid;gap:.9rem}
+.bk{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;align-items:center;padding:1.2rem 1.4rem;border:1px solid var(--line);border-radius:20px;background:rgba(15,22,51,.55)}
+.bk b{font-family:var(--display);font-size:1.45rem;font-weight:700;display:block;line-height:1.1;margin-bottom:.3rem}
+.bk .meta{color:var(--muted);font-size:.95rem}
+.bk-side{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.empty{color:var(--muted)}
+.badge{display:inline-block;font-size:.82rem;font-weight:600;padding:.28rem .75rem;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.badge.elofoglalas{color:var(--lantern);border-color:rgba(242,194,48,.55)}
+.badge.megerositett{background:var(--lantern);color:var(--ink);border-color:var(--lantern)}
+.badge.lemondott{color:var(--muted)}
+.btn-sm{min-height:40px;padding:.4rem 1rem;font-size:.92rem}
+.btn-danger{border-color:rgba(232,118,74,.7);color:#ffb59a}
+.btn-danger:hover{background:rgba(232,118,74,.12)}
+.danger{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--line)}
+.danger h3{font-size:1.3rem;margin-bottom:.4rem}
+.danger p{color:var(--muted);margin:0 0 1rem}
+.toolbar{display:flex;flex-wrap:wrap;gap:.8rem 1rem;align-items:end;justify-content:space-between;margin-bottom:1rem}
+.toolbar .field{min-width:min(260px,100%)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;margin:0 0 2rem;-webkit-overflow-scrolling:touch}
+.tbl{border-collapse:collapse;width:100%;font-size:.95rem}
+.tbl th,.tbl td{text-align:left;padding:.65rem .9rem;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;background:rgba(15,22,51,.6)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.total td{font-weight:700;background:rgba(242,194,48,.08)}
+.tbl select{min-height:36px;padding:.25rem .5rem;border-radius:10px;border:1px solid var(--line);background:var(--night);color:var(--paper);font:inherit}
+.card h3.sub{font-size:1.4rem;margin:0 0 .8rem}
+.prose{max-width:76ch}
+.prose h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:750;font-variation-settings:"wdth" 80;margin:0 0 1.5rem}
+.prose h2{font-size:clamp(1.4rem,3vw,1.8rem);font-weight:700;max-width:none;margin:2.4rem 0 .8rem;line-height:1.15}
+.prose h3{font-size:1.25rem;margin:1.6rem 0 .6rem}
+.prose p,.prose li{color:#dfe2ef}
+.prose table{border-collapse:collapse;width:100%;font-size:.93rem;margin:1rem 0;display:block;overflow-x:auto}
+.prose th,.prose td{border:1px solid var(--line);padding:.55rem .7rem;text-align:left;vertical-align:top}
+.prose th{background:rgba(15,22,51,.6)}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--paper)}
+@media (max-width: 600px){
+  .pkg-pick label{padding:.75rem .3rem}
+  .pkg-pick b{font-size:1.15rem}
+  .form .btn{justify-self:stretch}
+}
 </style>
 </head>
 <body>
@@ -280,6 +363,10 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
       <li><a href="#/csomagok">Csomagok</a></li>
       <li><a href="#/fesztivalok">Fesztiválok</a></li>
       <li><a href="#/gyik">GYIK</a></li>
+      <li data-auth="out"><a href="#/belepes">Belépés</a></li>
+      <li data-auth="in" hidden><a href="#/foglalasaim">Foglalásaim</a></li>
+      <li data-auth="admin" hidden><a href="#/admin">Admin</a></li>
+      <li data-auth="in" hidden><button type="button" class="navbtn" id="logout">Kijelentkezés</button></li>
     </ul>
     <a class="btn btn-primary" href="#/arak">Foglalás</a>
   </div>
@@ -339,7 +426,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
               <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>LED sátorlámpa</li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Powerbank</li>
             </ul>
-            <a class="btn btn-ghost" href="#/foglalas">Ezt kérem</a>
+            <a class="btn btn-ghost" href="#/foglalas?csomag=solo">Ezt kérem</a>
           </article>
           <article class="plan featured">
             <span class="tag">A legnépszerűbb</span>
@@ -354,7 +441,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
               <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>LED sátorlámpa</li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 powerbank</li>
             </ul>
-            <a class="btn" href="#/foglalas">Ezt kérem</a>
+            <a class="btn" href="#/foglalas?csomag=duo">Ezt kérem</a>
           </article>
           <article class="plan">
             <h3>Crew Pack</h3>
@@ -369,7 +456,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
               <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 LED sátorlámpa</li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 powerbank</li>
             </ul>
-            <a class="btn btn-ghost" href="#/foglalas">Ezt kérem</a>
+            <a class="btn btn-ghost" href="#/foglalas?csomag=crew">Ezt kérem</a>
           </article>
         </div>
         <div class="extras">
@@ -379,7 +466,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
       </div>
     </section>
 
-    <section class="final" id="foglalas" data-cam="6">
+    <section class="final" id="zaro" data-cam="6">
       <div class="wrap">
         <h2 class="reveal">Idén gyere üres kézzel.</h2>
         <p>Foglald le a csomagod, és csak a jókedvet hozd.</p>
@@ -465,15 +552,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
           <h1 class="ptitle reveal">Itt vár a csomagod.</h1>
           <p class="lede" style="margin:0">Ezekre a fesztiválokra tervezünk kitelepülni. Mindegyiknél a kemping bejárata előtt veszed át a csomagot.</p>
         </div>
-        <ul class="fest-list">
-          <li><div><b>Fishing on Orfű</b><span class="where">Orfű, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-          <li><div><b>Sziget</b><span class="where">Budapest, Hajógyári-sziget, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-          <li><div><b>VOLT</b><span class="where">Sopron, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-          <li><div><b>Balaton Sound</b><span class="where">Zamárdi, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-          <li><div><b>STRAND Fesztivál</b><span class="where">Zamárdi, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-          <li><div><b>EFOTT</b><span class="where">Velence, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-          <li><div><b>Campus Fesztivál</b><span class="where">Debrecen, [IDŐPONT]</span></div><span class="chip">Tervezett</span></li>
-        </ul>
+        <ul class="fest-list"></ul>
         <p class="fest-note">A végleges listát és az időpontokat hamarosan közzétesszük. Más fesztiválra mennél? Írd meg nekünk Instagramon: <a href="#/fesztivalok">[@FELHASZNÁLÓNÉV]</a></p>
         <div class="extras"><a class="btn btn-primary" href="#/csomagok">Csomagot választok</a></div>
       </div>
@@ -506,15 +585,182 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
       </div>
     </section>
   </div>
+
+  <!-- ================= BELÉPÉS / REGISZTRÁCIÓ ================= -->
+  <div class="view" data-view="belepes" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Lépj be, és foglalj.</h1>
+        <p class="lede">Az előfoglalás ingyenes, most még nem kell fizetned.</p>
+        <div class="card">
+          <div class="tabs" role="tablist" aria-label="Belépés vagy regisztráció">
+            <button type="button" role="tab" data-tab="login" aria-selected="true">Belépés</button>
+            <button type="button" role="tab" data-tab="signup" aria-selected="false">Regisztráció</button>
+          </div>
+
+          <form id="form-login" class="form">
+            <div class="field"><label for="login-email">E-mail-cím</label><input id="login-email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="login-password">Jelszó</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+            <div id="login-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Belépés</button>
+            <button class="linkbtn" type="button" id="to-reset">Elfelejtett jelszó</button>
+          </form>
+
+          <form id="form-signup" class="form" hidden>
+            <div class="field"><label for="signup-name">Teljes név</label><input id="signup-name" type="text" autocomplete="name" minlength="2" maxlength="100" required><p class="hint">Ezen a néven adjuk ki a csomagot.</p></div>
+            <div class="field"><label for="signup-email">E-mail-cím</label><input id="signup-email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="signup-password">Jelszó</label><input id="signup-password" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
+            <label class="check"><input id="signup-consent" type="checkbox" required><span>Elolvastam az <a href="#/adatkezeles">adatkezelési tájékoztatót</a>, és elmúltam 18 éves.</span></label>
+            <div id="signup-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Regisztrálok</button>
+          </form>
+
+          <form id="form-reset" class="form" hidden>
+            <h2>Új jelszó kérése</h2>
+            <p class="muted" style="margin:0">Add meg az e-mail-címed, és küldünk egy linket, amivel új jelszót állíthatsz be.</p>
+            <div class="field"><label for="reset-email">E-mail-cím</label><input id="reset-email" type="email" autocomplete="email" required></div>
+            <div id="reset-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Link küldése</button>
+            <button class="linkbtn" type="button" id="back-login">Vissza a belépéshez</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ÚJ JELSZÓ ================= -->
+  <div class="view" data-view="uj-jelszo" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Új jelszó.</h1>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <div id="newpw-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <form id="form-newpw" class="form">
+              <div class="field"><label for="newpw">Új jelszó</label><input id="newpw" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
+              <div class="field"><label for="newpw2">Új jelszó még egyszer</label><input id="newpw2" type="password" autocomplete="new-password" minlength="8" required></div>
+              <button class="btn btn-primary" type="submit">Mentés</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= FOGLALÁS ================= -->
+  <div class="view" data-view="foglalas" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Foglald le a csomagod.</h1>
+        <p class="lede">Ez egy ingyenes előfoglalás. Mielőtt bármit fizetnél, felvesszük veled a kapcsolatot.</p>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <form id="form-booking" class="form">
+              <p id="bk-hello" style="margin:0"></p>
+              <div class="field" id="bk-name-field" hidden><label for="bk-name">Teljes név</label><input id="bk-name" type="text" autocomplete="name" minlength="2" maxlength="100"></div>
+              <div class="field"><label for="bk-festival">Fesztivál</label><select id="bk-festival" required></select></div>
+              <fieldset class="pkg-pick" id="bk-packages"><legend>Csomag</legend></fieldset>
+              <div class="field"><label for="bk-people">Létszám</label><select id="bk-people"></select><p class="hint">Hány fő használja a csomagot?</p></div>
+              <div id="bk-msg" class="msg" role="status" aria-live="polite" hidden></div>
+              <button class="btn btn-primary" type="submit">Előfoglalás leadása</button>
+            </form>
+            <div id="bk-done" class="done" hidden>
+              <h2 tabindex="-1">Megvan az előfoglalásod!</h2>
+              <p class="sum" id="bk-summary"></p>
+              <p>Most nem kell fizetned. Hamarosan jelentkezünk, és egyeztetjük a részleteket. Kérdésed van? Hívj minket: <b id="bk-phone"></b></p>
+              <div class="btn-row">
+                <a class="btn btn-primary" href="#/foglalasaim">Foglalásaim</a>
+                <a class="btn btn-ghost" href="#/foglalas">Új foglalás</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= FOGLALÁSAIM ================= -->
+  <div class="view" data-view="foglalasaim" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Foglalásaim.</h1>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <div id="mine-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
+            <ul class="bk-list" id="mine-list"></ul>
+            <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Hívj minket: <b id="mine-phone"></b></p>
+            <div class="btn-row"><a class="btn btn-primary" href="#/foglalas">Új foglalás</a></div>
+            <div class="danger">
+              <h3>Fiókom törlése</h3>
+              <p>Törli a fiókodat és az összes foglalásodat. Ez nem vonható vissza.</p>
+              <button type="button" class="btn btn-ghost btn-danger btn-sm" id="delete-account">Fiókom törlése</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ADMIN ================= -->
+  <div class="view" data-view="admin" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Foglalások.</h1>
+        <div class="card wide">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <p id="admin-denied" class="muted" hidden>Ez az oldal csak a csapatnak szól.</p>
+            <div id="admin-panel" hidden>
+              <div class="toolbar">
+                <div class="field"><label for="admin-filter">Fesztivál</label><select id="admin-filter"><option value="">Minden fesztivál</option></select></div>
+                <div class="btn-row" style="margin:0">
+                  <button type="button" class="btn btn-ghost btn-sm" id="admin-reload">Frissítés</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="admin-csv">CSV letöltése</button>
+                </div>
+              </div>
+              <div id="admin-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
+              <p class="muted" id="admin-count"></p>
+              <h3 class="sub">Összesítő (lemondottak nélkül)</h3>
+              <div class="tbl-wrap"><table class="tbl" id="admin-summary"></table></div>
+              <h3 class="sub">Összes foglalás</h3>
+              <div class="tbl-wrap">
+                <table class="tbl" id="admin-table">
+                  <thead><tr><th>Leadva</th><th>Név</th><th>Fesztivál</th><th>Csomag</th><th>Létszám</th><th>Állapot</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ADATKEZELÉS ================= -->
+  <div class="view" data-view="adatkezeles" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <div class="card wide"><div class="prose" id="privacy"><p class="muted">Betöltés…</p></div></div>
+      </div>
+    </section>
+  </div>
 </main>
 
 <footer>
   <div class="wrap">
     <span>Üres Kézzel, egyetemi projekt a PTE KTK-n, 2026</span>
+    <span><a href="#/adatkezeles">Adatkezelési tájékoztató</a></span>
     <span>Instagram: [@FELHASZNÁLÓNÉV]</span>
   </div>
 </footer>
 
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
@@ -548,8 +794,8 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
   ];
   var STEPS = [
     {t:"Foglald le online",
-     s:"Válaszd ki a csomagot és a fesztivált, majd fizess online. Pár perc az egész.",
-     l:"Kiválasztod a csomagot és a fesztivált, és online fizetsz. A foglaláshoz 10\u00a0000\u00a0Ft kaució tartozik, ami a leadás után visszajár."},
+     s:"Válaszd ki a csomagot és a fesztivált, és foglald le előre. Most még nem kell fizetned.",
+     l:"Kiválasztod a csomagot és a fesztivált, és leadod az előfoglalást. Most még nem kell fizetned: előbb felvesszük veled a kapcsolatot. A csomaghoz 10\u00a0000\u00a0Ft kaució tartozik, ami a leadás után visszajár."},
     {t:"Vedd át a bejáratnál",
      s:"Az érkezés napján a kemping bejárata előtt vár a csomagod. Nem kell semmit cipelned.",
      l:"Az érkezés napján a kemping bejárata előtti átvételi ponton vár a csomagod. Vonattal, busszal is könnyen jössz, mert a felszerelés már ott van."},
@@ -579,6 +825,12 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
     }).join("");
     if (reduce) ol.classList.add("lit"); else flowIO.observe(ol);
   });
+
+  /* ---------- fesztiválok a közös listából (data.js) ---------- */
+  var FEST = (window.UK_DATA && window.UK_DATA.FESTIVALS) || [];
+  document.querySelector(".fest-list").innerHTML = FEST.map(function(f){
+    return '<li><div><b>' + f.name + '</b><span class="where">' + f.where + '</span></div><span class="chip">' + (f.status || "Tervezett") + '</span></li>';
+  }).join("");
 
   /* ---------- árak a Csomagok oldalon is (a főoldali szekció másolata) ---------- */
   var pricesHome = document.getElementById("csomagok");
@@ -614,7 +866,12 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
     "csomagok": {v:"csomag", nav:"csomagok", title:"Csomagok – Üres Kézzel"},
     "csomag-arak": {v:"csomag", nav:"csomagok", target:"csomagok-2", title:"Csomagok és árak – Üres Kézzel"},
     "fesztivalok": {v:"fesztivalok", title:"Fesztiválok – Üres Kézzel"},
-    "foglalas": {v:"home",   target:"foglalas", title:"Foglalás – Üres Kézzel"},
+    "foglalas": {v:"foglalas", app:true, title:"Foglalás – Üres Kézzel"},
+    "belepes":  {v:"belepes", app:true, title:"Belépés – Üres Kézzel"},
+    "uj-jelszo": {v:"uj-jelszo", app:true, nav:"belepes", title:"Új jelszó – Üres Kézzel"},
+    "foglalasaim": {v:"foglalasaim", app:true, title:"Foglalásaim – Üres Kézzel"},
+    "admin":    {v:"admin", app:true, title:"Admin – Üres Kézzel"},
+    "adatkezeles": {v:"adatkezeles", app:true, title:"Adatkezelési tájékoztató – Üres Kézzel"},
     "top":      {v:"home",   title:"Üres Kézzel – fesztiválcsomagok bérlése"},
     "hogyan":   {v:"hogyan", title:"Hogyan működik – Üres Kézzel"},
     "csomag":   {v:"csomag", nav:"csomagok", title:"Csomagok – Üres Kézzel"},
@@ -622,13 +879,18 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
   };
   var views = Array.from(document.querySelectorAll(".view"));
   var navLinks = Array.from(document.querySelectorAll(".nav ul a"));
-  var current = null, hooks = [];
+  var current = null, hooks = [], appMode = false;
   function route(first){
-    var key = (location.hash || "").replace(/^#\/?/, "");
+    var full = (location.hash || "").replace(/^#\/?/, ""), qi = full.indexOf("?");
+    var key = qi < 0 ? full : full.slice(0, qi);
+    var params = new URLSearchParams(qi < 0 ? "" : full.slice(qi + 1));
     var r = ROUTES[key] || ROUTES[""];
     var same = r.v === current;
     views.forEach(function(el){ el.hidden = el.getAttribute("data-view") !== r.v; });
     current = r.v;
+    // a foglalási oldalakon áll a 3D háttér, hogy ne lassítson
+    appMode = !!r.app;
+    document.documentElement.classList.toggle("app-mode", appMode);
     navLinks.forEach(function(a){
       if (a.getAttribute("href").replace(/^#\/?/, "") === (r.nav || key)) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
@@ -639,7 +901,9 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
     if (target) target.scrollIntoView({behavior:beh, block:"start"});
     else window.scrollTo({top:0, left:0, behavior:beh});
     chrome();
+    if (!appMode) ensure3D();
     hooks.forEach(function(h){ h(); });
+    window.dispatchEvent(new CustomEvent("uk:route", {detail:{view:r.v, key:key, params:params}}));
     if (!same && !first){
       var h = document.querySelector('.view:not([hidden]) h1');
       if (h && !target){ h.setAttribute("tabindex", "-1"); h.focus({preventScroll:true}); }
@@ -851,7 +1115,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
   ];
   var sections = [];
   var packSec = document.getElementById("csomag");
-  var finalSec = document.getElementById("foglalas");
+  var finalSec = document.getElementById("zaro");
   var itemLis = Array.from(document.querySelectorAll("#itemList li"));
   var camPos = KF[0].p.clone(), camTgt = KF[0].t.clone(), wantPos = KF[0].p.clone(), wantTgt = KF[0].t.clone();
   var mouse = {x:0, y:0, sx:0, sy:0};
@@ -897,11 +1161,14 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
   }
   addEventListener("resize", resize); resize();
 
-  var clock = new THREE.Clock(), running = true, time = 0;
-  document.addEventListener("visibilitychange", function(){ running = !document.hidden; if (running){ clock.getDelta(); loop(); } });
+  var clock = new THREE.Clock(), running = true, looping = false, time = 0;
+  function wake(){ if (running && !appMode && !looping){ clock.getDelta(); loop(); } }
+  document.addEventListener("visibilitychange", function(){ running = !document.hidden; wake(); });
+  hooks.push(wake);
 
   function loop(){
-    if (!running) return;
+    if (!running || appMode){ looping = false; return; }
+    looping = true;
     var dt = Math.min(clock.getDelta(), .05);
     if (!reduce) time += dt;
     var k = reduce ? 1 : 1 - Math.pow(.02, dt);   // simítás
@@ -963,10 +1230,10 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
   loop();
   snapCam = function(){ collect(); onScroll(); camPos.copy(wantPos); camTgt.copy(wantTgt); dawnS = dawnT; };
   }
-  var snapCam = null;
-  init3D();
+  var snapCam = null, started3D = false;
+  // a 3D jelenet csak az első nem-foglalási oldalnál indul el
+  function ensure3D(){ if (started3D) return; started3D = true; init3D(); if (snapCam) snapCam(); }
   route(true);
-  if (snapCam) snapCam();
   chrome();
 })();
 </script>
