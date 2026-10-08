@@ -196,7 +196,6 @@
       if (r.error) return say(msg, huErr(r.error));
       $("#login-password").value = "";
       await setUser(r.data.session);
-      syncNewsletter();
       afterLogin();
     });
   });
@@ -225,12 +224,6 @@
     });
   });
 
-  // a saját hírlevél-feliratkozás átküldése a MailerLite-ba (a szerverfunkció végzi, csendben)
-  function syncNewsletter(){
-    var m = state.user && state.user.user_metadata;
-    if (!sb || !m || typeof m.newsletter !== "boolean") return;
-    sb.functions.invoke("mailerlite-sync", { body: {} }).catch(function(e){ console.warn("MailerLite", e); });
-  }
   function newsletterData(name, on){
     var d = { newsletter: on, newsletter_at: on ? new Date().toISOString() : null };
     if (name) d.full_name = name;
@@ -516,7 +509,6 @@
       var r = await sb.auth.updateUser({ data: newsletterData(null, on) });
       if (r.error) return say(msg, huErr(r.error));
       state.user = r.data.user;
-      syncNewsletter();
       say(msg, on ? "Feliratkoztál a hírlevélre." : "Leiratkoztál a hírlevélről.", "ok");
     });
   });
@@ -832,13 +824,24 @@
     });
   });
 
+  // A feliratkozás változását az adatbázis magától átküldi a MailerLite-nak (trigger az auth.users táblán).
+  // Ez a gomb mindenkit újraküld, és pár másodperc múlva megmutatja a MailerLite válaszát.
   $("#admin-mlsync").addEventListener("click", function(){
     busy($("#admin-mlsync"), async function(){
-      var r = await sb.functions.invoke("mailerlite-sync", { body: { all: true } });
-      if (r.error || !r.data) return say($("#admin-msg"), "A MailerLite szinkronizálás nem sikerült. Be van állítva a MailerLite API-kulcs a Supabase-ben?");
-      var d = r.data;
-      say($("#admin-msg"), "MailerLite: " + d.subscribed + " feliratkozó átküldve, " + d.unsubscribed + " leiratkoztatva." +
-        (d.failed && d.failed.length ? " Hiba: " + d.failed.join(", ") : ""), d.failed && d.failed.length ? "err" : "ok");
+      var r = await sb.rpc("mailerlite_sync_all");
+      if (r.error) return say($("#admin-msg"), huErr(r.error));
+      if (r.data && r.data.error === "missing_key") return say($("#admin-msg"), "Hiányzik a MailerLite API-kulcs a Supabase Vaultból (név: mailerlite_api_key).");
+      var n = r.data.queued;
+      if (!n) return say($("#admin-msg"), "Nincs feliratkozó, akit át kellene küldeni.", "ok");
+      say($("#admin-msg"), n + " feliratkozó elküldve a MailerLite-nak, várom a választ…", "ok");
+      await new Promise(function(ok){ setTimeout(ok, 4000); });
+      var res = await sb.rpc("mailerlite_last_results");
+      if (res.error) return;
+      var last = res.data.slice(0, n);
+      var bad = last.filter(function(x){ return !(x.status >= 200 && x.status < 300); });
+      say($("#admin-msg"), bad.length
+        ? "MailerLite: " + (last.length - bad.length) + " rendben, " + bad.length + " hiba. Első hiba: " + (bad[0].status || "") + " " + (bad[0].message || "")
+        : "MailerLite: mind a(z) " + last.length + " feliratkozó rendben átment.", bad.length ? "err" : "ok");
     });
   });
 
@@ -1086,7 +1089,7 @@
           ? "Megerősítve. Ha a másik címedre is jött levél, kattints abban is a linkre, a csere utána lép életbe."
           : "Az e-mail-címed frissült." };
       }
-      else if (state.user){ target = "#/foglalas"; syncNewsletter(); }
+      else if (state.user){ target = "#/foglalas"; }
       else state.flash = { view: "belepes", text: "Az e-mail-címed meg van erősítve. Most már be tudsz lépni.", kind: "ok" };
       history.replaceState(null, "", location.pathname);
       go(target);
