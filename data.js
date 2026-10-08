@@ -18,7 +18,6 @@ window.UK_DATA = {
   SETTINGS: {
     kaucio: "10000",        // rendes kaució (Ft)
     kaucio_elso: "20000",   // első bérlésnél és probléma után (Ft)
-    leadas_idopont: "[IDŐPONT]",
     lemondasi_feltetelek: "[LEMONDÁSI FELTÉTELEK]"
   }
 };

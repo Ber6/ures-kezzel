@@ -26,7 +26,7 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
 - `#/admin` (csak az `admins` táblában szereplőknek):
   - **Foglalások:** összes foglalás, szűrés, állapot, CSV, összesítő, hírlevél-lista (CSV)
   - **Helyszín:** a fesztiválon: ki jön még, átvette / leadta, probléma (+ leírás), megjegyzés a vásárló fiókjához
-  - **Csomagok, Fesztiválok, Beállítások:** szerkesztés (kaució első bérlésnél / rendes, leadási időpont, lemondási feltételek)
+  - **Csomagok, Fesztiválok, Beállítások:** szerkesztés (leárazás %-ban, kaució első bérlésnél / rendes, lemondási feltételek)
   - **Napló:** minden admin-módosítás (ki, mikor, mit); nem szerkeszthető, nem törölhető
 
 **Kaució-szabály:** első bérlésnél és probléma után emelt kaució, ha a legutóbbi bérlés rendben zárult, rendes kaució. Két problémás visszahozás után a vásárlónak minden csomag „elfogyott”. Ezt az adatbázis számolja (`my_status`, `booking_before_insert`), nem lehet kijátszani.
