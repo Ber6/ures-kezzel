@@ -358,6 +358,37 @@ button.btn-ghost{background:transparent}
 .editor .key{color:var(--muted);font-size:.85rem}
 .editor .checks{display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
 .editor .btn-row{margin-top:.2rem}
+.btn[disabled],.btn.soldout{opacity:.55;cursor:not-allowed;transform:none !important;box-shadow:none !important}
+.pkg-pick input:disabled + label{opacity:.5;cursor:not-allowed}
+/* helyszíni fül */
+#admin-panel .tabs{flex-wrap:wrap;width:auto;border-radius:22px}
+.ci-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem;margin:0 0 1rem}
+.ci-stats div{border:1px solid var(--line);border-radius:16px;padding:.7rem .9rem;background:rgba(15,22,51,.55)}
+.ci-stats b{display:block;font-family:var(--display);font-size:1.8rem;line-height:1}
+.ci-stats span{color:var(--muted);font-size:.85rem}
+.ci-filter{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.ci-filter .chip{cursor:pointer;color:var(--paper);font:inherit;font-size:.9rem}
+.ci-filter .chip[aria-pressed="true"]{background:var(--lantern);color:var(--ink);border-color:var(--lantern)}
+.ci-list{list-style:none;margin:0;padding:0;display:grid;gap:.75rem}
+.ci-row{border:1px solid var(--line);border-radius:18px;padding:1rem 1.1rem;background:rgba(15,22,51,.55)}
+.ci-row.blocked{border-color:rgba(232,118,74,.7)}
+.ci-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem 1rem;align-items:baseline}
+.ci-top b{font-family:var(--display);font-size:1.35rem}
+.ci-top .meta{color:var(--muted);font-size:.92rem}
+.ci-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem}
+.ci-toggle{min-height:44px;padding:.5rem 1rem;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--paper);font:600 .95rem var(--body);cursor:pointer}
+.ci-toggle[aria-pressed="true"]{background:var(--lantern);border-color:var(--lantern);color:var(--ink)}
+.ci-toggle.prob[aria-pressed="true"]{background:var(--ember);border-color:var(--ember);color:var(--ink)}
+.ci-extra{margin-top:.8rem;display:grid;gap:.6rem}
+.ci-extra textarea,.ci-extra input{width:100%;padding:.55rem .8rem;border-radius:12px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:15px;box-sizing:border-box}
+.ci-notes{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;font-size:.92rem}
+.ci-notes li{border-left:3px solid var(--dusk);padding:.2rem .7rem;color:#dfe2ef}
+.ci-notes small{color:var(--muted)}
+.badge.prob{color:#ffb59a;border-color:rgba(232,118,74,.7)}
+.log-tbl td{white-space:normal;vertical-align:top;font-size:.9rem}
+.log-tbl td:first-child,.log-tbl td:nth-child(2){white-space:nowrap}
+.log-tbl .chg{color:var(--muted)}
+.log-tbl .chg b{color:var(--paper);font-weight:600}
 .acct-sec .form,.acct-sec > p,.acct-sec > .btn{margin-bottom:1.4rem}
 .acct-sec > p{margin-top:0}
 @media (max-width: 600px){ .acct-data{grid-template-columns:1fr} }
@@ -504,7 +535,7 @@ footer a:hover{color:var(--paper)}
         <dl class="logistics">
           <div><dt>Átvétel</dt><dd>Az érkezés napján, a bejárat előtti átvételi pontunkon</dd></div>
           <div><dt>Leadás</dt><dd>Az utolsó napon <span data-setting="leadas_idopont">[IDŐPONT]</span>-ig, ugyanott</dd></div>
-          <div><dt>Kaució</dt><dd><span data-setting="kaucio">10 000 Ft</span>, a leadás után visszajár</dd></div>
+          <div><dt>Kaució</dt><dd>Első bérlésnél <span data-setting="kaucio_elso">20 000 Ft</span>, utána <span data-setting="kaucio">10 000 Ft</span>. A leadás után visszajár.</dd></div>
         </dl>
         <div class="extras"><a class="btn btn-primary" href="#/arak">Csomagot választok</a></div>
       </div>
@@ -598,6 +629,7 @@ footer a:hover{color:var(--paper)}
             <div class="field"><label for="signup-email">E-mail-cím</label><input id="signup-email" type="email" autocomplete="email" required></div>
             <div class="field"><label for="signup-password">Jelszó</label><input id="signup-password" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
             <label class="check"><input id="signup-consent" type="checkbox" required><span>Elolvastam az <a href="#/adatkezeles">adatkezelési tájékoztatót</a>, és elmúltam 18 éves.</span></label>
+            <label class="check"><input id="signup-newsletter" type="checkbox" checked><span>Kérek hírlevelet az új fesztiválokról és akciókról. Bármikor leiratkozhatsz a Fiókom oldalon.</span></label>
             <div id="signup-msg" class="msg" role="status" aria-live="polite" hidden></div>
             <button class="btn btn-primary" type="submit">Regisztrálok</button>
           </form>
@@ -649,6 +681,7 @@ footer a:hover{color:var(--paper)}
               <div class="field" id="bk-name-field" hidden><label for="bk-name">Teljes név</label><input id="bk-name" type="text" autocomplete="name" minlength="2" maxlength="100"></div>
               <div class="field"><label for="bk-festival">Fesztivál</label><select id="bk-festival" required></select></div>
               <fieldset class="pkg-pick" id="bk-packages"><legend>Csomag</legend></fieldset>
+              <p class="hint" id="bk-deposit" hidden></p>
               <div id="bk-msg" class="msg" role="status" aria-live="polite" hidden></div>
               <button class="btn btn-primary" type="submit">Előfoglalás leadása</button>
             </form>
@@ -731,6 +764,15 @@ footer a:hover{color:var(--paper)}
             </details>
 
             <details class="acct-sec">
+              <summary>Hírlevél<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+              <form id="form-newsletter" class="form">
+                <label class="check"><input id="acct-newsletter" type="checkbox"><span>Kérek hírlevelet az új fesztiválokról és akciókról.</span></label>
+                <div id="nl-msg" class="msg" role="status" aria-live="polite" hidden></div>
+                <button class="btn btn-primary btn-sm" type="submit">Mentés</button>
+              </form>
+            </details>
+
+            <details class="acct-sec">
               <summary>Adataim letöltése<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
               <p class="muted">Letöltheted az összes adatot, amit rólad tárolunk: a fiókod adatait és a foglalásaidat, egy fájlban (JSON).</p>
               <button type="button" class="btn btn-ghost btn-sm" id="acct-export">Adataim letöltése</button>
@@ -759,9 +801,11 @@ footer a:hover{color:var(--paper)}
             <div id="admin-panel" hidden>
               <div class="tabs" role="tablist" aria-label="Admin">
                 <button type="button" role="tab" data-atab="bookings" aria-selected="true">Foglalások</button>
+                <button type="button" role="tab" data-atab="checkin" aria-selected="false">Helyszín</button>
                 <button type="button" role="tab" data-atab="packages" aria-selected="false">Csomagok</button>
                 <button type="button" role="tab" data-atab="festivals" aria-selected="false">Fesztiválok</button>
                 <button type="button" role="tab" data-atab="settings" aria-selected="false">Beállítások</button>
+                <button type="button" role="tab" data-atab="log" aria-selected="false">Napló</button>
               </div>
               <div id="admin-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
 
@@ -770,6 +814,7 @@ footer a:hover{color:var(--paper)}
                 <div class="field"><label for="admin-filter">Fesztivál</label><select id="admin-filter"><option value="">Minden fesztivál</option></select></div>
                 <div class="btn-row" style="margin:0">
                   <button type="button" class="btn btn-ghost btn-sm" id="admin-reload">Frissítés</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="admin-newsletter">Hírlevél-lista (CSV)</button>
                   <button type="button" class="btn btn-primary btn-sm" id="admin-csv">CSV letöltése</button>
                 </div>
               </div>
@@ -819,9 +864,40 @@ footer a:hover{color:var(--paper)}
                 </details>
               </div>
 
+              <div data-apanel="checkin" hidden>
+                <div class="toolbar">
+                  <div class="field"><label for="ci-festival">Fesztivál</label><select id="ci-festival"></select></div>
+                  <div class="field"><label for="ci-search">Keresés névre</label><input id="ci-search" type="search" placeholder="pl. Kovács"></div>
+                </div>
+                <div class="ci-stats" id="ci-stats"></div>
+                <div class="ci-filter" role="group" aria-label="Szűrés">
+                  <button type="button" class="chip" data-cif="all" aria-pressed="true">Mind</button>
+                  <button type="button" class="chip" data-cif="waiting" aria-pressed="false">Még jön</button>
+                  <button type="button" class="chip" data-cif="out" aria-pressed="false">Kint van</button>
+                  <button type="button" class="chip" data-cif="done" aria-pressed="false">Leadta</button>
+                </div>
+                <ul class="ci-list" id="ci-list"></ul>
+              </div>
+
+              <div data-apanel="log" hidden>
+                <div class="toolbar">
+                  <div class="field"><label for="log-filter">Mi változott</label><select id="log-filter">
+                    <option value="">Minden</option><option value="bookings">Foglalások</option><option value="packages">Csomagok</option>
+                    <option value="festivals">Fesztiválok</option><option value="settings">Beállítások</option><option value="user_notes">Megjegyzések</option><option value="admins">Adminok</option>
+                  </select></div>
+                  <button type="button" class="btn btn-ghost btn-sm" id="log-reload">Frissítés</button>
+                </div>
+                <p class="muted">Minden admin-módosítás automatikusan ide kerül. A naplót nem lehet szerkeszteni vagy törölni.</p>
+                <div class="tbl-wrap"><table class="tbl log-tbl" id="log-table"><thead><tr><th>Mikor</th><th>Ki</th><th>Mit</th><th>Változás</th></tr></thead><tbody></tbody></table></div>
+              </div>
+
               <div data-apanel="settings" hidden>
                 <form id="settings-form" class="form" style="max-width:580px">
-                  <div class="field"><label for="set-kaucio">Kaució</label><input id="set-kaucio" maxlength="40"><p class="hint">Pl. „10 000 Ft”. Megjelenik a Hogyan működik oldalon.</p></div>
+                  <div class="field-row">
+                    <div class="field"><label for="set-kaucio_elso">Kaució első bérlésnél (Ft)</label><input id="set-kaucio_elso" type="number" min="0" step="1000"></div>
+                    <div class="field"><label for="set-kaucio">Kaució rendes (Ft)</label><input id="set-kaucio" type="number" min="0" step="1000"></div>
+                  </div>
+                  <p class="hint" style="margin-top:-.5rem">A rendes kaució akkor jár, ha a vásárló legutóbbi bérlése rendben zárult. Első bérlésnél és probléma után az emelt kaució jár. Két problémás visszahozás után a vásárlónak minden csomag „elfogyott”.</p>
                   <div class="field"><label for="set-leadas_idopont">Leadás időpontja az utolsó napon</label><input id="set-leadas_idopont" maxlength="40"><p class="hint">Pl. „délután 2 óra”. A mondat: „Az utolsó napon …-ig, ugyanott”.</p></div>
                   <div class="field"><label for="set-lemondasi_feltetelek">Lemondási feltételek</label><textarea id="set-lemondasi_feltetelek" rows="4" maxlength="600"></textarea><p class="hint">A GYIK „Lemondhatom a foglalást?” kérdésére adott válasz.</p></div>
                   <button class="btn btn-primary btn-sm" type="submit">Beállítások mentése</button>
@@ -889,7 +965,7 @@ footer a:hover{color:var(--paper)}
   var STEPS = [
     {t:"Foglald le online",
      s:"Válaszd ki a csomagot és a fesztivált, és foglald le előre. Most még nem kell fizetned.",
-     l:"Kiválasztod a csomagot és a fesztivált, és leadod az előfoglalást. Most még nem kell fizetned: előbb felvesszük veled a kapcsolatot. A csomaghoz <span data-setting=\"kaucio\">10\u00a0000\u00a0Ft</span> kaució tartozik, ami a leadás után visszajár."},
+     l:"Kiválasztod a csomagot és a fesztivált, és leadod az előfoglalást. Most még nem kell fizetned: előbb felvesszük veled a kapcsolatot. A csomaghoz kaució tartozik, ami a leadás után visszajár: első bérlésnél <span data-setting=\"kaucio_elso\">20\u00a0000\u00a0Ft</span>, ha mindent rendben visszahoztál, legközelebb <span data-setting=\"kaucio\">10\u00a0000\u00a0Ft</span>."},
     {t:"Vedd át a bejáratnál",
      s:"Az érkezés napján a kemping bejárata előtt vár a csomagod. Nem kell semmit cipelned.",
      l:"Az érkezés napján a kemping bejárata előtti átvételi ponton vár a csomagod. Vonattal, busszal is könnyen jössz, mert a felszerelés már ott van."},

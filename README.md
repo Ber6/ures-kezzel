@@ -23,7 +23,13 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
 - `#/foglalas`: foglalás (csak belépve; a csomagkártyák „Ezt kérem” gombja előre kiválasztja a csomagot)
 - `#/foglalasaim`: saját foglalások, lemondás
 - `#/fiokom`: fiókadatok, név / e-mail / jelszó módosítása, adatok letöltése (JSON), fiók törlése
-- `#/admin`: összes foglalás, szűrés, állapot módosítása, CSV, összesítő; csomagok, fesztiválok és beállítások (kaució, leadási időpont, lemondási feltételek) szerkesztése (csak az `admins` táblában szereplőknek)
+- `#/admin` (csak az `admins` táblában szereplőknek):
+  - **Foglalások:** összes foglalás, szűrés, állapot, CSV, összesítő, hírlevél-lista (CSV)
+  - **Helyszín:** a fesztiválon: ki jön még, átvette / leadta, probléma (+ leírás), megjegyzés a vásárló fiókjához
+  - **Csomagok, Fesztiválok, Beállítások:** szerkesztés (kaució első bérlésnél / rendes, leadási időpont, lemondási feltételek)
+  - **Napló:** minden admin-módosítás (ki, mikor, mit); nem szerkeszthető, nem törölhető
+
+**Kaució-szabály:** első bérlésnél és probléma után emelt kaució, ha a legutóbbi bérlés rendben zárult, rendes kaució. Két problémás visszahozás után a vásárlónak minden csomag „elfogyott”. Ezt az adatbázis számolja (`my_status`, `booking_before_insert`), nem lehet kijátszani.
 - `#/adatkezeles`: adatkezelési tájékoztató
 
 A foglalási oldalakon a 3D háttér nem fut, hogy ne lassítson.

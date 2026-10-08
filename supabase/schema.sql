@@ -104,3 +104,15 @@ insert into public.settings (key, value) values
 alter table public.bookings drop constraint if exists bookings_package_check;
 alter table public.bookings add constraint bookings_package_fkey
   foreign key (package) references public.packages(key) on update cascade;
+
+-- ===== 3. lépés: helyszíni átvétel, kaució-szintek, megjegyzések, admin napló, hírlevél (2026-10-08) =====
+-- A teljes migráció a Supabase-ben "checkin_deposit_log_newsletter" néven fut le.
+-- Röviden:
+--   bookings: + deposit, picked_up_at, returned_at, return_problem, problem_note
+--   settings: kaucio = '10000', kaucio_elso = '20000' (számként)
+--   setting_int(), is_blocked(uid) (>= 2 probléma), deposit_for(uid), my_status() → {deposit, blocked}
+--   booking_before_insert trigger: letiltott vásárló / inaktív csomag → 'sold_out'; kaució beállítása
+--   user_notes tábla (csak admin), set_note_author trigger
+--   admin_log tábla (admin olvassa, senki nem írja közvetlenül), log_admin_change trigger
+--     a packages, festivals, settings, bookings, admins, user_notes táblákon
+--   newsletter_subscribers() (csak admin)
