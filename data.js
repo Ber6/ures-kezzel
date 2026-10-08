@@ -16,7 +16,8 @@ window.UK_DATA = {
     crew: { name: "Crew Pack", people: 4, price: 44900, items: ["4 fős kupolasátor", "4 önfelfújó matrac", "4 kempingszék", "3×3 m-es pavilon", "2 LED sátorlámpa", "4 powerbank"] }
   },
   SETTINGS: {
-    kaucio: "10 000 Ft",
+    kaucio: "10000",        // rendes kaució (Ft)
+    kaucio_elso: "20000",   // első bérlésnél és probléma után (Ft)
     leadas_idopont: "[IDŐPONT]",
     lemondasi_feltetelek: "[LEMONDÁSI FELTÉTELEK]"
   }
