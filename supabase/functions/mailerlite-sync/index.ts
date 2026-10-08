@@ -60,17 +60,17 @@ Deno.serve(async (req) => {
           method: "POST",
           body: JSON.stringify({ email: u.email, fields: { name: meta.full_name ?? "" }, groups: [GROUP_ID] }),
         });
-        if (!r.ok) throw new Error(String(r.status));
+        if (!r.ok) throw new Error(r.status + ": " + (await r.text()).slice(0, 200));
         subscribed++;
       } else {
         // a weboldalon leiratkozott: a MailerLite-ban is leiratkoztatjuk, ha ott aktív
         const r = await ml("/subscribers/" + encodeURIComponent(u.email));
         if (r.status === 404) { skipped++; continue; }
-        if (!r.ok) throw new Error(String(r.status));
+        if (!r.ok) throw new Error(r.status + ": " + (await r.text()).slice(0, 200));
         const s = (await r.json()).data;
         if (s.status === "active") {
           const p = await ml("/subscribers/" + s.id, { method: "PUT", body: JSON.stringify({ status: "unsubscribed" }) });
-          if (!p.ok) throw new Error(String(p.status));
+          if (!p.ok) throw new Error(p.status + ": " + (await p.text()).slice(0, 200));
           unsubscribed++;
         } else skipped++;
       }
