@@ -48,3 +48,59 @@ revoke execute on function public.cancel_booking(uuid) from public, anon;
 grant execute on function public.cancel_booking(uuid) to authenticated;
 revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- ===== 2. lépés: az admin oldalon szerkeszthető tartalom (2026-10-08) =====
+-- Csomagok, fesztiválok és beállítások: mindenki olvashatja, csak admin módosíthatja.
+create table public.packages (
+  key text primary key check (key ~ '^[a-z0-9-]{2,20}$'),
+  name text not null check (char_length(name) between 1 and 60),
+  people int not null check (people between 1 and 8),
+  price int not null check (price between 0 and 10000000),
+  items text[] not null default '{}',
+  featured boolean not null default false,
+  active boolean not null default true,
+  sort int not null default 0
+);
+
+create table public.festivals (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique check (char_length(name) between 1 and 80),
+  location text not null default '',
+  dates text not null default '',
+  status text not null default 'Tervezett',
+  active boolean not null default true,
+  sort int not null default 0
+);
+
+create table public.settings (
+  key text primary key,
+  value text not null default ''
+);
+
+alter table public.packages enable row level security;
+alter table public.festivals enable row level security;
+alter table public.settings enable row level security;
+
+create policy "public read" on public.packages for select using (true);
+create policy "admin write" on public.packages for all using (public.is_admin()) with check (public.is_admin());
+create policy "public read" on public.festivals for select using (true);
+create policy "admin write" on public.festivals for all using (public.is_admin()) with check (public.is_admin());
+create policy "public read" on public.settings for select using (true);
+create policy "admin write" on public.settings for all using (public.is_admin()) with check (public.is_admin());
+
+insert into public.packages (key, name, people, price, items, featured, sort) values
+  ('solo', 'Solo Pack', 1, 14900, array['2 fős sátor','Önfelfújó matrac','Kempingszék','LED sátorlámpa','Powerbank'], false, 1),
+  ('duo',  'Duo Pack',  2, 24900, array['3 fős sátor','2 önfelfújó matrac','2 kempingszék','LED sátorlámpa','2 powerbank'], true, 2),
+  ('crew', 'Crew Pack', 4, 44900, array['4 fős kupolasátor','4 önfelfújó matrac','4 kempingszék','3×3 m-es pavilon','2 LED sátorlámpa','4 powerbank'], false, 3);
+
+insert into public.festivals (name, location, sort) values
+  ('Fishing on Orfű', 'Orfű', 1), ('Sziget', 'Budapest, Hajógyári-sziget', 2), ('VOLT', 'Sopron', 3),
+  ('Balaton Sound', 'Zamárdi', 4), ('STRAND Fesztivál', 'Zamárdi', 5), ('EFOTT', 'Velence', 6), ('Campus Fesztivál', 'Debrecen', 7);
+
+insert into public.settings (key, value) values
+  ('kaucio', '10 000 Ft'), ('leadas_idopont', '[IDŐPONT]'), ('lemondasi_feltetelek', '[LEMONDÁSI FELTÉTELEK]');
+
+-- a foglalás csomagja a packages táblából jön (a régi fix lista helyett)
+alter table public.bookings drop constraint if exists bookings_package_check;
+alter table public.bookings add constraint bookings_package_fkey
+  foreign key (package) references public.packages(key) on update cascade;
