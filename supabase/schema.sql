@@ -116,3 +116,9 @@ alter table public.bookings add constraint bookings_package_fkey
 --   admin_log tábla (admin olvassa, senki nem írja közvetlenül), log_admin_change trigger
 --     a packages, festivals, settings, bookings, admins, user_notes táblákon
 --   newsletter_subscribers() (csak admin)
+
+-- ===== 4. lépés: leárazás, ár a foglaláson, kaució újraszámolása (2026-10-08) =====
+-- Migráció: "discounts_booking_price_deposit_recalc"
+--   packages.discount (0–90 %), pkg_price(key) → akciós ár 100 Ft-ra kerekítve
+--   bookings.price: a foglaláskori ár (booking_before_insert tölti)
+--   recalc_open_deposits trigger: leadás / probléma után a vásárló többi, még át nem vett foglalásán újraszámolja a kauciót

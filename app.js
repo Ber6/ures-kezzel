@@ -22,6 +22,11 @@
     return Object.keys(PKG).filter(function(k){ return PKG[k].active !== false; })
       .sort(function(a, b){ return (PKG[a].sort || 0) - (PKG[b].sort || 0); });
   }
+  // akciós ár: a leárazás után 100 Ft-ra kerekítve (ugyanígy számol az adatbázis is: pkg_price)
+  function effPrice(p){ return Math.round(p.price * (100 - (p.discount || 0)) / 100 / 100) * 100; }
+  function priceHtml(p){
+    return p.discount ? "<s>" + fmtFt(p.price) + "</s>" + fmtFt(effPrice(p)) : fmtFt(p.price);
+  }
   function activeFestivals(){ return DATA.FESTIVALS.filter(function(f){ return f.active !== false; }); }
   function fmtDate(s){
     try { return new Date(s).toLocaleString("hu-HU", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
@@ -263,7 +268,8 @@
       var p = PKG[k];
       return '<article class="plan' + (p.featured ? " featured" : "") + '">' +
         (p.featured ? '<span class="tag">A legnépszerűbb</span>' : "") +
-        "<h3>" + esc(p.name) + '</h3><p class="who">' + p.people + ' főre</p><div class="price">' + fmtFt(p.price) +
+        (p.discount ? '<span class="sale" aria-label="' + p.discount + ' százalék kedvezmény">−' + p.discount + "%</span>" : "") +
+        "<h3>" + esc(p.name) + '</h3><p class="who">' + p.people + ' főre</p><div class="price">' + priceHtml(p) +
         '</div><p class="per">egy teljes fesztiválra</p><ul>' +
         (p.items || []).map(function(it){ return "<li>" + CHECK + esc(it) + "</li>"; }).join("") +
         '</ul>' + (blocked()
@@ -326,7 +332,8 @@
       var p = PKG[k];
       return '<div><input type="radio" name="package" id="pkg-' + esc(k) + '" value="' + esc(k) + '" required>' +
         '<label for="pkg-' + esc(k) + '"><b>' + esc(p.name.replace(/ Pack$/, "")) + "</b><span>" +
-        (blocked() ? "Elfogyott" : p.people + " fő · " + fmtFt(p.price)) + "</span></label></div>";
+        (blocked() ? "Elfogyott" : p.people + " fő · " + (p.discount ? '<span class="was">' + fmtFt(p.price) + "</span>" + fmtFt(effPrice(p)) +
+          '<span class="off">−' + p.discount + "%</span>" : fmtFt(p.price))) + "</span></label></div>";
     }).join(""));
     $$("#bk-packages input").forEach(function(i){ i.disabled = blocked(); });
     $("#form-booking button[type=submit]").disabled = blocked();
@@ -337,6 +344,21 @@
     var r = $("#pkg-" + k);
     if (!r) return;
     r.checked = true;
+  }
+  // Lezáratlan (még nem leadott, probléma nélküli, nem lemondott) foglalások: ezek kimenetele még módosíthatja a kauciót.
+  function openBookings(list, exceptId, before){
+    return list.filter(function(o){
+      return o.id !== exceptId && o.status !== "lemondott" && !o.returned_at && !o.return_problem &&
+        (!before || o.created_at < before);
+    });
+  }
+  function provisionalNote(deposit, others){
+    if (!others.length) return "";
+    var names = Array.from(new Set(others.map(function(o){ return o.festival; }))).join(", ");
+    var reg = settingFt("kaucio"), high = settingFt("kaucio_elso");
+    return "A kaució még nem végleges, mert a(z) " + names + " foglalásod még nincs lezárva (a csomagot még nem adtad le). " +
+      (deposit > reg && reg ? "Ha azt mindennel együtt, rendben visszahozod, itt " + fmtFt(reg) + " lesz a kaució."
+        : "Ha annál a visszahozással probléma lesz, itt " + fmtFt(high) + "-ra nőhet a kaució.");
   }
   function showBooking(){
     showBody("foglalas");
@@ -350,8 +372,17 @@
     buildBookingForm();
     var dep = $("#bk-deposit");
     dep.hidden = blocked() || !state.status;
-    if (state.status) dep.textContent = "Kaució: " + fmtFt(state.status.deposit) + ". Átvételkor kell kifizetni, és a leadás után visszajár." +
-      (state.status.deposit > settingFt("kaucio") && settingFt("kaucio") ? " Ha mindent rendben visszahozol, legközelebb csak " + fmtFt(settingFt("kaucio")) + "." : "");
+    var depText = state.status ? "Kaució: " + fmtFt(state.status.deposit) + ". Átvételkor kell kifizetni, és a leadás után visszajár." +
+      (state.status.deposit > settingFt("kaucio") && settingFt("kaucio") ? " Ha mindent rendben visszahozol, legközelebb csak " + fmtFt(settingFt("kaucio")) + "." : "") : "";
+    dep.textContent = depText;
+    if (state.status && !blocked()){
+      sb.from("bookings").select("id,festival,status,returned_at,return_problem,created_at").eq("user_id", state.user.id).then(function(r){
+        if (r.error) return;
+        state.ownBookings = r.data;
+        var note = provisionalNote(state.status.deposit, openBookings(r.data));
+        if (note) dep.textContent = "Kaució: " + fmtFt(state.status.deposit) + ", átvételkor kell kifizetni, és a leadás után visszajár. " + note;
+      });
+    }
     if (blocked()) return say($("#bk-msg"), "Sajnos jelenleg minden csomagunk elfogyott.");
     var k = state.params.get("csomag");
     if (k && PKG[k]) pickPackage(k);
@@ -376,8 +407,11 @@
         .select().single();
       if (r.error) return say(msg, huErr(r.error));
       var b = r.data;
-      $("#bk-summary").innerHTML = "<b>" + esc(b.festival) + "</b><br>" + esc(PKG[b.package].name) + " · " + b.people + " fő · " + fmtFt(PKG[b.package].price) +
-        (b.deposit ? "<br>Kaució: " + fmtFt(b.deposit) + " (átvételkor, a leadás után visszajár)" : "");
+      var note = provisionalNote(b.deposit, openBookings(state.ownBookings || [], b.id));
+      $("#bk-summary").innerHTML = "<b>" + esc(b.festival) + "</b><br>" + esc(PKG[b.package].name) + " · " + b.people + " fő · " +
+        fmtFt(b.price != null ? b.price : effPrice(PKG[b.package])) +
+        (b.deposit ? "<br>Kaució: " + fmtFt(b.deposit) + " (átvételkor, a leadás után visszajár)" : "") +
+        (note ? '<span class="prov">' + esc(note) + "</span>" : "");
       showContact();
       $("#form-booking").hidden = true;
       $("#bk-done").hidden = false;
@@ -401,9 +435,12 @@
     }
     list.innerHTML = r.data.map(function(b){
       var p = PKG[b.package] || { name: b.package };
+      var price = b.price != null ? b.price : (p.price != null ? p.price : null);
+      var note = !b.picked_up_at && b.status !== "lemondott" ? provisionalNote(b.deposit, openBookings(r.data, b.id, b.created_at)) : "";
       return '<li class="bk">' +
-        "<div><b>" + esc(b.festival) + '</b><span class="meta">' + esc(p.name) + " · " + b.people + " fő" + (p.price != null ? " · " + fmtFt(p.price) : "") +
-        "<br>Leadva: " + esc(fmtDate(b.created_at)) + (b.deposit ? " · Kaució: " + fmtFt(b.deposit) : "") + "</span></div>" +
+        "<div><b>" + esc(b.festival) + '</b><span class="meta">' + esc(p.name) + " · " + b.people + " fő" + (price != null ? " · " + fmtFt(price) : "") +
+        "<br>Foglalva: " + esc(fmtDate(b.created_at)) + (b.deposit ? " · Kaució: " + fmtFt(b.deposit) : "") + "</span>" +
+        (note ? '<span class="prov">' + esc(note) + "</span>" : "") + "</div>" +
         '<div class="bk-side">' + (b.returned_at ? '<span class="badge megerositett">Visszahozva</span>' : b.picked_up_at ? '<span class="badge elofoglalas">Átvéve</span>' : "") +
         '<span class="badge ' + esc(b.status) + '">' + esc(STATUS[b.status] || b.status) + "</span>" +
         (b.status !== "lemondott" && !b.picked_up_at ? '<button type="button" class="btn btn-ghost btn-sm" data-cancel="' + esc(b.id) + '">Lemondás</button>' : "") +
@@ -616,9 +653,9 @@
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
   }
   $("#admin-csv").addEventListener("click", function(){
-    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Fő", "Állapot", "Kaució", "Átvette", "Leadta", "Probléma", "Probléma leírása", "Azonosító"];
+    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Fő", "Ár", "Állapot", "Kaució", "Átvette", "Leadta", "Probléma", "Probléma leírása", "Azonosító"];
     downloadCsv("foglalasok-" + new Date().toISOString().slice(0, 10) + ".csv", [head].concat(filteredRows().map(function(b){
-      return [fmtDate(b.created_at), b.full_name, b.festival, (PKG[b.package] || {}).name || b.package, b.people, STATUS[b.status] || b.status,
+      return [fmtDate(b.created_at), b.full_name, b.festival, (PKG[b.package] || {}).name || b.package, b.people, b.price || "", STATUS[b.status] || b.status,
         b.deposit || "", b.picked_up_at ? fmtDate(b.picked_up_at) : "", b.returned_at ? fmtDate(b.returned_at) : "",
         b.return_problem ? "igen" : "", b.problem_note || "", b.id];
     })));
@@ -665,7 +702,9 @@
         '<div class="head"><b>' + esc(p.name) + '</b><span class="key">' + esc(k) + "</span></div>" +
         inp("Név", "name", p.name, 'required maxlength="60"') +
         '<div class="field-row">' + inp("Létszám (fő)", "people", p.people, 'type="number" min="1" max="8" required') +
-        inp("Ár (Ft)", "price", p.price, 'type="number" min="0" step="100" required') + "</div>" +
+        inp("Ár (Ft)", "price", p.price, 'type="number" min="0" step="100" required') +
+        inp("Leárazás (%)", "discount", p.discount || 0, 'type="number" min="0" max="90"') + "</div>" +
+        (p.discount ? '<p class="hint" style="margin:0">Akciós ár: ' + fmtFt(effPrice(p)) + "</p>" : "") +
         '<div class="field"><label>Tartalom (soronként egy)<textarea name="items" rows="5">' + esc((p.items || []).join("\n")) + "</textarea></label></div>" +
         inp("Sorrend", "sort", p.sort || 0, 'type="number"') +
         '<div class="checks">' + checkbox("active", "Aktív", p.active !== false) + checkbox("featured", "Legnépszerűbb", !!p.featured) + "</div>" +
@@ -676,7 +715,7 @@
   $("#pkg-editors").addEventListener("submit", function(e){
     e.preventDefault();
     var f = e.target, k = f.getAttribute("data-pkg");
-    var row = { name: f.elements.name.value.trim(), people: +f.elements.people.value, price: +f.elements.price.value, items: lines(f.elements.items.value),
+    var row = { name: f.elements.name.value.trim(), people: +f.elements.people.value, price: +f.elements.price.value, discount: +f.elements.discount.value || 0, items: lines(f.elements.items.value),
       sort: +f.elements.sort.value || 0, active: f.elements.active.checked, featured: f.elements.featured.checked };
     busy(f.querySelector("[type=submit]"), async function(){
       // egyszerre csak egy „legnépszerűbb” csomag legyen
@@ -701,7 +740,7 @@
     e.preventDefault();
     var f = e.target;
     var row = { key: $("#pkg-new-key").value.trim().toLowerCase(), name: $("#pkg-new-name").value.trim(),
-      people: +$("#pkg-new-people").value, price: +$("#pkg-new-price").value, items: lines($("#pkg-new-items").value),
+      people: +$("#pkg-new-people").value, price: +$("#pkg-new-price").value, discount: +$("#pkg-new-discount").value || 0, items: lines($("#pkg-new-items").value),
       sort: Object.keys(PKG).length + 1 };
     busy(f.querySelector("[type=submit]"), async function(){
       var r = await sb.from("packages").insert(row).select();
@@ -760,7 +799,7 @@
     });
   });
 
-  var SETTING_KEYS = ["kaucio_elso", "kaucio", "leadas_idopont", "lemondasi_feltetelek"];
+  var SETTING_KEYS = ["kaucio_elso", "kaucio", "lemondasi_feltetelek"];
   function fillSettings(){
     SETTING_KEYS.forEach(function(k){ $("#set-" + k).value = /^kaucio/.test(k) ? settingFt(k) : (DATA.SETTINGS[k] || ""); });
   }
@@ -901,7 +940,7 @@
   var LOG_ACT = { insert: "létrehozta", update: "módosította", delete: "törölte" };
   var LOG_FIELD = { status: "állapot", picked_up_at: "átvette", returned_at: "leadta", return_problem: "probléma", problem_note: "probléma leírása",
     name: "név", price: "ár", people: "létszám", items: "tartalom", featured: "legnépszerűbb", active: "aktív", sort: "sorrend",
-    location: "helyszín", dates: "időpont", value: "érték", note: "megjegyzés", full_name: "név", festival: "fesztivál", package: "csomag", deposit: "kaució" };
+    location: "helyszín", dates: "időpont", value: "érték", note: "megjegyzés", full_name: "név", festival: "fesztivál", package: "csomag", deposit: "kaució", discount: "leárazás (%)" };
   function logLabel(x){
     var d = x.new_data || x.old_data || {};
     if (x.tbl === "bookings") return (d.full_name || "") + " · " + (d.festival || "");
