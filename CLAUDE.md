@@ -27,17 +27,18 @@ Ezt a fájlt a claude.ai-os beszélgetésből hoztuk át. Olvasd végig, mielőt
 ## Bekért adatok (csak ezek!)
 
 - Regisztráció: név, e-mail, jelszó, plusz egy kötelező jelölőnégyzet: „Elolvastam az adatkezelési tájékoztatót, és elmúltam 18 éves.”
-- Foglalás: fesztivál (legördülő lista), csomag (Solo/Duo/Crew), létszám.
-- **Telefonszámot NEM kérünk.** A visszaigazoló képernyőn és a „Foglalásaim” oldalon a csapat saját telefonszáma jelenjen meg: `[CSAPAT TELEFONSZÁM]`.
+- Foglalás: fesztivál (legördülő lista), csomag (Solo/Duo/Crew). A létszámot nem kérdezzük, a csomagból adódik (Solo 1, Duo 2, Crew 4).
+- **Telefonszámot NEM kérünk.** A visszaigazoló képernyőn és a „Foglalásaim” oldalon a csapat e-mail-címe jelenik meg (`config.js` → `TEAM_EMAIL`). A csapat telefonszámát csak a fesztivál előtt, e-mailben adjuk ki a foglalóknak.
 - Nincs fizetés, nincs analitika, nincs követő süti.
 
 ## Oldalak és funkciók
 
 1. **Regisztráció / Belépés** (`#/belepes`): váltható fülek, „Elfelejtett jelszó” (Supabase reset e-mail), érthető magyar hibaüzenetek.
 2. **Foglalás** (`#/foglalas`): csak belépve. A csomagkártyák „Ezt kérem” gombja előre kiválasztja a csomagot. Kijelentkezett felhasználót a belépésre visz, majd vissza a foglaláshoz.
-3. **Foglalásaim** (`#/foglalasaim`): a saját foglalások listája állapottal, lemondás gomb, valamint **„Fiókom törlése”** (megerősítő kérdéssel). A törlés a fiókot és minden foglalást töröl.
+3. **Foglalásaim** (`#/foglalasaim`): a saját foglalások listája állapottal, lemondás gomb.
+3/b. **Fiókom** (`#/fiokom`): fiókadatok, név, e-mail-cím és jelszó módosítása, adatok letöltése (JSON), valamint **„Fiókom törlése”** (megerősítő kérdéssel). A törlés a fiókot és minden foglalást töröl.
 4. **Admin** (`#/admin`): csak az `admins` táblában szereplő felhasználóknak. Az összes foglalás táblázatban, szűrés fesztiválra, állapot módosítása, CSV export, és egy összesítő: fesztivál × csomag darabszám.
-5. A navigációban legyen „Belépés”, belépve pedig „Foglalásaim” és „Kijelentkezés”.
+5. A navigációban legyen „Belépés”, belépve pedig „Foglalásaim”, „Fiókom” és „Kijelentkezés”.
 
 ## Adatbázis (Supabase SQL Editorba)
 

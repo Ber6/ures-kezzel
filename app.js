@@ -7,7 +7,7 @@
   var PKG = DATA.PACKAGES;
   var STATUS = { elofoglalas: "Előfoglalás", megerositett: "Megerősítve", lemondott: "Lemondva" };
   var BASE = location.origin + location.pathname;
-  var BACK_OK = ["foglalas", "foglalasaim", "admin"];
+  var BACK_OK = ["foglalas", "foglalasaim", "fiokom", "admin"];
 
   function $(s, r){ return (r || document).querySelector(s); }
   function $$(s, r){ return Array.from((r || document).querySelectorAll(s)); }
@@ -20,10 +20,9 @@
     try { return new Date(s).toLocaleString("hu-HU", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
     catch (e) { return s; }
   }
-  function phoneHtml(){
-    var p = CFG.TEAM_PHONE || "[CSAPAT TELEFONSZÁM]";
-    var digits = p.replace(/[^\d+]/g, "");
-    return digits.length >= 8 ? '<a href="tel:' + esc(digits) + '">' + esc(p) + "</a>" : esc(p);
+  function showContact(){
+    var m = CFG.TEAM_EMAIL || "";
+    $$(".team-contact").forEach(function(el){ el.innerHTML = '<a href="mailto:' + esc(m) + '">' + esc(m) + "</a>"; });
   }
 
   /* ---------- Supabase kliens ---------- */
@@ -45,6 +44,7 @@
     console.warn("Supabase hiba:", err);
     if (/Invalid login credentials/i.test(all)) return "Hibás e-mail-cím vagy jelszó.";
     if (/Email not confirmed|email_not_confirmed/i.test(all)) return "Még nem erősítetted meg az e-mail-címed. Nézd meg a postafiókod (a spam mappát is), és kattints a levélben lévő linkre.";
+    if (/email_exists/i.test(all)) return "Ezzel az e-mail-címmel már van fiók.";
     if (/already registered|already been registered|user_already_exists/i.test(all)) return "Ezzel az e-mail-címmel már regisztráltak. Lépj be, vagy kérj új jelszót.";
     if (/same_password|should be different/i.test(all)) return "Az új jelszó nem lehet ugyanaz, mint a régi.";
     if (/Password should|weak_password/i.test(all)) return "A jelszó túl rövid vagy túl gyenge. Legalább 8 karakter legyen.";
@@ -124,6 +124,7 @@
       case "belepes": return showLogin();
       case "foglalas": return guard() && showBooking();
       case "foglalasaim": return guard() && showMine();
+      case "fiokom": return guard() && showAccount();
       case "admin": return guard() && showAdmin();
       case "uj-jelszo": return showNewPassword();
       case "adatkezeles": return showPrivacy();
@@ -242,19 +243,12 @@
       return '<div><input type="radio" name="package" id="pkg-' + k + '" value="' + k + '" required>' +
         '<label for="pkg-' + k + '"><b>' + esc(p.name.replace(" Pack", "")) + "</b><span>" + p.people + " fő · " + esc(p.price) + "</span></label></div>";
     }).join(""));
-    var opts = "";
-    for (var i = 1; i <= 8; i++) opts += '<option value="' + i + '">' + i + " fő</option>";
-    $("#bk-people").innerHTML = opts;
-    $$('#bk-packages input').forEach(function(r){
-      r.addEventListener("change", function(){ $("#bk-people").value = String(PKG[r.value].people); });
-    });
   })();
 
   function pickPackage(k){
     var r = $("#pkg-" + k);
     if (!r) return;
     r.checked = true;
-    $("#bk-people").value = String(PKG[k].people);
   }
   function showBooking(){
     showBody("foglalas");
@@ -276,18 +270,17 @@
     var name = (meta.full_name || $("#bk-name").value).trim();
     var festival = $("#bk-festival").value;
     var pkgEl = $('#bk-packages input:checked');
-    var people = parseInt($("#bk-people").value, 10);
     if (name.length < 2) return say(msg, "Add meg a teljes neved.");
     if (!festival) return say(msg, "Válassz fesztivált.");
     if (!pkgEl) return say(msg, "Válassz csomagot.");
     busy($("#form-booking button[type=submit]"), async function(){
       var r = await sb.from("bookings")
-        .insert({ user_id: state.user.id, full_name: name, festival: festival, package: pkgEl.value, people: people })
+        .insert({ user_id: state.user.id, full_name: name, festival: festival, package: pkgEl.value, people: PKG[pkgEl.value].people })
         .select().single();
       if (r.error) return say(msg, huErr(r.error));
       var b = r.data;
       $("#bk-summary").innerHTML = "<b>" + esc(b.festival) + "</b><br>" + esc(PKG[b.package].name) + " · " + b.people + " fő · " + esc(PKG[b.package].price);
-      $("#bk-phone").innerHTML = phoneHtml();
+      showContact();
       $("#form-booking").hidden = true;
       $("#bk-done").hidden = false;
       $("#bk-done h2").focus();
@@ -297,7 +290,7 @@
   /* ---------- Foglalásaim ---------- */
   async function showMine(){
     var el = showBody("foglalasaim");
-    $("#mine-phone").innerHTML = phoneHtml();
+    showContact();
     var f = takeFlash("foglalasaim");
     say($("#mine-msg"), f ? f.text : "", f ? f.kind : "err");
     var list = $("#mine-list", el);
@@ -333,11 +326,88 @@
     if (!confirm("Biztosan törlöd a fiókodat? Ezzel az összes foglalásod is törlődik, és ez nem vonható vissza.")) return;
     busy($("#delete-account"), async function(){
       var r = await sb.rpc("delete_my_account");
-      if (r.error) return say($("#mine-msg"), huErr(r.error));
+      if (r.error) return say($("#acct-msg"), huErr(r.error));
       await sb.auth.signOut({ scope: "local" });
       await setUser(null);
       alert("A fiókodat és az összes foglalásodat töröltük.");
       go("#/");
+    });
+  });
+
+  /* ---------- Fiókom ---------- */
+  function userName(){ return (state.user.user_metadata && state.user.user_metadata.full_name) || ""; }
+  async function showAccount(){
+    showBody("fiokom");
+    var u = state.user;
+    var f = takeFlash("fiokom");
+    say($("#acct-msg"), f ? f.text : "", f ? f.kind : "err");
+    ["#name-msg", "#email-msg", "#pw-msg"].forEach(function(s){ say($(s), ""); });
+    $("#acct-name").textContent = userName() || "–";
+    $("#acct-email").textContent = u.email + (u.new_email ? " (függőben: " + u.new_email + ")" : "");
+    $("#acct-created").textContent = u.created_at ? fmtDate(u.created_at) : "–";
+    $("#acct-new-name").value = userName();
+    $("#acct-bookings").textContent = "…";
+    var r = await sb.from("bookings").select("status").eq("user_id", u.id);
+    if (r.error) return $("#acct-bookings").textContent = "–";
+    var active = r.data.filter(function(b){ return b.status !== "lemondott"; }).length;
+    $("#acct-bookings").innerHTML = r.data.length + " db (" + active + ' aktív) · <a href="#/foglalasaim">megnézem</a>';
+  }
+  $("#form-name").addEventListener("submit", function(e){
+    e.preventDefault();
+    var msg = $("#name-msg"), name = $("#acct-new-name").value.trim(); say(msg, "");
+    if (name.length < 2) return say(msg, "Add meg a teljes neved.");
+    busy($("#form-name button[type=submit]"), async function(){
+      var r = await sb.auth.updateUser({ data: { full_name: name } });
+      if (r.error) return say(msg, huErr(r.error));
+      state.user = r.data.user;
+      $("#acct-name").textContent = name;
+      say(msg, "A neved el van mentve.", "ok");
+    });
+  });
+  $("#form-email").addEventListener("submit", function(e){
+    e.preventDefault();
+    var msg = $("#email-msg"), email = $("#acct-new-email").value.trim(); say(msg, "");
+    if (email.toLowerCase() === (state.user.email || "").toLowerCase()) return say(msg, "Ez a jelenlegi e-mail-címed.");
+    busy($("#form-email button[type=submit]"), async function(){
+      var r = await sb.auth.updateUser({ email: email }, { emailRedirectTo: BASE + "?email-csere=1" });
+      if (r.error) return say(msg, huErr(r.error));
+      if (r.data && r.data.user) state.user = r.data.user;
+      $("#form-email").reset();
+      say(msg, "Küldtünk egy megerősítő levelet ide: " + email + ". A csere a levélben lévő linkre kattintva lép életbe. Ha a régi címedre is jön levél, azt is meg kell erősítened.", "ok");
+    });
+  });
+  $("#form-pw").addEventListener("submit", function(e){
+    e.preventDefault();
+    var msg = $("#pw-msg"); say(msg, "");
+    var old = $("#acct-pw-old").value, a = $("#acct-pw-new").value, b = $("#acct-pw-new2").value;
+    if (a !== b) return say(msg, "A két új jelszó nem egyezik.");
+    busy($("#form-pw button[type=submit]"), async function(){
+      // a jelenlegi jelszó ellenőrzése: újra belépünk vele
+      var chk = await sb.auth.signInWithPassword({ email: state.user.email, password: old });
+      if (chk.error) return say(msg, /Invalid login credentials/i.test(chk.error.message) ? "A jelenlegi jelszó nem jó." : huErr(chk.error));
+      var r = await sb.auth.updateUser({ password: a });
+      if (r.error) return say(msg, huErr(r.error));
+      $("#form-pw").reset();
+      say(msg, "Az új jelszavad el van mentve.", "ok");
+    });
+  });
+  $("#acct-export").addEventListener("click", function(){
+    busy($("#acct-export"), async function(){
+      var u = state.user;
+      var r = await sb.from("bookings").select("*").eq("user_id", u.id).order("created_at", { ascending: true });
+      if (r.error) return say($("#acct-msg"), huErr(r.error));
+      var out = {
+        letoltve: new Date().toISOString(),
+        fiok: { nev: userName(), email: u.email, regisztracio: u.created_at, email_megerositve: u.email_confirmed_at || null, utolso_belepes: u.last_sign_in_at || null },
+        foglalasok: r.data.map(function(b){
+          return { leadva: b.created_at, fesztival: b.festival, csomag: (PKG[b.package] || {}).name || b.package, fo: b.people, allapot: STATUS[b.status] || b.status, nev_a_foglalason: b.full_name };
+        })
+      };
+      var blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "ures-kezzel-adataim.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
     });
   });
 
@@ -398,8 +468,8 @@
         return '<option value="' + s + '"' + (s === b.status ? " selected" : "") + ">" + STATUS[s] + "</option>";
       }).join("");
       return "<tr><td>" + esc(fmtDate(b.created_at)) + "</td><td>" + esc(b.full_name) + "</td><td>" + esc(b.festival) + "</td><td>" +
-        esc((PKG[b.package] || {}).name || b.package) + "</td><td>" + b.people + '</td><td><select data-status="' + esc(b.id) + '" aria-label="Állapot">' + opts + "</select></td></tr>";
-    }).join("") : '<tr><td colspan="6" class="muted">Nincs foglalás.</td></tr>';
+        esc((PKG[b.package] || {}).name || b.package) + '</td><td><select data-status="' + esc(b.id) + '" aria-label="Állapot">' + opts + "</select></td></tr>";
+    }).join("") : '<tr><td colspan="5" class="muted">Nincs foglalás.</td></tr>';
   }
   $("#admin-filter").addEventListener("change", renderAdmin);
   $("#admin-reload").addEventListener("click", showAdmin);
@@ -419,7 +489,7 @@
     renderAdmin();
   });
   $("#admin-csv").addEventListener("click", function(){
-    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Létszám", "Állapot", "Azonosító"];
+    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Fő", "Állapot", "Azonosító"];
     var lines = [head].concat(filteredRows().map(function(b){
       return [fmtDate(b.created_at), b.full_name, b.festival, (PKG[b.package] || {}).name || b.package, b.people, STATUS[b.status] || b.status, b.id];
     })).map(function(r){
@@ -480,7 +550,7 @@
     var q = new URLSearchParams(location.search);
     var h = new URLSearchParams(location.hash.replace(/^#\/?/, ""));
     var linkError = q.get("error_description") || h.get("error_description");
-    var fromLink = q.has("code") || q.has("megerositve") || q.has("uj-jelszo") || !!linkError;
+    var fromLink = q.has("code") || q.has("megerositve") || q.has("uj-jelszo") || q.has("email-csere") || !!linkError;
 
     var s = await sb.auth.getSession(); // ez cseréli be a ?code=… paramétert is belépésre
     await setUser(s.data.session);
@@ -500,6 +570,15 @@
       var target = "#/belepes";
       if (linkError) state.flash = { view: "belepes", text: "A link lejárt, vagy már felhasználták. Lépj be, vagy kérj új linket.", kind: "err" };
       else if (q.has("uj-jelszo")) target = "#/uj-jelszo";
+      else if (q.has("email-csere")){
+        // a Supabase a régi és az új címre is küldhet linket; a csere a második után lép életbe
+        var u = (await sb.auth.getUser()).data.user;
+        if (u) state.user = u;
+        target = state.user ? "#/fiokom" : "#/belepes";
+        state.flash = { view: state.user ? "fiokom" : "belepes", kind: "ok", text: state.user && state.user.new_email
+          ? "Megerősítve. Ha a másik címedre is jött levél, kattints abban is a linkre, a csere utána lép életbe."
+          : "Az e-mail-címed frissült." };
+      }
       else if (state.user){ target = "#/foglalas"; }
       else state.flash = { view: "belepes", text: "Az e-mail-címed meg van erősítve. Most már be tudsz lépni.", kind: "ok" };
       history.replaceState(null, "", location.pathname);
