@@ -11,7 +11,7 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
 | --- | --- |
 | `index.html` | A weboldal: landing page és minden aloldal (hash alapú: `#/`, `#/csomagok`, `#/foglalas` …) |
 | `app.js` | Belépés, regisztráció, foglalás, Foglalásaim, admin (Supabase) |
-| `data.js` | A fesztiválok és a csomagok listája. **Új fesztivál ide kerül.** |
+| `data.js` | Tartalék csomag-, fesztivál- és beállításlista. Az élő adatok a Supabase-ben vannak, és az **admin oldalon** szerkeszthetők. |
 | `config.js` | Supabase Project URL + publishable kulcs + a csapat e-mail-címe |
 | `supabase/schema.sql` | Az adatbázis (egyszer kell lefuttatni a Supabase SQL Editorban) |
 | `docs/adatkezeles.md` | Adatkezelési tájékoztató, ebből lesz a `#/adatkezeles` oldal. A `[...]` részeket ki kell tölteni. |
@@ -23,7 +23,7 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
 - `#/foglalas`: foglalás (csak belépve; a csomagkártyák „Ezt kérem” gombja előre kiválasztja a csomagot)
 - `#/foglalasaim`: saját foglalások, lemondás
 - `#/fiokom`: fiókadatok, név / e-mail / jelszó módosítása, adatok letöltése (JSON), fiók törlése
-- `#/admin`: összes foglalás, szűrés, állapot módosítása, CSV, összesítő (csak az `admins` táblában szereplőknek)
+- `#/admin`: összes foglalás, szűrés, állapot módosítása, CSV, összesítő; csomagok, fesztiválok és beállítások (kaució, leadási időpont, lemondási feltételek) szerkesztése (csak az `admins` táblában szereplőknek)
 - `#/adatkezeles`: adatkezelési tájékoztató
 
 A foglalási oldalakon a 3D háttér nem fut, hogy ne lassítson.

@@ -100,7 +100,7 @@ h2,.ptitle{font-size:clamp(2.4rem,5.5vw,4.6rem);font-weight:750;font-variation-s
 /* csomagok */
 .prices{padding:clamp(6rem,14vh,10rem) 0}
 .prices .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1.5rem}
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:3.5rem;align-items:stretch}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-top:3.5rem;align-items:stretch}
 .plan{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;padding:2rem;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.2,.8,.2,1), border-color .3s}
 .plan:hover{transform:translateY(-6px);border-color:rgba(244,241,234,.35)}
 .plan h3{font-size:1.9rem;font-weight:750;font-variation-settings:"wdth" 80}
@@ -295,7 +295,7 @@ button.btn-ghost{background:transparent}
 .check{display:flex;gap:.75rem;align-items:flex-start;font-size:.97rem;cursor:pointer}
 .check input{width:20px;height:20px;margin:.2rem 0 0;accent-color:var(--lantern);flex:none}
 .linkbtn{appearance:none;background:none;border:0;padding:0;color:var(--lantern);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;justify-self:start}
-.pkg-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;border:0;padding:0;margin:0;min-width:0}
+.pkg-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem;border:0;padding:0;margin:0;min-width:0}
 .pkg-pick legend{font-weight:600;margin-bottom:.4rem;padding:0}
 .pkg-pick div{position:relative}
 .pkg-pick input{position:absolute;opacity:0;pointer-events:none}
@@ -345,6 +345,19 @@ button.btn-ghost{background:transparent}
 /* a <details> tartalma nem örökli a border-box-ot, ezért itt külön megadjuk */
 .acct-sec *{box-sizing:border-box}
 .acct-sec + .danger{border-top:0;margin-top:1.25rem;padding-top:.5rem}
+.field textarea{width:100%;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px;resize:vertical;box-sizing:border-box}
+.field textarea:focus{outline:none;border-color:var(--lantern);box-shadow:0 0 0 3px rgba(242,194,48,.2)}
+.field-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem}
+.editors{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1.25rem 0 1.5rem}
+.editor{border:1px solid var(--line);border-radius:20px;padding:1.25rem;background:rgba(15,22,51,.55);display:grid;gap:.9rem;align-content:start}
+.editor.off{opacity:.6}
+.editor .field label{font-size:.9rem}
+.editor .field input,.editor .field select,.editor .field textarea{min-height:42px;padding:.5rem .8rem;font-size:15px}
+.editor .head{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.editor .head b{font-family:var(--display);font-size:1.3rem}
+.editor .key{color:var(--muted);font-size:.85rem}
+.editor .checks{display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+.editor .btn-row{margin-top:.2rem}
 .acct-sec .form,.acct-sec > p,.acct-sec > .btn{margin-bottom:1.4rem}
 .acct-sec > p{margin-top:0}
 @media (max-width: 600px){ .acct-data{grid-template-columns:1fr} }
@@ -419,7 +432,7 @@ footer a:hover{color:var(--paper)}
         <div class="fest-strip">
           <div>
             <h3>Melyik fesztiválon vagyunk ott?</h3>
-            <div class="names"><span class="chip">Fishing on Orfű</span><span class="chip">Sziget</span><span class="chip">VOLT</span><span class="chip">Balaton Sound</span><span class="chip">és még több</span></div>
+            <div class="names" id="fest-chips"></div>
           </div>
           <a class="btn btn-primary" href="#/fesztivalok">Fesztiválok listája</a>
         </div>
@@ -432,52 +445,7 @@ footer a:hover{color:var(--paper)}
           <h2 class="reveal">Válaszd ki a csomagod.</h2>
           <p class="lede" style="margin:0">Az árak a teljes fesztiválra szólnak, nem napidíjasak.</p>
         </div>
-        <div class="plans">
-          <article class="plan">
-            <h3>Solo Pack</h3>
-            <p class="who">1 főre</p>
-            <div class="price">14 900 Ft</div>
-            <p class="per">egy teljes fesztiválra</p>
-            <ul>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 fős sátor</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Önfelfújó matrac</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Kempingszék</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>LED sátorlámpa</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Powerbank</li>
-            </ul>
-            <a class="btn btn-ghost" href="#/foglalas?csomag=solo">Ezt kérem</a>
-          </article>
-          <article class="plan featured">
-            <span class="tag">A legnépszerűbb</span>
-            <h3>Duo Pack</h3>
-            <p class="who">2 főre</p>
-            <div class="price">24 900 Ft</div>
-            <p class="per">egy teljes fesztiválra</p>
-            <ul>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>3 fős sátor</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 önfelfújó matrac</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 kempingszék</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>LED sátorlámpa</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 powerbank</li>
-            </ul>
-            <a class="btn" href="#/foglalas?csomag=duo">Ezt kérem</a>
-          </article>
-          <article class="plan">
-            <h3>Crew Pack</h3>
-            <p class="who">4 főre</p>
-            <div class="price">44 900 Ft</div>
-            <p class="per">egy teljes fesztiválra</p>
-            <ul>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 fős kupolasátor</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 önfelfújó matrac</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 kempingszék</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>3×3 m-es pavilon</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 LED sátorlámpa</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 powerbank</li>
-            </ul>
-            <a class="btn btn-ghost" href="#/foglalas?csomag=crew">Ezt kérem</a>
-          </article>
-        </div>
+        <div class="plans"></div>
         <div class="extras">
           <p>Bővítsd a csomagod:</p>
           <span class="chip">Kempingasztal</span><span class="chip">Pavilon</span><span class="chip">Hűtőtáska</span><span class="chip">Függőágy</span><span class="chip">Hálózsák béléssel</span><span class="chip">Túlélőcsomag</span>
@@ -535,8 +503,8 @@ footer a:hover{color:var(--paper)}
         <p class="eco">És a kempingben sem marad ott egy újabb eldobott sátor.</p>
         <dl class="logistics">
           <div><dt>Átvétel</dt><dd>Az érkezés napján, a bejárat előtti átvételi pontunkon</dd></div>
-          <div><dt>Leadás</dt><dd>Az utolsó napon [IDŐPONT]-ig, ugyanott</dd></div>
-          <div><dt>Kaució</dt><dd>10 000 Ft, a leadás után visszajár</dd></div>
+          <div><dt>Leadás</dt><dd>Az utolsó napon <span data-setting="leadas_idopont">[IDŐPONT]</span>-ig, ugyanott</dd></div>
+          <div><dt>Kaució</dt><dd><span data-setting="kaucio">10 000 Ft</span>, a leadás után visszajár</dd></div>
         </dl>
         <div class="extras"><a class="btn btn-primary" href="#/arak">Csomagot választok</a></div>
       </div>
@@ -598,7 +566,7 @@ footer a:hover{color:var(--paper)}
           </details>
           <details>
             <summary>Lemondhatom a foglalást?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
-            <p>[LEMONDÁSI FELTÉTELEK]</p>
+            <p data-setting="lemondasi_feltetelek">[LEMONDÁSI FELTÉTELEK]</p>
           </details>
         </div>
       </div>
@@ -783,12 +751,21 @@ footer a:hover{color:var(--paper)}
   <div class="view" data-view="admin" hidden>
     <section class="app-sec subpage">
       <div class="wrap">
-        <h1 class="ptitle">Foglalások.</h1>
+        <h1 class="ptitle">Admin.</h1>
         <div class="card wide">
           <p class="muted" data-loading>Betöltés…</p>
           <div data-body hidden>
             <p id="admin-denied" class="muted" hidden>Ez az oldal csak a csapatnak szól.</p>
             <div id="admin-panel" hidden>
+              <div class="tabs" role="tablist" aria-label="Admin">
+                <button type="button" role="tab" data-atab="bookings" aria-selected="true">Foglalások</button>
+                <button type="button" role="tab" data-atab="packages" aria-selected="false">Csomagok</button>
+                <button type="button" role="tab" data-atab="festivals" aria-selected="false">Fesztiválok</button>
+                <button type="button" role="tab" data-atab="settings" aria-selected="false">Beállítások</button>
+              </div>
+              <div id="admin-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
+
+              <div data-apanel="bookings">
               <div class="toolbar">
                 <div class="field"><label for="admin-filter">Fesztivál</label><select id="admin-filter"><option value="">Minden fesztivál</option></select></div>
                 <div class="btn-row" style="margin:0">
@@ -796,7 +773,6 @@ footer a:hover{color:var(--paper)}
                   <button type="button" class="btn btn-primary btn-sm" id="admin-csv">CSV letöltése</button>
                 </div>
               </div>
-              <div id="admin-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
               <p class="muted" id="admin-count"></p>
               <h3 class="sub">Összesítő (lemondottak nélkül)</h3>
               <div class="tbl-wrap"><table class="tbl" id="admin-summary"></table></div>
@@ -806,6 +782,50 @@ footer a:hover{color:var(--paper)}
                   <thead><tr><th>Leadva</th><th>Név</th><th>Fesztivál</th><th>Csomag</th><th>Állapot</th></tr></thead>
                   <tbody></tbody>
                 </table>
+              </div>
+              </div>
+
+              <div data-apanel="packages" hidden>
+                <p class="muted">A változás mentés után azonnal megjelenik a weboldalon. Csomagot, amire már van foglalás, nem lehet törölni, de ki lehet kapcsolni: akkor nem látszik és nem foglalható.</p>
+                <div id="pkg-editors" class="editors"></div>
+                <details class="acct-sec">
+                  <summary>Új csomag<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+                  <form id="pkg-new" class="form">
+                    <div class="field"><label for="pkg-new-key">Azonosító</label><input id="pkg-new-key" required pattern="[a-z0-9\-]{2,20}" maxlength="20" placeholder="pl. family"><p class="hint">Kisbetű, szám és kötőjel. Később nem módosítható, a weboldalon nem látszik.</p></div>
+                    <div class="field"><label for="pkg-new-name">Név</label><input id="pkg-new-name" required maxlength="60" placeholder="pl. Family Pack"></div>
+                    <div class="field-row">
+                      <div class="field"><label for="pkg-new-people">Létszám (fő)</label><input id="pkg-new-people" type="number" min="1" max="8" value="2" required></div>
+                      <div class="field"><label for="pkg-new-price">Ár (Ft)</label><input id="pkg-new-price" type="number" min="0" step="100" required></div>
+                    </div>
+                    <div class="field"><label for="pkg-new-items">Tartalom</label><textarea id="pkg-new-items" rows="5" placeholder="Soronként egy tétel"></textarea></div>
+                    <button class="btn btn-primary btn-sm" type="submit">Csomag hozzáadása</button>
+                  </form>
+                </details>
+              </div>
+
+              <div data-apanel="festivals" hidden>
+                <p class="muted">A kikapcsolt fesztivál nem látszik az oldalon, és nem lehet rá foglalni. A korábbi foglalásokon a fesztivál neve úgy marad, ahogy foglaláskor volt.</p>
+                <div id="fest-editors" class="editors"></div>
+                <details class="acct-sec">
+                  <summary>Új fesztivál<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+                  <form id="fest-new" class="form">
+                    <div class="field"><label for="fest-new-name">Név</label><input id="fest-new-name" required maxlength="80"></div>
+                    <div class="field-row">
+                      <div class="field"><label for="fest-new-location">Helyszín</label><input id="fest-new-location" maxlength="80"></div>
+                      <div class="field"><label for="fest-new-dates">Időpont</label><input id="fest-new-dates" maxlength="60" placeholder="pl. 2027. jún. 2–5."></div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" type="submit">Fesztivál hozzáadása</button>
+                  </form>
+                </details>
+              </div>
+
+              <div data-apanel="settings" hidden>
+                <form id="settings-form" class="form" style="max-width:580px">
+                  <div class="field"><label for="set-kaucio">Kaució</label><input id="set-kaucio" maxlength="40"><p class="hint">Pl. „10 000 Ft”. Megjelenik a Hogyan működik oldalon.</p></div>
+                  <div class="field"><label for="set-leadas_idopont">Leadás időpontja az utolsó napon</label><input id="set-leadas_idopont" maxlength="40"><p class="hint">Pl. „délután 2 óra”. A mondat: „Az utolsó napon …-ig, ugyanott”.</p></div>
+                  <div class="field"><label for="set-lemondasi_feltetelek">Lemondási feltételek</label><textarea id="set-lemondasi_feltetelek" rows="4" maxlength="600"></textarea><p class="hint">A GYIK „Lemondhatom a foglalást?” kérdésére adott válasz.</p></div>
+                  <button class="btn btn-primary btn-sm" type="submit">Beállítások mentése</button>
+                </form>
               </div>
             </div>
           </div>
@@ -869,7 +889,7 @@ footer a:hover{color:var(--paper)}
   var STEPS = [
     {t:"Foglald le online",
      s:"Válaszd ki a csomagot és a fesztivált, és foglald le előre. Most még nem kell fizetned.",
-     l:"Kiválasztod a csomagot és a fesztivált, és leadod az előfoglalást. Most még nem kell fizetned: előbb felvesszük veled a kapcsolatot. A csomaghoz 10\u00a0000\u00a0Ft kaució tartozik, ami a leadás után visszajár."},
+     l:"Kiválasztod a csomagot és a fesztivált, és leadod az előfoglalást. Most még nem kell fizetned: előbb felvesszük veled a kapcsolatot. A csomaghoz <span data-setting=\"kaucio\">10\u00a0000\u00a0Ft</span> kaució tartozik, ami a leadás után visszajár."},
     {t:"Vedd át a bejáratnál",
      s:"Az érkezés napján a kemping bejárata előtt vár a csomagod. Nem kell semmit cipelned.",
      l:"Az érkezés napján a kemping bejárata előtti átvételi ponton vár a csomagod. Vonattal, busszal is könnyen jössz, mert a felszerelés már ott van."},
@@ -899,12 +919,7 @@ footer a:hover{color:var(--paper)}
     }).join("");
     if (reduce) ol.classList.add("lit"); else flowIO.observe(ol);
   });
-
-  /* ---------- fesztiválok a közös listából (data.js) ---------- */
-  var FEST = (window.UK_DATA && window.UK_DATA.FESTIVALS) || [];
-  document.querySelector(".fest-list").innerHTML = FEST.map(function(f){
-    return '<li><div><b>' + f.name + '</b><span class="where">' + f.where + '</span></div><span class="chip">' + (f.status || "Tervezett") + '</span></li>';
-  }).join("");
+  if (window.UK_applySettings) UK_applySettings();
 
   /* ---------- árak a Csomagok oldalon is (a főoldali szekció másolata) ---------- */
   var pricesHome = document.getElementById("csomagok");
