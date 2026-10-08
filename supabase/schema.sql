@@ -129,3 +129,15 @@ alter table public.bookings add constraint bookings_package_fkey
 --   mailerlite_send(email, name, subscribe) → POST https://connect.mailerlite.com/api/subscribers
 --   mailerlite_on_user_change trigger az auth.users-en (megerősítés / hírlevél be-ki)
 --   mailerlite_sync_all() (admin), mailerlite_last_results() (admin, hibakereséshez)
+
+-- ===== 6. lépés: kuka a foglalásokhoz (2026-10-08) =====
+--   bookings.deleted_at: kukában van-e (a vásárló a kukában lévőt nem látja; is_blocked, deposit_for, cancel_booking figyelmen kívül hagyja)
+--   "admin delete" szabály: végleges törlés csak adminnak
+--   purge_trash(): a 30 napnál régebbi kukás foglalások törlése (az admin oldal megnyitásakor fut, csak adminnak)
+create or replace function public.purge_trash() returns void language sql security definer set search_path = public
+begin atomic delete from public.bookings where deleted_at < now() - interval '30 days' and public.is_admin(); end;
+revoke execute on function public.purge_trash() from public, anon;
+grant execute on function public.purge_trash() to authenticated;
+-- napi automatikus ürítés (pg_cron, 3:17 UTC)
+create extension if not exists pg_cron;
+select cron.schedule('purge-booking-trash', '17 3 * * *', $$delete from public.bookings where deleted_at < now() - interval '30 days'$$);
