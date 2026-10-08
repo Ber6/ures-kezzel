@@ -10,10 +10,9 @@ Az Üres Kézzel a Pécsi Tudományegyetem Közgazdaságtudományi Karának „V
 | --- | --- |
 | Adatkezelő | [A projektcsapat tagjainak neve] |
 | Kapcsolattartó | [Kapcsolattartó neve] |
-| E-mail | [ureskezzel@…] |
-| Telefon | [+36 …] |
+| E-mail | urreskezzel@gmail.com |
 | Postacím | [Cím] |
-| Weboldal | [https://…] |
+| Weboldal | https://ures-kezzel.vercel.app |
 
 Adatvédelmi kérdéseiddel a fenti e-mail-címen fordulhatsz hozzánk. 30 napon belül válaszolunk.
 
@@ -21,14 +20,14 @@ A szolgáltatás jelenleg tesztüzemben működik. Az előfoglalás nem jár fiz
 
 ## 2. Milyen adatokat kezelünk, miért és meddig?
 
-Csak azt kérjük be, ami a fiókhoz és az előfoglaláshoz feltétlenül kell. Telefonszámot nem kérünk: az átvétel egyeztetéséhez mi adjuk meg a sajátunkat.
+Csak azt kérjük be, ami a fiókhoz és az előfoglaláshoz feltétlenül kell. Telefonszámot nem kérünk: az átvétel részleteit és a saját telefonszámunkat a fesztivál előtt e-mailben küldjük el neked.
 
 | Adat | Cél | Jogalap | Meddig őrizzük |
 | --- | --- | --- | --- |
 | Név | A foglalás azonosítása, átvételkor a csomag kiadása | GDPR 6. cikk (1) b): a szerződéskötést megelőző lépések a kérésedre | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
-| E-mail-cím | Belépés, a foglalás visszaigazolása, értesítés a foglalásról | GDPR 6. cikk (1) b) | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
+| E-mail-cím | Belépés, a foglalás visszaigazolása, értesítés a foglalásról, a fesztivál előtt az átvétel részleteinek elküldése | GDPR 6. cikk (1) b) | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
 | Jelszó | Belépés a fiókba | GDPR 6. cikk (1) b) | A fiók törléséig. A jelszót csak titkosított (hash-elt) formában tárolja a rendszer, mi sem látjuk. |
-| Foglalási adatok: fesztivál, csomag, létszám, a foglalás időpontja és állapota | Az előfoglalás kezelése, a kitelepülés megtervezése | GDPR 6. cikk (1) b) | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
+| Foglalási adatok: fesztivál, csomag, a foglalás időpontja és állapota | Az előfoglalás kezelése, a kitelepülés megtervezése | GDPR 6. cikk (1) b) | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
 | Belépési és technikai naplók: IP-cím, időpont, böngésző | A rendszer biztonságos működése, visszaélések kiszűrése | GDPR 6. cikk (1) f): jogos érdek | A szolgáltatók beállításai szerint, jellemzően legfeljebb 90 napig |
 
 A foglalási adatokból név nélküli, összesített statisztikát is készíthetünk, például hogy melyik fesztiválra hány előfoglalás érkezett. Ezt az egyetemi kurzuson bemutathatjuk, de személyes adatot nem tartalmaz.
@@ -41,8 +40,9 @@ Az adataidhoz csak a projektcsapat tagjai férnek hozzá. Nem adjuk el őket, é
 
 | Szolgáltató | Mit csinál | Hol tárolja az adatokat |
 | --- | --- | --- |
-| Supabase Inc. | Fiókkezelés (belépés), adatbázis a foglalásokhoz | Az Európai Unióban, [a választott régió, pl. Frankfurt] |
-| [Vercel Inc. / GitHub Inc.] | A weboldal kiszolgálása (tárhely) | [A szolgáltató szerint] |
+| Supabase Inc. | Fiókkezelés (belépés), adatbázis a foglalásokhoz | Az Európai Unióban, Írországban (AWS eu-west-1) |
+| Vercel Inc. | A weboldal kiszolgálása (tárhely). Személyes adatot csak a technikai naplókban (IP-cím, időpont, böngésző) kezel. | Világszerte, az Egyesült Államokat is beleértve |
+| Google (Gmail) | A rendszerüzenetek (regisztráció megerősítése, új jelszó) és a csapat leveleinek küldése | Az Európai Unióban és az Egyesült Államokban |
 
 Ha egy szolgáltató az Európai Unión kívüli (például amerikai) cég, az adattovábbítás az Európai Bizottság által elfogadott általános szerződési feltételek vagy az EU–USA adatvédelmi keretrendszer alapján történik.
 
@@ -90,4 +90,4 @@ Regisztrálni és foglalni 18. életévét betöltött személy tud.
 
 Ha megváltozik, hogyan kezeljük az adatokat (például online fizetést vezetünk be), frissítjük ezt a tájékoztatót, és a regisztrált felhasználókat e-mailben értesítjük.
 
-Hatályos: [dátum]
+Hatályos: 2026. október 8-tól

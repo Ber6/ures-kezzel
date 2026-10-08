@@ -20,10 +20,9 @@
     try { return new Date(s).toLocaleString("hu-HU", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
     catch (e) { return s; }
   }
-  function phoneHtml(){
-    var p = CFG.TEAM_PHONE || "[CSAPAT TELEFONSZÁM]";
-    var digits = p.replace(/[^\d+]/g, "");
-    return digits.length >= 8 ? '<a href="tel:' + esc(digits) + '">' + esc(p) + "</a>" : esc(p);
+  function showContact(){
+    var m = CFG.TEAM_EMAIL || "";
+    $$(".team-contact").forEach(function(el){ el.innerHTML = '<a href="mailto:' + esc(m) + '">' + esc(m) + "</a>"; });
   }
 
   /* ---------- Supabase kliens ---------- */
@@ -242,19 +241,12 @@
       return '<div><input type="radio" name="package" id="pkg-' + k + '" value="' + k + '" required>' +
         '<label for="pkg-' + k + '"><b>' + esc(p.name.replace(" Pack", "")) + "</b><span>" + p.people + " fő · " + esc(p.price) + "</span></label></div>";
     }).join(""));
-    var opts = "";
-    for (var i = 1; i <= 8; i++) opts += '<option value="' + i + '">' + i + " fő</option>";
-    $("#bk-people").innerHTML = opts;
-    $$('#bk-packages input').forEach(function(r){
-      r.addEventListener("change", function(){ $("#bk-people").value = String(PKG[r.value].people); });
-    });
   })();
 
   function pickPackage(k){
     var r = $("#pkg-" + k);
     if (!r) return;
     r.checked = true;
-    $("#bk-people").value = String(PKG[k].people);
   }
   function showBooking(){
     showBody("foglalas");
@@ -276,18 +268,17 @@
     var name = (meta.full_name || $("#bk-name").value).trim();
     var festival = $("#bk-festival").value;
     var pkgEl = $('#bk-packages input:checked');
-    var people = parseInt($("#bk-people").value, 10);
     if (name.length < 2) return say(msg, "Add meg a teljes neved.");
     if (!festival) return say(msg, "Válassz fesztivált.");
     if (!pkgEl) return say(msg, "Válassz csomagot.");
     busy($("#form-booking button[type=submit]"), async function(){
       var r = await sb.from("bookings")
-        .insert({ user_id: state.user.id, full_name: name, festival: festival, package: pkgEl.value, people: people })
+        .insert({ user_id: state.user.id, full_name: name, festival: festival, package: pkgEl.value, people: PKG[pkgEl.value].people })
         .select().single();
       if (r.error) return say(msg, huErr(r.error));
       var b = r.data;
       $("#bk-summary").innerHTML = "<b>" + esc(b.festival) + "</b><br>" + esc(PKG[b.package].name) + " · " + b.people + " fő · " + esc(PKG[b.package].price);
-      $("#bk-phone").innerHTML = phoneHtml();
+      showContact();
       $("#form-booking").hidden = true;
       $("#bk-done").hidden = false;
       $("#bk-done h2").focus();
@@ -297,7 +288,7 @@
   /* ---------- Foglalásaim ---------- */
   async function showMine(){
     var el = showBody("foglalasaim");
-    $("#mine-phone").innerHTML = phoneHtml();
+    showContact();
     var f = takeFlash("foglalasaim");
     say($("#mine-msg"), f ? f.text : "", f ? f.kind : "err");
     var list = $("#mine-list", el);
@@ -398,8 +389,8 @@
         return '<option value="' + s + '"' + (s === b.status ? " selected" : "") + ">" + STATUS[s] + "</option>";
       }).join("");
       return "<tr><td>" + esc(fmtDate(b.created_at)) + "</td><td>" + esc(b.full_name) + "</td><td>" + esc(b.festival) + "</td><td>" +
-        esc((PKG[b.package] || {}).name || b.package) + "</td><td>" + b.people + '</td><td><select data-status="' + esc(b.id) + '" aria-label="Állapot">' + opts + "</select></td></tr>";
-    }).join("") : '<tr><td colspan="6" class="muted">Nincs foglalás.</td></tr>';
+        esc((PKG[b.package] || {}).name || b.package) + '</td><td><select data-status="' + esc(b.id) + '" aria-label="Állapot">' + opts + "</select></td></tr>";
+    }).join("") : '<tr><td colspan="5" class="muted">Nincs foglalás.</td></tr>';
   }
   $("#admin-filter").addEventListener("change", renderAdmin);
   $("#admin-reload").addEventListener("click", showAdmin);
@@ -419,7 +410,7 @@
     renderAdmin();
   });
   $("#admin-csv").addEventListener("click", function(){
-    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Létszám", "Állapot", "Azonosító"];
+    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Fő", "Állapot", "Azonosító"];
     var lines = [head].concat(filteredRows().map(function(b){
       return [fmtDate(b.created_at), b.full_name, b.festival, (PKG[b.package] || {}).name || b.package, b.people, STATUS[b.status] || b.status, b.id];
     })).map(function(r){

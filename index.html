@@ -662,14 +662,13 @@ footer a:hover{color:var(--paper)}
               <div class="field" id="bk-name-field" hidden><label for="bk-name">Teljes név</label><input id="bk-name" type="text" autocomplete="name" minlength="2" maxlength="100"></div>
               <div class="field"><label for="bk-festival">Fesztivál</label><select id="bk-festival" required></select></div>
               <fieldset class="pkg-pick" id="bk-packages"><legend>Csomag</legend></fieldset>
-              <div class="field"><label for="bk-people">Létszám</label><select id="bk-people"></select><p class="hint">Hány fő használja a csomagot?</p></div>
               <div id="bk-msg" class="msg" role="status" aria-live="polite" hidden></div>
               <button class="btn btn-primary" type="submit">Előfoglalás leadása</button>
             </form>
             <div id="bk-done" class="done" hidden>
               <h2 tabindex="-1">Megvan az előfoglalásod!</h2>
               <p class="sum" id="bk-summary"></p>
-              <p>Most nem kell fizetned. Hamarosan jelentkezünk, és egyeztetjük a részleteket. Kérdésed van? Hívj minket: <b id="bk-phone"></b></p>
+              <p>Most nem kell fizetned. Hamarosan jelentkezünk e-mailben. A fesztivál előtt elküldjük az átvétel pontos helyét, idejét és a telefonszámunkat. Kérdésed van? Írj nekünk: <b class="team-contact"></b></p>
               <div class="btn-row">
                 <a class="btn btn-primary" href="#/foglalasaim">Foglalásaim</a>
                 <a class="btn btn-ghost" href="#/foglalas">Új foglalás</a>
@@ -691,7 +690,7 @@ footer a:hover{color:var(--paper)}
           <div data-body hidden>
             <div id="mine-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
             <ul class="bk-list" id="mine-list"></ul>
-            <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Hívj minket: <b id="mine-phone"></b></p>
+            <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Írj nekünk: <b class="team-contact"></b>. Az átvétel részleteit és a telefonszámunkat a fesztivál előtt küldjük el e-mailben.</p>
             <div class="btn-row"><a class="btn btn-primary" href="#/foglalas">Új foglalás</a></div>
             <div class="danger">
               <h3>Fiókom törlése</h3>
@@ -728,7 +727,7 @@ footer a:hover{color:var(--paper)}
               <h3 class="sub">Összes foglalás</h3>
               <div class="tbl-wrap">
                 <table class="tbl" id="admin-table">
-                  <thead><tr><th>Leadva</th><th>Név</th><th>Fesztivál</th><th>Csomag</th><th>Létszám</th><th>Állapot</th></tr></thead>
+                  <thead><tr><th>Leadva</th><th>Név</th><th>Fesztivál</th><th>Csomag</th><th>Állapot</th></tr></thead>
                   <tbody></tbody>
                 </table>
               </div>

@@ -12,7 +12,7 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
 | `index.html` | A weboldal: landing page és minden aloldal (hash alapú: `#/`, `#/csomagok`, `#/foglalas` …) |
 | `app.js` | Belépés, regisztráció, foglalás, Foglalásaim, admin (Supabase) |
 | `data.js` | A fesztiválok és a csomagok listája. **Új fesztivál ide kerül.** |
-| `config.js` | Supabase Project URL + publishable kulcs + a csapat telefonszáma |
+| `config.js` | Supabase Project URL + publishable kulcs + a csapat e-mail-címe |
 | `supabase/schema.sql` | Az adatbázis (egyszer kell lefuttatni a Supabase SQL Editorban) |
 | `docs/adatkezeles.md` | Adatkezelési tájékoztató, ebből lesz a `#/adatkezeles` oldal. A `[...]` részeket ki kell tölteni. |
 | `CLAUDE.md` | Részletes fejlesztési leírás |

@@ -27,8 +27,8 @@ Ezt a fájlt a claude.ai-os beszélgetésből hoztuk át. Olvasd végig, mielőt
 ## Bekért adatok (csak ezek!)
 
 - Regisztráció: név, e-mail, jelszó, plusz egy kötelező jelölőnégyzet: „Elolvastam az adatkezelési tájékoztatót, és elmúltam 18 éves.”
-- Foglalás: fesztivál (legördülő lista), csomag (Solo/Duo/Crew), létszám.
-- **Telefonszámot NEM kérünk.** A visszaigazoló képernyőn és a „Foglalásaim” oldalon a csapat saját telefonszáma jelenjen meg: `[CSAPAT TELEFONSZÁM]`.
+- Foglalás: fesztivál (legördülő lista), csomag (Solo/Duo/Crew). A létszámot nem kérdezzük, a csomagból adódik (Solo 1, Duo 2, Crew 4).
+- **Telefonszámot NEM kérünk.** A visszaigazoló képernyőn és a „Foglalásaim” oldalon a csapat e-mail-címe jelenik meg (`config.js` → `TEAM_EMAIL`). A csapat telefonszámát csak a fesztivál előtt, e-mailben adjuk ki a foglalóknak.
 - Nincs fizetés, nincs analitika, nincs követő süti.
 
 ## Oldalak és funkciók
