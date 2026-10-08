@@ -196,6 +196,7 @@
       if (r.error) return say(msg, huErr(r.error));
       $("#login-password").value = "";
       await setUser(r.data.session);
+      syncNewsletter();
       afterLogin();
     });
   });
@@ -224,6 +225,12 @@
     });
   });
 
+  // a saját hírlevél-feliratkozás átküldése a MailerLite-ba (a szerverfunkció végzi, csendben)
+  function syncNewsletter(){
+    var m = state.user && state.user.user_metadata;
+    if (!sb || !m || typeof m.newsletter !== "boolean") return;
+    sb.functions.invoke("mailerlite-sync", { body: {} }).catch(function(e){ console.warn("MailerLite", e); });
+  }
   function newsletterData(name, on){
     var d = { newsletter: on, newsletter_at: on ? new Date().toISOString() : null };
     if (name) d.full_name = name;
@@ -509,6 +516,7 @@
       var r = await sb.auth.updateUser({ data: newsletterData(null, on) });
       if (r.error) return say(msg, huErr(r.error));
       state.user = r.data.user;
+      syncNewsletter();
       say(msg, on ? "Feliratkoztál a hírlevélre." : "Leiratkoztál a hírlevélről.", "ok");
     });
   });
@@ -824,6 +832,16 @@
     });
   });
 
+  $("#admin-mlsync").addEventListener("click", function(){
+    busy($("#admin-mlsync"), async function(){
+      var r = await sb.functions.invoke("mailerlite-sync", { body: { all: true } });
+      if (r.error || !r.data) return say($("#admin-msg"), "A MailerLite szinkronizálás nem sikerült. Be van állítva a MailerLite API-kulcs a Supabase-ben?");
+      var d = r.data;
+      say($("#admin-msg"), "MailerLite: " + d.subscribed + " feliratkozó átküldve, " + d.unsubscribed + " leiratkoztatva." +
+        (d.failed && d.failed.length ? " Hiba: " + d.failed.join(", ") : ""), d.failed && d.failed.length ? "err" : "ok");
+    });
+  });
+
   /* ---------- Admin: Helyszín (átvétel és leadás a fesztiválon) ---------- */
   var ciFilter = "all", ciNotes = {}, ciOpen = {};
   function problemsOf(uid){ return state.rows.filter(function(b){ return b.user_id === uid && b.return_problem; }).length; }
@@ -1068,7 +1086,7 @@
           ? "Megerősítve. Ha a másik címedre is jött levél, kattints abban is a linkre, a csere utána lép életbe."
           : "Az e-mail-címed frissült." };
       }
-      else if (state.user){ target = "#/foglalas"; }
+      else if (state.user){ target = "#/foglalas"; syncNewsletter(); }
       else state.flash = { view: "belepes", text: "Az e-mail-címed meg van erősítve. Most már be tudsz lépni.", kind: "ok" };
       history.replaceState(null, "", location.pathname);
       go(target);

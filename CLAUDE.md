@@ -43,6 +43,7 @@ Ezt a fájlt a claude.ai-os beszélgetésből hoztuk át. Olvasd végig, mielőt
    - **Kaució:** `kaucio_elso` (első bérlés, probléma után) és `kaucio` (rendes, ha a legutóbbi bérlés rendben zárult). Két `return_problem` után a vásárló le van tiltva: minden csomag „Elfogyott”, és az adatbázis is elutasítja a foglalást (`sold_out`).
    - **Leárazás:** `packages.discount` (%), az akciós ár 100 Ft-ra kerekítve (`pkg_price`); a kártyán `−X%` jelvény. A foglalás elmenti az árat (`bookings.price`).
    - **Kaució több foglalásnál:** ha egy bérlés lezárul, a vásárló többi, még át nem vett foglalásán a kaució újraszámolódik (`recalc_open_deposits` trigger); amíg van lezáratlan korábbi foglalás, a vásárló a „még nem végleges” magyarázatot látja.
+   - **MailerLite:** `supabase/functions/mailerlite-sync` (Edge Function, `MAILERLITE_API_KEY` titok, csoport: „Üres Kézzel hírlevél”). Saját magát szinkronizálja belépéskor és hírlevél-váltáskor; admin `{all:true}`-val mindenkit. A MailerLite-ban leiratkozottat nem iratkoztatja vissza.
    - **Hírlevél:** a regisztrációnál (alapból üres) jelölőnégyzet (`user_metadata.newsletter`), a Fiókom oldalon ki/be kapcsolható, az admin CSV-ben letöltheti (`newsletter_subscribers()`).
 5. A navigációban legyen „Belépés”, belépve pedig „Foglalásaim”, „Fiókom” és „Kijelentkezés”.
 
