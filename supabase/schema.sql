@@ -122,3 +122,10 @@ alter table public.bookings add constraint bookings_package_fkey
 --   packages.discount (0–90 %), pkg_price(key) → akciós ár 100 Ft-ra kerekítve
 --   bookings.price: a foglaláskori ár (booking_before_insert tölti)
 --   recalc_open_deposits trigger: leadás / probléma után a vásárló többi, még át nem vett foglalásán újraszámolja a kauciót
+
+-- ===== 5. lépés: MailerLite szinkron az adatbázisból (2026-10-08) =====
+-- Migrációk: "enable_pg_net", "mailerlite_sync_from_db"
+--   pg_net bővítmény; API-kulcs a Vaultban: mailerlite_api_key
+--   mailerlite_send(email, name, subscribe) → POST https://connect.mailerlite.com/api/subscribers
+--   mailerlite_on_user_change trigger az auth.users-en (megerősítés / hírlevél be-ki)
+--   mailerlite_sync_all() (admin), mailerlite_last_results() (admin, hibakereséshez)
