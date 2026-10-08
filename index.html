@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Üres Kézzel – fesztiválcsomagok bérlése</title>
+<meta name="description" content="Bérelj komplett fesztiválcsomagot sátorral, matraccal, székkel, lámpával és powerbankkal. A bejárat előtt átveszed, az utolsó napon ugyanott leadod.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* A lap szándékosan "fesztiváléjszaka" tónusú, ezért a világos és sötét téma azonos palettát használ. */
+:root{
+  --night:#0f1633; --night-2:#18214a; --ink:#141A2E; --paper:#F4F1EA; --lantern:#F2C230;
+  --lantern-deep:#c99a12; --dusk:#3A4A8C; --ember:#E8764A; --muted:#b7bdd6; --line:rgba(244,241,234,.16);
+  --glass:rgba(16,23,52,.66);
+  --display:"Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+  --body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --night:#0f1633; --paper:#F4F1EA; --glass:rgba(16,23,52,.66); } }
+:root[data-theme="dark"]{ --night:#0f1633; --paper:#F4F1EA; --glass:rgba(16,23,52,.66); }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);background:var(--night)}
+body{margin:0;background:var(--night);color:var(--paper);font-family:var(--body);font-size:1.0625rem;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,svg{max-width:100%}
+a{color:var(--lantern)}
+:focus-visible{outline:3px solid var(--lantern);outline-offset:3px;border-radius:6px}
+[tabindex="-1"]:focus{outline:none}
+
+/* háttér jelenet */
+#scene{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;display:block;z-index:0}
+.no-webgl #scene{display:none}
+.no-webgl body, body.no-webgl{background:radial-gradient(120% 80% at 70% 30%, #2a3570 0%, var(--night) 60%)}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+main,header,footer{position:relative;z-index:2}
+
+/* progress + nav */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--lantern);z-index:20}
+.nav{position:fixed;top:0;left:0;right:0;z-index:10;padding-top:env(safe-area-inset-top,0px);transition:background .35s, backdrop-filter .35s, border-color .35s;border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(15,22,51,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
+.nav-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:2rem;padding:1rem clamp(1.25rem,4vw,3rem)}
+.logo{display:flex;align-items:center;gap:.6rem;color:var(--paper);text-decoration:none;font-family:var(--display);font-weight:750;font-size:1.3rem;letter-spacing:-.02em;font-variation-settings:"wdth" 85}
+.logo svg{width:30px;height:30px}
+.nav ul{display:flex;gap:1.75rem;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{color:var(--muted);text-decoration:none;font-weight:500;font-size:.95rem;transition:color .2s}
+.nav ul a:hover{color:var(--paper)}
+.nav ul a[aria-current="page"]{color:var(--paper);box-shadow:inset 0 -2px 0 var(--lantern)}
+.nav ul a{display:inline-block;padding:.3rem 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.8rem 1.5rem;border-radius:999px;font-family:var(--body);font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid transparent;cursor:pointer;transition:transform .2s, background .2s, color .2s, box-shadow .25s}
+.btn-primary{background:var(--lantern);color:var(--ink)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px rgba(242,194,48,.6)}
+.btn-ghost{border-color:rgba(244,241,234,.4);color:var(--paper)}
+.btn-ghost:hover{border-color:var(--paper);background:rgba(244,241,234,.06)}
+.nav .btn{min-height:44px;padding:.55rem 1.2rem;font-size:.95rem}
+
+/* közös */
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(1.25rem,4vw,3rem)}
+section{position:relative}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.025em;line-height:1;margin:0}
+h2,.ptitle{font-size:clamp(2.4rem,5.5vw,4.6rem);font-weight:750;font-variation-settings:"wdth" 80;max-width:14ch}
+.lede{color:var(--muted);font-size:1.15rem;max-width:48ch;margin:1.25rem 0 0}
+
+/* hero */
+.hero{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:7rem 0 5rem}
+.hero .wrap{width:100%}
+.hero h1{font-size:clamp(3.6rem,11vw,10rem);font-weight:800;font-variation-settings:"wdth" 75, "opsz" 96;line-height:.88;letter-spacing:-.045em;max-width:7.5ch}
+.hero h1 .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.06em}
+.hero h1 .c{display:inline-block;transform:translateY(105%) rotate(6deg);opacity:0;animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes rise{to{transform:none;opacity:1}}
+.hero p.sub{font-size:clamp(1.1rem,1.6vw,1.3rem);color:var(--muted);max-width:40ch;margin:2rem 0 2.25rem;opacity:0;animation:fade .8s .9s forwards}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:.9rem;opacity:0;animation:fade .8s 1.05s forwards}
+@keyframes fade{to{opacity:1}}
+.scroll-hint{position:absolute;left:50%;bottom:calc(1.75rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--muted);font-size:.85rem;opacity:0;animation:fade 1s 1.6s forwards}
+.scroll-hint span{width:1.5px;height:42px;background:linear-gradient(var(--lantern),transparent);animation:drip 2s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* csomag tartalma */
+.pack{padding:clamp(6rem,14vh,10rem) 0;min-height:180vh}
+.pack .btn{margin-top:2rem}
+.pack .panel{max-width:520px;position:sticky;top:18vh;background:linear-gradient(100deg, rgba(15,22,51,.88) 40%, rgba(15,22,51,0));padding:2rem 0;border-radius:0 24px 24px 0}
+.items{list-style:none;margin:2.5rem 0 0;padding:0;border-top:1px solid var(--line)}
+.items li{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line);transition:padding .3s, color .3s}
+.items li b{font-family:var(--display);font-size:1.45rem;font-weight:600;letter-spacing:-.01em;font-variation-settings:"wdth" 85}
+.items li span{color:var(--muted);font-size:.95rem;text-align:right}
+.items li.on{padding-left:.75rem}
+.items li.on b{color:var(--lantern)}
+
+/* csomagok */
+.prices{padding:clamp(6rem,14vh,10rem) 0}
+.prices .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1.5rem}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:3.5rem;align-items:stretch}
+.plan{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;padding:2rem;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.2,.8,.2,1), border-color .3s}
+.plan:hover{transform:translateY(-6px);border-color:rgba(244,241,234,.35)}
+.plan h3{font-size:1.9rem;font-weight:750;font-variation-settings:"wdth" 80}
+.plan .who{color:var(--muted);margin:.35rem 0 1.75rem}
+.plan .price{font-family:var(--display);font-size:2.8rem;font-weight:700;letter-spacing:-.03em;line-height:1}
+.plan .per{color:var(--muted);font-size:.95rem;margin:.4rem 0 1.5rem}
+.plan ul{list-style:none;padding:0;margin:0 0 2rem;display:grid;gap:.55rem;flex:1}
+.plan li{display:flex;gap:.65rem;align-items:flex-start}
+.plan li svg{flex:none;width:18px;height:18px;margin-top:.3rem;stroke:var(--lantern)}
+.plan .btn{width:100%}
+.plan.featured{background:var(--lantern);color:var(--ink);border-color:var(--lantern);transform:translateY(-14px)}
+.plan.featured:hover{transform:translateY(-20px)}
+.plan.featured .who,.plan.featured .per{color:#4a3d10}
+.plan.featured li svg{stroke:var(--ink)}
+.plan.featured .btn{background:var(--ink);color:var(--paper)}
+.plan.featured .btn:hover{box-shadow:0 10px 30px -10px rgba(20,26,46,.7)}
+.plan .tag{align-self:flex-start;font-size:.8rem;font-weight:600;padding:.3rem .75rem;border-radius:999px;background:var(--ink);color:var(--lantern);margin-bottom:1rem}
+.extras{margin-top:2.5rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.extras p{margin:0 .5rem 0 0;color:var(--muted)}
+.chip{padding:.45rem 1rem;border:1px solid var(--line);border-radius:999px;font-size:.95rem;background:rgba(15,22,51,.5)}
+
+/* nem kell */
+.nope{padding:clamp(6rem,14vh,10rem) 0}
+.nope-list{list-style:none;padding:0;margin:3rem 0 0;display:grid;grid-template-columns:repeat(2,1fr);gap:0 3rem}
+.nope-list li{padding:2rem 0;border-top:1px solid var(--line)}
+.nope-list h3{font-size:clamp(2rem,4vw,3.2rem);font-weight:750;font-variation-settings:"wdth" 78;line-height:.95}
+.nope-list li{display:grid;grid-template-columns:76px 1fr;column-gap:1.5rem;align-items:start}
+.nope-list p{color:var(--muted);margin:.8rem 0 0;max-width:40ch}
+.nope-ico{position:relative;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:rgba(15,22,51,.7);border:1.5px solid var(--line);margin-top:-.2rem}
+.nope-ico .thing{width:42px;height:42px;transition:opacity .5s;transition-delay:calc(var(--d) * .25s + .5s)}
+.nope-ico .s{fill:none;stroke:var(--paper);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.nope-ico .ban{position:absolute;inset:-2px;width:calc(100% + 4px);height:calc(100% + 4px);overflow:visible}
+.ban circle,.ban path{fill:none;stroke:var(--lantern);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .6s cubic-bezier(.6,.1,.3,1)}
+.ban circle{transition-delay:calc(var(--d) * .25s)}
+.ban path{transition-delay:calc(var(--d) * .25s + .45s)}
+.nope-list li.in .ban circle,.nope-list li.in .ban path{stroke-dashoffset:0}
+.nope-list li.in .nope-ico .thing{opacity:.45}
+.strike{position:relative;display:inline-block;transition:color .5s;transition-delay:calc(var(--d) * .25s + .4s)}
+.scribble{position:absolute;left:-5%;width:110%;top:50%;transform:translateY(-50%);overflow:visible;pointer-events:none}
+.scribble path{fill:none;stroke:var(--lantern);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .55s cubic-bezier(.6,.1,.3,1);transition-delay:calc(var(--d) * .25s + .2s)}
+.scribble path+path{transition-delay:calc(var(--d) * .25s + .6s);stroke:var(--ember)}
+.nope-list li.in .scribble path{stroke-dashoffset:0}
+.nope-list li.in .strike{color:rgba(244,241,234,.5)}
+
+/* fesztivál előzetes a főoldalon */
+.fest-strip{margin-top:1.25rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1.25rem 2rem;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;padding:1.5rem clamp(1.5rem,3vw,2.25rem)}
+.fest-strip h3{font-size:clamp(1.4rem,2.4vw,1.9rem);font-weight:700;font-variation-settings:"wdth" 85;margin:0 0 .75rem}
+.fest-strip .names{display:flex;flex-wrap:wrap;gap:.5rem}
+
+/* fesztiválok oldal */
+.fests{padding-bottom:clamp(5rem,12vh,8rem)}
+.fest-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1.25rem 2rem}
+.fest-list{list-style:none;margin:3rem 0 0;padding:0;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;overflow:hidden}
+.fest-list li{display:grid;grid-template-columns:1fr auto;align-items:center;gap:1.25rem;padding:1.35rem clamp(1.25rem,3vw,2.25rem);border-top:1px solid var(--line)}
+.fest-list li:first-child{border-top:0}
+.fest-list .no{font-family:var(--display);font-weight:300;font-size:1.6rem;color:var(--lantern);font-variation-settings:"wdth" 75}
+.fest-list b{display:block;font-family:var(--display);font-size:clamp(1.8rem,4.2vw,3.2rem);font-weight:780;letter-spacing:-.025em;line-height:1;font-variation-settings:"wdth" 78;transition:color .25s}
+.fest-list li:hover b{color:var(--lantern)}
+.fest-list .where{color:var(--muted);margin-top:.35rem;display:block}
+.fest-list .chip{white-space:nowrap}
+.fest-note{margin:2rem 0 0;color:var(--muted);max-width:56ch}
+.fest-note a{font-weight:600}
+@media (max-width: 600px){
+  .nope-list li{grid-template-columns:58px 1fr;column-gap:1rem}
+  .nope-ico{width:58px;height:58px}.nope-ico .thing{width:32px;height:32px}
+  .fest-list li{grid-template-columns:1fr;row-gap:.6rem}
+  .fest-list .chip{justify-self:start}
+}
+
+.eco{margin:2.5rem 0 0;font-size:1.2rem;max-width:46ch}
+
+.logistics{margin-top:5rem;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:28px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
+.logistics div{padding:2rem}
+.logistics div+div{border-left:1px solid var(--line)}
+.logistics dt{font-weight:600;color:var(--lantern);margin-bottom:.5rem}
+.logistics dd{margin:0;font-size:1.15rem}
+
+/* GYIK */
+.faq{padding:clamp(6rem,14vh,10rem) 0}
+.faq-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:3rem;align-items:start}
+details{border-bottom:1px solid var(--line)}
+details:first-child{border-top:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.4rem 0;font-family:var(--display);font-size:1.4rem;font-weight:600;letter-spacing:-.01em;min-height:44px}
+summary::-webkit-details-marker{display:none}
+summary .pm{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;transition:transform .3s, background .3s}
+summary .pm svg{width:14px;height:14px;stroke:var(--paper)}
+details[open] summary .pm{transform:rotate(45deg);background:var(--lantern);border-color:var(--lantern)}
+details[open] summary .pm svg{stroke:var(--ink)}
+details p{margin:0 0 1.5rem;color:var(--muted);max-width:56ch}
+.faq .panel{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:28px;padding:1rem 2rem;border:1px solid var(--line)}
+
+/* záró */
+.final{min-height:100vh;min-height:100svh;display:flex;align-items:center;text-align:center;padding:8rem 0}
+.final .wrap{width:100%}
+.final h2{font-size:clamp(3.4rem,10vw,9rem);max-width:none;font-weight:800;font-variation-settings:"wdth" 75;line-height:.9;margin:0 auto}
+.final p{color:var(--paper);opacity:.85;font-size:1.25rem;margin:1.75rem auto 2.25rem;max-width:36ch}
+.final .ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:.9rem}
+footer{border-top:1px solid var(--line);background:rgba(15,22,51,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;padding-top:1.75rem;padding-bottom:1.75rem;color:var(--muted);font-size:.95rem}
+
+/* megjelenés görgetésre: csak a szekciócímek */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+
+/* nézetek (külön oldalak) */
+.view[hidden]{display:none}
+section.subpage{padding-top:clamp(8rem,16vh,10rem)}
+
+/* folyamatábra */
+.flow-sec{padding:clamp(5rem,12vh,8rem) 0}
+.flow-panel{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;padding:clamp(1.75rem,4vw,3.25rem)}
+.flow-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1rem 2rem}
+.flow-head .more{color:var(--lantern);font-weight:600;text-decoration:none;border-bottom:1.5px solid rgba(242,194,48,.4);padding-bottom:2px}
+.flow-head .more:hover{border-color:var(--lantern)}
+.flow{--gap:2.25rem;--node:52px;list-style:none;margin:3.25rem 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);column-gap:var(--gap)}
+.step{position:relative}
+.node{position:relative;z-index:1;width:var(--node);height:var(--node);border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:750;font-size:1.35rem;line-height:1;color:var(--lantern);border:1.5px solid var(--lantern);background:var(--night);transition:background .5s, color .5s, box-shadow .7s;transition-delay:calc(var(--i) * .55s)}
+.flow.lit .node{background:var(--lantern);color:var(--ink);box-shadow:0 0 0 6px rgba(242,194,48,.14),0 0 28px 4px rgba(242,194,48,.45)}
+.wire{position:absolute;top:calc(var(--node) / 2);left:calc(var(--node) + 10px);right:calc(10px - var(--gap));height:18px;pointer-events:none}
+.wire svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wire path{fill:none;stroke:rgba(244,241,234,.35);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.bulb{position:absolute;left:calc(var(--x) * 100%);top:calc(var(--y) * 1px);width:9px;height:11px;margin-left:-4.5px;border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;background:rgba(244,241,234,.18);transition:background .4s, box-shadow .5s;transition-delay:calc(var(--i) * .55s + .2s + var(--x) * .35s)}
+.flow.lit .bulb{background:var(--c);box-shadow:0 0 10px 2px var(--c)}
+.ico{display:block;width:96px;height:72px;margin:1.75rem 0 1.25rem}
+.ico svg{width:100%;height:100%;display:block;overflow:visible}
+.ico .s{fill:none;stroke:var(--paper);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.ico .y{fill:var(--lantern)} .ico .o{fill:var(--ember)} .ico .n{fill:var(--night)} .ico .d{fill:var(--dusk)}
+.step h3{font-size:1.5rem;font-weight:700;letter-spacing:-.015em;font-variation-settings:"wdth" 85;margin:0 0 .5rem}
+.step p{margin:0;color:var(--muted);max-width:32ch}
+.flow-long .step p{max-width:36ch}
+@media (max-width: 959px){
+  .flow{grid-template-columns:1fr;row-gap:2.75rem;margin-top:2.25rem}
+  .step{display:grid;grid-template-columns:var(--node) 1fr;column-gap:1.25rem;align-items:start}
+  .step .node{grid-column:1;grid-row:1 / span 3}
+  .step .ico{grid-column:2;grid-row:1;width:72px;height:54px;margin:0 0 .85rem}
+  .step h3,.step p{grid-column:2}
+  .wire{top:calc(var(--node) + 8px);left:calc(var(--node) / 2 - 1px);right:auto;width:2px;height:auto;bottom:calc(8px - 2.75rem)}
+  .wire svg{display:none}
+  .wire::before{content:"";position:absolute;inset:0;border-left:1.5px dashed rgba(244,241,234,.3)}
+  .bulb{left:1px;top:calc(var(--x) * 100%)}
+}
+
+@media (max-width: 900px){
+  .nav{background:rgba(15,22,51,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
+  .nav-inner{flex-wrap:wrap;row-gap:.35rem;padding-top:.7rem;padding-bottom:.45rem}
+  .nav .btn{margin-left:auto}
+  .nav ul{order:3;width:100%;margin:0;gap:1.1rem;overflow-x:auto;scrollbar-width:none}
+  .nav ul::-webkit-scrollbar{display:none}
+  .nav ul a{white-space:nowrap;font-size:.92rem}
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 125px)}
+  .plans{grid-template-columns:1fr}
+  .plan.featured{transform:none}.plan.featured:hover{transform:translateY(-6px)}
+  .nope-list{grid-template-columns:1fr}
+  .logistics{grid-template-columns:1fr}
+  .logistics div+div{border-left:0;border-top:1px solid var(--line)}
+  .faq-grid{grid-template-columns:1fr}
+  .pack .panel{background:rgba(15,22,51,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:1.75rem;border-radius:24px}
+  .pack .panel{position:relative;top:0}
+  .hero h1{max-width:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0s !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none}
+  .ban circle,.ban path,.scribble path,.strike,.nope-ico .thing{transition-delay:0s !important}
+  .flow .node,.flow .bulb{transition-delay:0s !important}
+}
+
+/* ---------- alkalmazás oldalak: belépés, foglalás, Foglalásaim, admin ---------- */
+[hidden]{display:none !important}
+/* ezeken az oldalakon a 3D háttér áll, helyette sima színátmenet */
+.app-mode #scene{display:none}
+.app-mode body{background:radial-gradient(120% 70% at 75% 0%, #26306a 0%, var(--night) 60%) fixed}
+button.btn-ghost{background:transparent}
+.nav ul .navbtn{appearance:none;background:none;border:0;padding:.3rem 0;display:inline-block;line-height:inherit;vertical-align:baseline;color:var(--muted);font:500 .95rem var(--body);cursor:pointer;transition:color .2s}
+.nav ul .navbtn:hover{color:var(--paper)}
+.app-sec{min-height:85vh;padding-bottom:clamp(4rem,10vh,6rem)}
+.muted{color:var(--muted)}
+.card{max-width:580px;margin-top:2.5rem;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;padding:clamp(1.4rem,4vw,2.5rem)}
+.card.wide{max-width:none}
+.card h2{font-size:clamp(1.8rem,4vw,2.6rem);max-width:none}
+.tabs{display:flex;gap:.3rem;padding:.3rem;border:1px solid var(--line);border-radius:999px;margin-bottom:1.75rem;width:max-content;max-width:100%}
+.tabs button{appearance:none;border:0;background:none;color:var(--muted);font:600 .95rem var(--body);padding:.55rem 1.15rem;border-radius:999px;cursor:pointer;min-height:42px}
+.tabs button[aria-selected="true"]{background:var(--lantern);color:var(--ink)}
+.form{display:grid;gap:1.15rem}
+.form .btn{justify-self:start}
+.field label,.field .lbl{display:block;font-weight:600;margin-bottom:.4rem}
+.field input,.field select{width:100%;min-height:48px;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--lantern);box-shadow:0 0 0 3px rgba(242,194,48,.2)}
+.hint{color:var(--muted);font-size:.9rem;margin:.35rem 0 0}
+.check{display:flex;gap:.75rem;align-items:flex-start;font-size:.97rem;cursor:pointer}
+.check input{width:20px;height:20px;margin:.2rem 0 0;accent-color:var(--lantern);flex:none}
+.linkbtn{appearance:none;background:none;border:0;padding:0;color:var(--lantern);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;justify-self:start}
+.pkg-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;border:0;padding:0;margin:0;min-width:0}
+.pkg-pick legend{font-weight:600;margin-bottom:.4rem;padding:0}
+.pkg-pick div{position:relative}
+.pkg-pick input{position:absolute;opacity:0;pointer-events:none}
+.pkg-pick label{display:block;height:100%;border:1.5px solid var(--line);border-radius:16px;padding:.85rem .5rem;cursor:pointer;text-align:center;transition:border-color .2s, background .2s}
+.pkg-pick label:hover{border-color:rgba(244,241,234,.4)}
+.pkg-pick b{display:block;font-family:var(--display);font-size:1.3rem;font-weight:700}
+.pkg-pick span{color:var(--muted);font-size:.85rem}
+.pkg-pick input:checked + label{border-color:var(--lantern);background:rgba(242,194,48,.14)}
+.pkg-pick input:focus-visible + label{outline:3px solid var(--lantern);outline-offset:2px}
+.msg{border-radius:14px;padding:.8rem 1rem;font-size:.97rem}
+.msg.err{background:rgba(232,118,74,.15);border:1px solid rgba(232,118,74,.55)}
+.msg.ok{background:rgba(242,194,48,.12);border:1px solid rgba(242,194,48,.45)}
+.done p{color:var(--muted)}
+.done .sum{color:var(--paper);font-size:1.2rem;border-left:3px solid var(--lantern);padding-left:1rem}
+.btn-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.5rem}
+.bk-list{list-style:none;margin:0;padding:0;display:grid;gap:.9rem}
+.bk{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;align-items:center;padding:1.2rem 1.4rem;border:1px solid var(--line);border-radius:20px;background:rgba(15,22,51,.55)}
+.bk b{font-family:var(--display);font-size:1.45rem;font-weight:700;display:block;line-height:1.1;margin-bottom:.3rem}
+.bk .meta{color:var(--muted);font-size:.95rem}
+.bk-side{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.empty{color:var(--muted)}
+.badge{display:inline-block;font-size:.82rem;font-weight:600;padding:.28rem .75rem;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.badge.elofoglalas{color:var(--lantern);border-color:rgba(242,194,48,.55)}
+.badge.megerositett{background:var(--lantern);color:var(--ink);border-color:var(--lantern)}
+.badge.lemondott{color:var(--muted)}
+.btn-sm{min-height:40px;padding:.4rem 1rem;font-size:.92rem}
+.btn-danger{border-color:rgba(232,118,74,.7);color:#ffb59a}
+.btn-danger:hover{background:rgba(232,118,74,.12)}
+.danger{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--line)}
+.danger h3{font-size:1.3rem;margin-bottom:.4rem}
+.danger p{color:var(--muted);margin:0 0 1rem}
+.toolbar{display:flex;flex-wrap:wrap;gap:.8rem 1rem;align-items:end;justify-content:space-between;margin-bottom:1rem}
+.toolbar .field{min-width:min(260px,100%)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;margin:0 0 2rem;-webkit-overflow-scrolling:touch}
+.tbl{border-collapse:collapse;width:100%;font-size:.95rem}
+.tbl th,.tbl td{text-align:left;padding:.65rem .9rem;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;background:rgba(15,22,51,.6)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.total td{font-weight:700;background:rgba(242,194,48,.08)}
+.tbl select{min-height:36px;padding:.25rem .5rem;border-radius:10px;border:1px solid var(--line);background:var(--night);color:var(--paper);font:inherit}
+.card h3.sub{font-size:1.4rem;margin:0 0 .8rem}
+.prose{max-width:76ch}
+.prose h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:750;font-variation-settings:"wdth" 80;margin:0 0 1.5rem}
+.prose h2{font-size:clamp(1.4rem,3vw,1.8rem);font-weight:700;max-width:none;margin:2.4rem 0 .8rem;line-height:1.15}
+.prose h3{font-size:1.25rem;margin:1.6rem 0 .6rem}
+.prose p,.prose li{color:#dfe2ef}
+.prose table{border-collapse:collapse;width:100%;font-size:.93rem;margin:1rem 0;display:block;overflow-x:auto}
+.prose th,.prose td{border:1px solid var(--line);padding:.55rem .7rem;text-align:left;vertical-align:top}
+.prose th{background:rgba(15,22,51,.6)}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--paper)}
+@media (max-width: 600px){
+  .pkg-pick label{padding:.75rem .3rem}
+  .pkg-pick b{font-size:1.15rem}
+  .form .btn{justify-self:stretch}
+}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#/" aria-label="Üres Kézzel, főoldal">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 4 L29 27 H3 Z" fill="#F2C230"/><path d="M16 14 L21 27 H11 Z" fill="#0f1633"/></svg>
+      Üres Kézzel
+    </a>
+    <ul>
+      <li><a href="#/hogyan">Hogyan működik</a></li>
+      <li><a href="#/csomagok">Csomagok</a></li>
+      <li><a href="#/fesztivalok">Fesztiválok</a></li>
+      <li><a href="#/gyik">GYIK</a></li>
+      <li data-auth="out"><a href="#/belepes">Belépés</a></li>
+      <li data-auth="in" hidden><a href="#/foglalasaim">Foglalásaim</a></li>
+      <li data-auth="admin" hidden><a href="#/admin">Admin</a></li>
+      <li data-auth="in" hidden><button type="button" class="navbtn" id="logout">Kijelentkezés</button></li>
+    </ul>
+    <a class="btn btn-primary" href="#/arak">Foglalás</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= FŐOLDAL ================= -->
+  <div class="view" data-view="home">
+    <section class="hero" data-cam="0">
+      <div class="wrap">
+        <h1 id="headline">Gyere üres kézzel.</h1>
+        <p class="sub">Bérelj komplett fesztiválcsomagot sátorral, matraccal, székkel, lámpával és powerbankkal. A bejárat előtt átveszed, az utolsó napon ugyanott leadod.</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="#/arak">Csomagot választok</a>
+          <a class="btn btn-ghost" href="#/folyamat">Hogyan működik?</a>
+        </div>
+      </div>
+      <div class="scroll-hint" aria-hidden="true">Görgess<span></span></div>
+    </section>
+
+    <section class="flow-sec" id="folyamat" data-cam="1">
+      <div class="wrap">
+        <div class="flow-panel">
+          <div class="flow-head">
+            <h2 class="reveal">Négy lépés, és kész.</h2>
+            <a class="more" href="#/hogyan">Részletesen a működésről</a>
+          </div>
+          <ol class="flow" data-flow="short"></ol>
+        </div>
+        <div class="fest-strip">
+          <div>
+            <h3>Melyik fesztiválon vagyunk ott?</h3>
+            <div class="names"><span class="chip">Fishing on Orfű</span><span class="chip">Sziget</span><span class="chip">VOLT</span><span class="chip">Balaton Sound</span><span class="chip">és még több</span></div>
+          </div>
+          <a class="btn btn-primary" href="#/fesztivalok">Fesztiválok listája</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="prices" id="csomagok" data-cam="3">
+      <div class="wrap">
+        <div class="head">
+          <h2 class="reveal">Válaszd ki a csomagod.</h2>
+          <p class="lede" style="margin:0">Az árak a teljes fesztiválra szólnak, nem napidíjasak.</p>
+        </div>
+        <div class="plans">
+          <article class="plan">
+            <h3>Solo Pack</h3>
+            <p class="who">1 főre</p>
+            <div class="price">14 900 Ft</div>
+            <p class="per">egy teljes fesztiválra</p>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 fős sátor</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Önfelfújó matrac</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Kempingszék</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>LED sátorlámpa</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Powerbank</li>
+            </ul>
+            <a class="btn btn-ghost" href="#/foglalas?csomag=solo">Ezt kérem</a>
+          </article>
+          <article class="plan featured">
+            <span class="tag">A legnépszerűbb</span>
+            <h3>Duo Pack</h3>
+            <p class="who">2 főre</p>
+            <div class="price">24 900 Ft</div>
+            <p class="per">egy teljes fesztiválra</p>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>3 fős sátor</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 önfelfújó matrac</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 kempingszék</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>LED sátorlámpa</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 powerbank</li>
+            </ul>
+            <a class="btn" href="#/foglalas?csomag=duo">Ezt kérem</a>
+          </article>
+          <article class="plan">
+            <h3>Crew Pack</h3>
+            <p class="who">4 főre</p>
+            <div class="price">44 900 Ft</div>
+            <p class="per">egy teljes fesztiválra</p>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 fős kupolasátor</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 önfelfújó matrac</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 kempingszék</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>3×3 m-es pavilon</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>2 LED sátorlámpa</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>4 powerbank</li>
+            </ul>
+            <a class="btn btn-ghost" href="#/foglalas?csomag=crew">Ezt kérem</a>
+          </article>
+        </div>
+        <div class="extras">
+          <p>Bővítsd a csomagod:</p>
+          <span class="chip">Kempingasztal</span><span class="chip">Pavilon</span><span class="chip">Hűtőtáska</span><span class="chip">Függőágy</span><span class="chip">Hálózsák béléssel</span><span class="chip">Túlélőcsomag</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="final" id="zaro" data-cam="6">
+      <div class="wrap">
+        <h2 class="reveal">Idén gyere üres kézzel.</h2>
+        <p>Foglald le a csomagod, és csak a jókedvet hozd.</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="#/arak">Csomagot választok</a>
+          <a class="btn btn-ghost" href="#/">Kövess Instagramon: [@FELHASZNÁLÓNÉV]</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= HOGYAN MŰKÖDIK ================= -->
+  <div class="view" data-view="hogyan" hidden>
+    <section class="flow-sec subpage" data-cam="1">
+      <div class="wrap">
+        <div class="flow-panel">
+          <div class="flow-head">
+            <h1 class="ptitle reveal">Így működik.</h1>
+            <p class="lede" style="margin:0">A foglalástól a hazaindulásig, cipekedés nélkül.</p>
+          </div>
+          <ol class="flow flow-long" data-flow="long"></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="nope" data-cam="4">
+      <div class="wrap">
+        <h2 class="reveal">Idén ezekkel nem kell foglalkoznod.</h2>
+        <ul class="nope-list">
+          <li style="--d:0">
+            <span class="nope-ico" aria-hidden="true"><svg class="thing" viewBox="0 0 44 44"><path class="s" d="M5 22 L21 6 H35 a3 3 0 0 1 3 3 V23 L22 39 Z"/><circle class="s" cx="30" cy="14" r="2.6"/><path class="s" d="M15 25l7-7M18 28l7-7"/></svg><svg class="ban" viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" pathLength="1" transform="rotate(-135 40 40)"/><path d="M13 13L67 67" pathLength="1"/></svg></span>
+            <div><h3>Nem kell <span class="strike">megvenni<svg class="scribble" viewBox="0 0 200 22" aria-hidden="true"><path pathLength="1" d="M3 13C35 7 62 16 98 10S165 7 197 12"/><path pathLength="1" d="M8 16C58 10 120 18 193 8"/></svg></span>.</h3><p>Sátor, matrac és szék ára helyett csak a fesztivál napjaiért fizetsz.</p></div>
+          </li>
+          <li style="--d:1">
+            <span class="nope-ico" aria-hidden="true"><svg class="thing" viewBox="0 0 44 44"><rect class="s" x="11" y="12" width="22" height="27" rx="6"/><path class="s" d="M17 12V9a5 5 0 0 1 10 0v3M15 26h14v7H15z"/><path class="s" d="M5 30l4 2M5 24l4 1"/></svg><svg class="ban" viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" pathLength="1" transform="rotate(-135 40 40)"/><path d="M13 13L67 67" pathLength="1"/></svg></span>
+            <div><h3>Nem kell <span class="strike">cipelni<svg class="scribble" viewBox="0 0 200 22" aria-hidden="true"><path pathLength="1" d="M3 13C35 7 62 16 98 10S165 7 197 12"/><path pathLength="1" d="M8 16C58 10 120 18 193 8"/></svg></span>.</h3><p>Vonattal, busszal is könnyen érkezel, a felszerelés a helyszínen vár.</p></div>
+          </li>
+          <li style="--d:2">
+            <span class="nope-ico" aria-hidden="true"><svg class="thing" viewBox="0 0 44 44"><path class="s" d="M6 15L22 8l16 7v16l-16 7-16-7z"/><path class="s" d="M6 15l16 7 16-7M22 22v16M14 11.5l16 7v5"/></svg><svg class="ban" viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" pathLength="1" transform="rotate(-135 40 40)"/><path d="M13 13L67 67" pathLength="1"/></svg></span>
+            <div><h3>Nem kell <span class="strike">tárolni<svg class="scribble" viewBox="0 0 200 22" aria-hidden="true"><path pathLength="1" d="M3 13C35 7 62 16 98 10S165 7 197 12"/><path pathLength="1" d="M8 16C58 10 120 18 193 8"/></svg></span>.</h3><p>Nem foglalja a helyet egész évben a koliban vagy a lakásban.</p></div>
+          </li>
+          <li style="--d:3">
+            <span class="nope-ico" aria-hidden="true"><svg class="thing" viewBox="0 0 44 44"><path class="s" d="M10 18h24l-3 20H13z"/><path class="s" d="M12 18a10 10 0 0 1 20 0"/><circle class="s" cx="31" cy="7" r="2.2"/><circle class="s" cx="37" cy="11" r="1.5"/><path class="s" d="M14 26c3 2 6-2 9 0s6-2 8 0"/></svg><svg class="ban" viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" pathLength="1" transform="rotate(-135 40 40)"/><path d="M13 13L67 67" pathLength="1"/></svg></span>
+            <div><h3>Nem kell <span class="strike">takarítani<svg class="scribble" viewBox="0 0 200 22" aria-hidden="true"><path pathLength="1" d="M3 13C35 7 62 16 98 10S165 7 197 12"/><path pathLength="1" d="M8 16C58 10 120 18 193 8"/></svg></span>.</h3><p>Sárosan is visszahozhatod, mi kimossuk, kiszárítjuk és átnézzük.</p></div>
+          </li>
+        </ul>
+        <p class="eco">És a kempingben sem marad ott egy újabb eldobott sátor.</p>
+        <dl class="logistics">
+          <div><dt>Átvétel</dt><dd>Az érkezés napján, a bejárat előtti átvételi pontunkon</dd></div>
+          <div><dt>Leadás</dt><dd>Az utolsó napon [IDŐPONT]-ig, ugyanott</dd></div>
+          <div><dt>Kaució</dt><dd>10 000 Ft, a leadás után visszajár</dd></div>
+        </dl>
+        <div class="extras"><a class="btn btn-primary" href="#/arak">Csomagot választok</a></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= CSOMAGOK (mi van benne + árak) ================= -->
+  <div class="view" data-view="csomag" hidden>
+    <section class="pack subpage" id="csomag" data-cam="2">
+      <div class="wrap">
+        <div class="panel">
+          <h1 class="ptitle reveal">Minden benne van, ami kell.</h1>
+          <p class="lede">Görgess, és nyisd ki a csomagot. Ezt kapod egy Duo Pack-ben két főre.</p>
+          <ul class="items" id="itemList">
+            <li data-i="0"><b>Sátor</b><span>3 fős, gyorsan felállítható</span></li>
+            <li data-i="1"><b>Matrac</b><span>2 önfelfújó</span></li>
+            <li data-i="2"><b>Kempingszék</b><span>2 darab</span></li>
+            <li data-i="3"><b>Sátorlámpa</b><span>LED, egész éjszakára</span></li>
+            <li data-i="4"><b>Powerbank</b><span>2 darab, feltöltve</span></li>
+          </ul>
+          <a class="btn btn-primary" href="#/csomag-arak">Csomagok és árak</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= FESZTIVÁLOK ================= -->
+  <div class="view" data-view="fesztivalok" hidden>
+    <section class="fests subpage" data-cam="3">
+      <div class="wrap">
+        <div class="fest-head">
+          <h1 class="ptitle reveal">Itt vár a csomagod.</h1>
+          <p class="lede" style="margin:0">Ezekre a fesztiválokra tervezünk kitelepülni. Mindegyiknél a kemping bejárata előtt veszed át a csomagot.</p>
+        </div>
+        <ul class="fest-list"></ul>
+        <p class="fest-note">A végleges listát és az időpontokat hamarosan közzétesszük. Más fesztiválra mennél? Írd meg nekünk Instagramon: <a href="#/fesztivalok">[@FELHASZNÁLÓNÉV]</a></p>
+        <div class="extras"><a class="btn btn-primary" href="#/csomagok">Csomagot választok</a></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= GYIK ================= -->
+  <div class="view" data-view="gyik" hidden>
+    <section class="faq subpage" id="gyik" data-cam="5">
+      <div class="wrap faq-grid">
+        <h1 class="ptitle reveal">Amit még kérdezni szoktak.</h1>
+        <div class="panel">
+          <details open>
+            <summary>Tiszta lesz a matrac és a sátor?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+            <p>Minden bérlés után kimossuk, kiszárítjuk és átnézzük a felszerelést. A hálózsákhoz saját bélést adunk.</p>
+          </details>
+          <details>
+            <summary>Mi van, ha valami megsérül?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+            <p>A normál kopás a mi gondunk. Ha valami tönkremegy vagy elveszik, a javítás vagy pótlás költségét a kaucióból vonjuk le.</p>
+          </details>
+          <details>
+            <summary>Melyik fesztiválokon vagytok ott?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+            <p>Az első szezonban több nagy hazai fesztiválra tervezünk kitelepülni. A teljes lista a <a href="#/fesztivalok">Fesztiválok</a> oldalon van.</p>
+          </details>
+          <details>
+            <summary>Lemondhatom a foglalást?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+            <p>[LEMONDÁSI FELTÉTELEK]</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= BELÉPÉS / REGISZTRÁCIÓ ================= -->
+  <div class="view" data-view="belepes" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Lépj be, és foglalj.</h1>
+        <p class="lede">Az előfoglalás ingyenes, most még nem kell fizetned.</p>
+        <div class="card">
+          <div class="tabs" role="tablist" aria-label="Belépés vagy regisztráció">
+            <button type="button" role="tab" data-tab="login" aria-selected="true">Belépés</button>
+            <button type="button" role="tab" data-tab="signup" aria-selected="false">Regisztráció</button>
+          </div>
+
+          <form id="form-login" class="form">
+            <div class="field"><label for="login-email">E-mail-cím</label><input id="login-email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="login-password">Jelszó</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+            <div id="login-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Belépés</button>
+            <button class="linkbtn" type="button" id="to-reset">Elfelejtett jelszó</button>
+          </form>
+
+          <form id="form-signup" class="form" hidden>
+            <div class="field"><label for="signup-name">Teljes név</label><input id="signup-name" type="text" autocomplete="name" minlength="2" maxlength="100" required><p class="hint">Ezen a néven adjuk ki a csomagot.</p></div>
+            <div class="field"><label for="signup-email">E-mail-cím</label><input id="signup-email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="signup-password">Jelszó</label><input id="signup-password" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
+            <label class="check"><input id="signup-consent" type="checkbox" required><span>Elolvastam az <a href="#/adatkezeles">adatkezelési tájékoztatót</a>, és elmúltam 18 éves.</span></label>
+            <div id="signup-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Regisztrálok</button>
+          </form>
+
+          <form id="form-reset" class="form" hidden>
+            <h2>Új jelszó kérése</h2>
+            <p class="muted" style="margin:0">Add meg az e-mail-címed, és küldünk egy linket, amivel új jelszót állíthatsz be.</p>
+            <div class="field"><label for="reset-email">E-mail-cím</label><input id="reset-email" type="email" autocomplete="email" required></div>
+            <div id="reset-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Link küldése</button>
+            <button class="linkbtn" type="button" id="back-login">Vissza a belépéshez</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ÚJ JELSZÓ ================= -->
+  <div class="view" data-view="uj-jelszo" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Új jelszó.</h1>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <div id="newpw-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <form id="form-newpw" class="form">
+              <div class="field"><label for="newpw">Új jelszó</label><input id="newpw" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
+              <div class="field"><label for="newpw2">Új jelszó még egyszer</label><input id="newpw2" type="password" autocomplete="new-password" minlength="8" required></div>
+              <button class="btn btn-primary" type="submit">Mentés</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= FOGLALÁS ================= -->
+  <div class="view" data-view="foglalas" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Foglald le a csomagod.</h1>
+        <p class="lede">Ez egy ingyenes előfoglalás. Mielőtt bármit fizetnél, felvesszük veled a kapcsolatot.</p>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <form id="form-booking" class="form">
+              <p id="bk-hello" style="margin:0"></p>
+              <div class="field" id="bk-name-field" hidden><label for="bk-name">Teljes név</label><input id="bk-name" type="text" autocomplete="name" minlength="2" maxlength="100"></div>
+              <div class="field"><label for="bk-festival">Fesztivál</label><select id="bk-festival" required></select></div>
+              <fieldset class="pkg-pick" id="bk-packages"><legend>Csomag</legend></fieldset>
+              <div class="field"><label for="bk-people">Létszám</label><select id="bk-people"></select><p class="hint">Hány fő használja a csomagot?</p></div>
+              <div id="bk-msg" class="msg" role="status" aria-live="polite" hidden></div>
+              <button class="btn btn-primary" type="submit">Előfoglalás leadása</button>
+            </form>
+            <div id="bk-done" class="done" hidden>
+              <h2 tabindex="-1">Megvan az előfoglalásod!</h2>
+              <p class="sum" id="bk-summary"></p>
+              <p>Most nem kell fizetned. Hamarosan jelentkezünk, és egyeztetjük a részleteket. Kérdésed van? Hívj minket: <b id="bk-phone"></b></p>
+              <div class="btn-row">
+                <a class="btn btn-primary" href="#/foglalasaim">Foglalásaim</a>
+                <a class="btn btn-ghost" href="#/foglalas">Új foglalás</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= FOGLALÁSAIM ================= -->
+  <div class="view" data-view="foglalasaim" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Foglalásaim.</h1>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <div id="mine-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
+            <ul class="bk-list" id="mine-list"></ul>
+            <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Hívj minket: <b id="mine-phone"></b></p>
+            <div class="btn-row"><a class="btn btn-primary" href="#/foglalas">Új foglalás</a></div>
+            <div class="danger">
+              <h3>Fiókom törlése</h3>
+              <p>Törli a fiókodat és az összes foglalásodat. Ez nem vonható vissza.</p>
+              <button type="button" class="btn btn-ghost btn-danger btn-sm" id="delete-account">Fiókom törlése</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ADMIN ================= -->
+  <div class="view" data-view="admin" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Foglalások.</h1>
+        <div class="card wide">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <p id="admin-denied" class="muted" hidden>Ez az oldal csak a csapatnak szól.</p>
+            <div id="admin-panel" hidden>
+              <div class="toolbar">
+                <div class="field"><label for="admin-filter">Fesztivál</label><select id="admin-filter"><option value="">Minden fesztivál</option></select></div>
+                <div class="btn-row" style="margin:0">
+                  <button type="button" class="btn btn-ghost btn-sm" id="admin-reload">Frissítés</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="admin-csv">CSV letöltése</button>
+                </div>
+              </div>
+              <div id="admin-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
+              <p class="muted" id="admin-count"></p>
+              <h3 class="sub">Összesítő (lemondottak nélkül)</h3>
+              <div class="tbl-wrap"><table class="tbl" id="admin-summary"></table></div>
+              <h3 class="sub">Összes foglalás</h3>
+              <div class="tbl-wrap">
+                <table class="tbl" id="admin-table">
+                  <thead><tr><th>Leadva</th><th>Név</th><th>Fesztivál</th><th>Csomag</th><th>Létszám</th><th>Állapot</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ADATKEZELÉS ================= -->
+  <div class="view" data-view="adatkezeles" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <div class="card wide"><div class="prose" id="privacy"><p class="muted">Betöltés…</p></div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Üres Kézzel, egyetemi projekt a PTE KTK-n, 2026</span>
+    <span><a href="#/adatkezeles">Adatkezelési tájékoztató</a></span>
+    <span>Instagram: [@FELHASZNÁLÓNÉV]</span>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  /* ---------- címsor betűnként ---------- */
+  var h1 = document.getElementById("headline");
+  var words = h1.textContent.trim().split(" ");
+  h1.setAttribute("aria-label", h1.textContent.trim());
+  h1.textContent = "";
+  var k = 0;
+  words.forEach(function(w, wi){
+    var ws = document.createElement("span"); ws.className = "w"; ws.setAttribute("aria-hidden","true");
+    Array.from(w).forEach(function(ch){
+      var c = document.createElement("span"); c.className = "c"; c.textContent = ch;
+      c.style.animationDelay = (0.15 + k * 0.035) + "s"; k++;
+      ws.appendChild(c);
+    });
+    h1.appendChild(ws);
+    if (wi < words.length - 1) h1.appendChild(document.createTextNode(" "));
+  });
+
+  /* ---------- folyamatábra ---------- */
+  var ICO = [
+    '<svg viewBox="0 0 96 72"><rect class="s" x="33" y="3" width="30" height="64" rx="6"/><path class="s" d="M44 9h8"/><rect class="y" x="38" y="16" width="20" height="24" rx="3"/><path class="n" d="M48 21l7 14H41z"/><rect class="o" x="38" y="46" width="20" height="8" rx="4"/><path class="s" d="M70 12l5-5M72 20h7M67 6l2-4"/></svg>',
+    '<svg viewBox="0 0 96 72"><path class="s" d="M16 68V18M80 68V18M6 68h84"/><rect class="d" x="10" y="14" width="76" height="12" rx="2"/><path class="y" d="M22 26l4 8 4-8zM42 26l4 8 4-8zM62 26l4 8 4-8z"/><path class="s" d="M44 51q8-11 16 0"/><rect class="o" x="36" y="50" width="32" height="17" rx="8.5"/><path class="s" d="M52 50v17"/></svg>',
+    '<svg viewBox="0 0 96 72"><path class="s" d="M4 10Q26 22 48 10Q70 22 92 10"/><circle class="y" cx="15" cy="15" r="2.6"/><circle class="o" cx="26" cy="16.5" r="2.6"/><circle class="y" cx="37" cy="15" r="2.6"/><circle class="o" cx="59" cy="15" r="2.6"/><circle class="y" cx="70" cy="16.5" r="2.6"/><circle class="o" cx="81" cy="15" r="2.6"/><path class="s" d="M48 22v-5"/><path class="y" d="M48 22l30 46H18z"/><path class="n" d="M48 42l9 26H39z"/><circle class="y" cx="48" cy="60" r="2.2"/><path class="s" d="M8 68h80"/></svg>',
+    '<svg viewBox="0 0 96 72"><path class="s" d="M22 30a28 28 0 0 1 48-14"/><path class="s" d="M70 6v10H60"/><path class="s" d="M74 42a28 28 0 0 1-48 14"/><path class="s" d="M26 66V56h10"/><path class="s" d="M41 33q7-10 14 0"/><rect class="o" x="32" y="32" width="32" height="18" rx="9"/><path class="s" d="M48 32v18"/></svg>'
+  ];
+  var STEPS = [
+    {t:"Foglald le online",
+     s:"Válaszd ki a csomagot és a fesztivált, és foglald le előre. Most még nem kell fizetned.",
+     l:"Kiválasztod a csomagot és a fesztivált, és leadod az előfoglalást. Most még nem kell fizetned: előbb felvesszük veled a kapcsolatot. A csomaghoz 10\u00a0000\u00a0Ft kaució tartozik, ami a leadás után visszajár."},
+    {t:"Vedd át a bejáratnál",
+     s:"Az érkezés napján a kemping bejárata előtt vár a csomagod. Nem kell semmit cipelned.",
+     l:"Az érkezés napján a kemping bejárata előtti átvételi ponton vár a csomagod. Vonattal, busszal is könnyen jössz, mert a felszerelés már ott van."},
+    {t:"Táborozz és bulizz",
+     s:"Felállítod a sátrat, és kezdődhet a fesztivál. Minden benne van, ami egy jó éjszakához kell.",
+     l:"Sátor, matrac, szék, lámpa és feltöltött powerbank: minden benne van, ami a kempinghez kell. Felállítod a sátrat, és mehetsz a koncertekre."},
+    {t:"Add le hazafelé",
+     s:"Az utolsó napon ugyanott leadod, koszosan is. A takarítás a mi dolgunk.",
+     l:"Hazainduláskor ugyanott leadod a csomagot, sárosan, vizesen is. Átnézzük, a kaució visszajár, a mosás és a szárítás pedig a mi dolgunk."}
+  ];
+  var BX = [.12, .31, .5, .69, .88];
+  var BC = ["#F2C230", "#E8764A", "#fff1c1", "#a9baff"];
+  var flowIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add("lit"); flowIO.unobserve(e.target); } });
+  }, {threshold:.35});
+  document.querySelectorAll(".flow").forEach(function(ol){
+    var long = ol.getAttribute("data-flow") === "long";
+    ol.innerHTML = STEPS.map(function(st, i){
+      var wire = "";
+      if (i < STEPS.length - 1){
+        wire = '<span class="wire" aria-hidden="true"><svg viewBox="0 0 100 18" preserveAspectRatio="none"><path d="M0 0Q50 36 100 0"/></svg>' +
+          BX.map(function(x, j){ return '<i class="bulb" style="--x:' + x + ';--y:' + (72 * x * (1 - x)).toFixed(1) + ';--c:' + BC[(i + j) % BC.length] + '"></i>'; }).join("") +
+          '</span>';
+      }
+      return '<li class="step" style="--i:' + i + '"><span class="node" aria-hidden="true">' + (i + 1) + '</span>' + wire +
+        '<span class="ico" aria-hidden="true">' + ICO[i] + '</span><h3>' + st.t + '</h3><p>' + (long ? st.l : st.s) + '</p></li>';
+    }).join("");
+    if (reduce) ol.classList.add("lit"); else flowIO.observe(ol);
+  });
+
+  /* ---------- fesztiválok a közös listából (data.js) ---------- */
+  var FEST = (window.UK_DATA && window.UK_DATA.FESTIVALS) || [];
+  document.querySelector(".fest-list").innerHTML = FEST.map(function(f){
+    return '<li><div><b>' + f.name + '</b><span class="where">' + f.where + '</span></div><span class="chip">' + (f.status || "Tervezett") + '</span></li>';
+  }).join("");
+
+  /* ---------- árak a Csomagok oldalon is (a főoldali szekció másolata) ---------- */
+  var pricesHome = document.getElementById("csomagok");
+  var pricesCopy = pricesHome.cloneNode(true);
+  pricesCopy.id = "csomagok-2";
+  document.getElementById("csomag").after(pricesCopy);
+
+  /* ---------- „Nem kell” lista: áthúzás rajzolása ---------- */
+  var nopeIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add("in"); nopeIO.unobserve(e.target); } });
+  }, {threshold:.5});
+  document.querySelectorAll(".nope-list li").forEach(function(li){ if (reduce) li.classList.add("in"); else nopeIO.observe(li); });
+
+  /* ---------- nav, progress, reveal ---------- */
+  var nav = document.getElementById("nav");
+  var bar = document.querySelector(".progress");
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} });
+  }, {threshold:.2});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  function chrome(){
+    var sy = window.scrollY || window.pageYOffset, dh = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = "scaleX(" + (dh > 0 ? clamp(sy / dh, 0, 1) : 0) + ")";
+    nav.classList.toggle("scrolled", sy > 40);
+  }
+  addEventListener("scroll", chrome, {passive:true});
+
+  /* ---------- oldalak (hash alapú útválasztás) ---------- */
+  var ROUTES = {
+    "":         {v:"home",   title:"Üres Kézzel – fesztiválcsomagok bérlése"},
+    "folyamat": {v:"home",   target:"folyamat", title:"Üres Kézzel – fesztiválcsomagok bérlése"},
+    "arak":     {v:"home",   target:"csomagok", title:"Csomagok és árak – Üres Kézzel"},
+    "csomagok": {v:"csomag", nav:"csomagok", title:"Csomagok – Üres Kézzel"},
+    "csomag-arak": {v:"csomag", nav:"csomagok", target:"csomagok-2", title:"Csomagok és árak – Üres Kézzel"},
+    "fesztivalok": {v:"fesztivalok", title:"Fesztiválok – Üres Kézzel"},
+    "foglalas": {v:"foglalas", app:true, title:"Foglalás – Üres Kézzel"},
+    "belepes":  {v:"belepes", app:true, title:"Belépés – Üres Kézzel"},
+    "uj-jelszo": {v:"uj-jelszo", app:true, nav:"belepes", title:"Új jelszó – Üres Kézzel"},
+    "foglalasaim": {v:"foglalasaim", app:true, title:"Foglalásaim – Üres Kézzel"},
+    "admin":    {v:"admin", app:true, title:"Admin – Üres Kézzel"},
+    "adatkezeles": {v:"adatkezeles", app:true, title:"Adatkezelési tájékoztató – Üres Kézzel"},
+    "top":      {v:"home",   title:"Üres Kézzel – fesztiválcsomagok bérlése"},
+    "hogyan":   {v:"hogyan", title:"Hogyan működik – Üres Kézzel"},
+    "csomag":   {v:"csomag", nav:"csomagok", title:"Csomagok – Üres Kézzel"},
+    "gyik":     {v:"gyik",   title:"GYIK – Üres Kézzel"}
+  };
+  var views = Array.from(document.querySelectorAll(".view"));
+  var navLinks = Array.from(document.querySelectorAll(".nav ul a"));
+  var current = null, hooks = [], appMode = false;
+  function route(first){
+    var full = (location.hash || "").replace(/^#\/?/, ""), qi = full.indexOf("?");
+    var key = qi < 0 ? full : full.slice(0, qi);
+    var params = new URLSearchParams(qi < 0 ? "" : full.slice(qi + 1));
+    var r = ROUTES[key] || ROUTES[""];
+    var same = r.v === current;
+    views.forEach(function(el){ el.hidden = el.getAttribute("data-view") !== r.v; });
+    current = r.v;
+    // a foglalási oldalakon áll a 3D háttér, hogy ne lassítson
+    appMode = !!r.app;
+    document.documentElement.classList.toggle("app-mode", appMode);
+    navLinks.forEach(function(a){
+      if (a.getAttribute("href").replace(/^#\/?/, "") === (r.nav || key)) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+    document.title = r.title;
+    var target = r.target ? document.getElementById(r.target) : null;
+    var beh = (same && !first && !reduce) ? "smooth" : "instant";
+    if (target) target.scrollIntoView({behavior:beh, block:"start"});
+    else window.scrollTo({top:0, left:0, behavior:beh});
+    chrome();
+    if (!appMode) ensure3D();
+    hooks.forEach(function(h){ h(); });
+    window.dispatchEvent(new CustomEvent("uk:route", {detail:{view:r.v, key:key, params:params}}));
+    if (!same && !first){
+      var h = document.querySelector('.view:not([hidden]) h1');
+      if (h && !target){ h.setAttribute("tabindex", "-1"); h.focus({preventScroll:true}); }
+    }
+  }
+  addEventListener("hashchange", function(){ route(false); });
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest('a[href^="#/"]');
+    if (a && a.getAttribute("href") === location.hash){ e.preventDefault(); route(false); }
+  });
+
+  /* ---------- 3D jelenet ---------- */
+  function init3D(){
+  if (typeof THREE === "undefined") { document.documentElement.classList.add("no-webgl"); return; }
+  var canvas = document.getElementById("scene");
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:"high-performance"}); }
+  catch(e){ document.documentElement.classList.add("no-webgl"); return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  var scene = new THREE.Scene();
+  var skyNight = new THREE.Color("#0f1633"), skyDawn = new THREE.Color("#3d2e5e"), skyNow = new THREE.Color();
+  scene.background = skyNight.clone();
+  scene.fog = new THREE.FogExp2(0x0f1633, 0.032);
+
+  var camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 300);
+
+  // determinisztikus véletlen
+  var seed = 7; function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+
+  // izzás textúra
+  function glowTex(){
+    var c = document.createElement("canvas"); c.width = c.height = 64;
+    var g = c.getContext("2d"), gr = g.createRadialGradient(32,32,0,32,32,32);
+    gr.addColorStop(0,"rgba(255,255,255,1)"); gr.addColorStop(.25,"rgba(255,255,255,.7)"); gr.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle = gr; g.fillRect(0,0,64,64);
+    var t = new THREE.CanvasTexture(c); return t;
+  }
+  var GLOW = glowTex();
+
+  // fények
+  var hemi = new THREE.HemisphereLight(0x6a78c2, 0x14182c, 0.55); scene.add(hemi);
+  var moon = new THREE.DirectionalLight(0xa9b8ff, 0.55); moon.position.set(-8, 14, -6); scene.add(moon);
+
+  // domborzat
+  var terrainGeo = new THREE.PlaneGeometry(160, 160, 80, 80);
+  terrainGeo.rotateX(-Math.PI/2);
+  var pos = terrainGeo.attributes.position;
+  for (var i = 0; i < pos.count; i++){
+    var x = pos.getX(i), z = pos.getZ(i), d = Math.sqrt(x*x + z*z);
+    var h = Math.sin(x*.18)*Math.cos(z*.15)*1.1 + Math.sin(x*.05+z*.07)*2.2 + (rnd()-.5)*.35;
+    var flat = Math.min(1, Math.max(0, (d - 9) / 14));
+    pos.setY(i, h * flat - (d < 9 ? .02 : 0));
+  }
+  terrainGeo.computeVertexNormals();
+  var terrain = new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({color:0x1b2548, roughness:1, metalness:0, flatShading:true}));
+  scene.add(terrain);
+
+  // sátor gyártó
+  function makeTent(color, size, glow){
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.ConeGeometry(size, size*1.25, 4), new THREE.MeshStandardMaterial({color:color, roughness:.85, flatShading:true, emissive:color, emissiveIntensity:glow}));
+    body.rotation.y = Math.PI/4; body.position.y = size*.625; g.add(body);
+    var door = new THREE.Mesh(new THREE.ConeGeometry(size*.34, size*.72, 3, 1, true), new THREE.MeshBasicMaterial({color:0x0a0f24, side:THREE.DoubleSide}));
+    door.position.set(0, size*.36, size*.52); door.rotation.x = -.18; g.add(door);
+    return g;
+  }
+
+  // fő sátor
+  var heroTent = makeTent(0xF2C230, 1.45, .35); heroTent.position.set(2.4, 0, 0); heroTent.rotation.y = -.35; scene.add(heroTent);
+  var heroTentMat = heroTent.children[0].material;
+  var tentLight = new THREE.PointLight(0xffb640, 2.4, 9, 2); tentLight.position.set(2.4, .9, 1.2); scene.add(tentLight);
+  var tentHalo = new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW, color:0xffc54a, transparent:true, opacity:.45, depthWrite:false, blending:THREE.AdditiveBlending}));
+  tentHalo.scale.set(5.5, 5.5, 1); tentHalo.position.set(2.4, 1, .3); scene.add(tentHalo);
+
+  // többi sátor
+  var palette = [0x3A4A8C, 0xE8764A, 0x2f6f6c, 0xe9e2d0, 0x7a5aa6, 0xF2C230];
+  var campLights = 0;
+  for (var t = 0; t < 26; t++){
+    var ang = rnd()*Math.PI*2, rad = 6 + rnd()*26;
+    var tx = Math.cos(ang)*rad, tz = Math.sin(ang)*rad - 4;
+    if (Math.abs(tx + 6) < 3 && Math.abs(tz - 1) < 3) continue; // csomag helye
+    var gl = rnd() < .4 ? .25 + rnd()*.35 : .02;
+    var tent = makeTent(palette[Math.floor(rnd()*palette.length)], .6 + rnd()*.6, gl);
+    var ty = 0;
+    tent.position.set(tx, ty, tz); tent.rotation.y = rnd()*Math.PI; scene.add(tent);
+    if (gl > .3 && campLights < 3){ var pl = new THREE.PointLight(0xffa860, 1.1, 5, 2); pl.position.set(tx, .7, tz); scene.add(pl); campLights++; }
+  }
+
+  // égősor (lánclámpák)
+  var poles = [[-9,-3],[-4,-4.8],[1.5,-4.4],[6.5,-2.8],[10.5,.6]];
+  var poleMat = new THREE.MeshStandardMaterial({color:0x2a2f45, roughness:.9});
+  var bulbPos = [], bulbCol = [], bulbBase = [], bulbPhase = [];
+  var wirePts = [];
+  var warm = [new THREE.Color("#ffd36b"), new THREE.Color("#ff9a5a"), new THREE.Color("#fff1c1"), new THREE.Color("#a9baff")];
+  poles.forEach(function(p){
+    var m = new THREE.Mesh(new THREE.CylinderGeometry(.05,.07,3.4,6), poleMat); m.position.set(p[0], 1.7, p[1]); scene.add(m);
+  });
+  for (var s = 0; s < poles.length - 1; s++){
+    var a = poles[s], b = poles[s+1], N = 16;
+    for (var j = 0; j <= N; j++){
+      var u = j / N, px = a[0] + (b[0]-a[0])*u, pz = a[1] + (b[1]-a[1])*u, py = 3.35 - Math.sin(u*Math.PI)*.85;
+      wirePts.push(new THREE.Vector3(px, py, pz));
+      if (j > 0 && j < N){
+        bulbPos.push(px, py - .08, pz);
+        var col = warm[(s*N + j) % warm.length]; bulbBase.push(col); bulbCol.push(col.r, col.g, col.b); bulbPhase.push(rnd()*6.28);
+      }
+    }
+  }
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(wirePts), new THREE.LineBasicMaterial({color:0x0b0f22})));
+  var bulbGeo = new THREE.BufferGeometry();
+  bulbGeo.setAttribute("position", new THREE.Float32BufferAttribute(bulbPos, 3));
+  bulbGeo.setAttribute("color", new THREE.Float32BufferAttribute(bulbCol, 3));
+  var bulbs = new THREE.Points(bulbGeo, new THREE.PointsMaterial({size:.55, map:GLOW, vertexColors:true, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending}));
+  scene.add(bulbs);
+
+  // színpad és fénycsóvák a távolban
+  var stage = new THREE.Group(); stage.position.set(-2, 0, -34); scene.add(stage);
+  var stageBox = new THREE.Mesh(new THREE.BoxGeometry(14, 1.4, 5), new THREE.MeshStandardMaterial({color:0x151a33, roughness:1})); stageBox.position.y = .7; stage.add(stageBox);
+  var roof = new THREE.Mesh(new THREE.BoxGeometry(15, .5, 5.5), new THREE.MeshStandardMaterial({color:0x151a33})); roof.position.y = 8; stage.add(roof);
+  [-7, 7].forEach(function(x){ var tw = new THREE.Mesh(new THREE.BoxGeometry(.5, 8, .5), new THREE.MeshStandardMaterial({color:0x1d2344})); tw.position.set(x, 4, 0); stage.add(tw); });
+  var stageGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW, color:0x8a6cff, transparent:true, opacity:.5, depthWrite:false, blending:THREE.AdditiveBlending}));
+  stageGlow.scale.set(26, 14, 1); stageGlow.position.set(0, 4, 1); stage.add(stageGlow);
+  var beams = [];
+  var beamCols = [0xF2C230, 0x8a6cff, 0x5fd0ff, 0xE8764A, 0xF2C230];
+  for (var bI = 0; bI < 5; bI++){
+    var bg = new THREE.ConeGeometry(2.6, 34, 24, 1, true); bg.translate(0, -17, 0);
+    var bm = new THREE.MeshBasicMaterial({color:beamCols[bI], transparent:true, opacity:.07, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending, fog:false});
+    var beam = new THREE.Mesh(bg, bm);
+    var piv = new THREE.Group(); piv.position.set(-6 + bI*3, 7.6, 1.5); piv.add(beam); stage.add(piv);
+    beam.rotation.z = Math.PI; beams.push({piv:piv, ph:bI*1.3, sp:.35 + bI*.07});
+  }
+
+  // csillagok
+  var starPos = [], starCol = [];
+  for (var st = 0; st < 1800; st++){
+    var th = rnd()*Math.PI*2, ph = Math.acos(rnd()*.95), R = 120;
+    starPos.push(Math.sin(ph)*Math.cos(th)*R, Math.cos(ph)*R*.8 + 4, Math.sin(ph)*Math.sin(th)*R);
+    var b = .5 + rnd()*.5; starCol.push(b, b, b*1.05);
+  }
+  var starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute("position", new THREE.Float32BufferAttribute(starPos, 3));
+  starGeo.setAttribute("color", new THREE.Float32BufferAttribute(starCol, 3));
+  var starMat = new THREE.PointsMaterial({size:.7, map:GLOW, vertexColors:true, transparent:true, depthWrite:false, fog:false, blending:THREE.AdditiveBlending});
+  var stars = new THREE.Points(starGeo, starMat); scene.add(stars);
+
+  // szentjánosbogarak
+  var FF = 260, ffPos = new Float32Array(FF*3), ffSeed = [];
+  for (var f = 0; f < FF; f++){
+    var fx = (rnd()-.5)*40, fz = (rnd()-.5)*34 - 3, fy = .3 + rnd()*4;
+    ffPos[f*3] = fx; ffPos[f*3+1] = fy; ffPos[f*3+2] = fz; ffSeed.push([fx, fy, fz, rnd()*6.28, .3 + rnd()*.7]);
+  }
+  var ffGeo = new THREE.BufferGeometry(); ffGeo.setAttribute("position", new THREE.BufferAttribute(ffPos, 3));
+  var fireflies = new THREE.Points(ffGeo, new THREE.PointsMaterial({size:.22, map:GLOW, color:0xffe08a, transparent:true, opacity:.9, depthWrite:false, blending:THREE.AdditiveBlending}));
+  scene.add(fireflies);
+
+  // hajnali derengés a horizonton
+  var dawnGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW, color:0xff9a5a, transparent:true, opacity:0, depthWrite:false, fog:false, blending:THREE.AdditiveBlending}));
+  dawnGlow.scale.set(180, 60, 1); dawnGlow.position.set(0, 2, -90); scene.add(dawnGlow);
+
+  /* --- a kinyíló csomag --- */
+  var PACK = new THREE.Vector3(-6, 1.7, 1);
+  var pack = new THREE.Group(); pack.position.copy(PACK); scene.add(pack);
+  var crate = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.6, 1.6, 1.6)), new THREE.LineBasicMaterial({color:0xF2C230, transparent:true, opacity:.9}));
+  pack.add(crate);
+  var packLight = new THREE.PointLight(0xffd27a, 1.6, 7, 2); pack.add(packLight);
+  var std = function(c, e){ return new THREE.MeshStandardMaterial({color:c, roughness:.7, flatShading:true, emissive:c, emissiveIntensity:e || .12}); };
+  var items = [];
+  // 0 sátor
+  var iTent = makeTent(0xF2C230, .55, .25); iTent.children.forEach(function(ch){ ch.position.y -= .34; });
+  // 1 matrac
+  var iMat = new THREE.Group();
+  var mBody = new THREE.Mesh(new THREE.BoxGeometry(1.5, .14, .62), std(0x3A4A8C, .2)); iMat.add(mBody);
+  for (var q = -2; q <= 2; q++){ var rib = new THREE.Mesh(new THREE.BoxGeometry(.03, .15, .6), std(0x2b3870, .1)); rib.position.x = q*.26; iMat.add(rib); }
+  // 2 szék
+  var iChair = new THREE.Group(), cm = std(0xE8764A, .18), lm = std(0x2a2f45, .05);
+  var seat = new THREE.Mesh(new THREE.BoxGeometry(.6, .06, .55), cm); seat.position.y = .05; iChair.add(seat);
+  var back = new THREE.Mesh(new THREE.BoxGeometry(.6, .6, .06), cm); back.position.set(0, .38, -.26); back.rotation.x = -.15; iChair.add(back);
+  [[-.26,-.24],[.26,-.24],[-.26,.24],[.26,.24]].forEach(function(p){ var l = new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.5,5), lm); l.position.set(p[0], -.22, p[1]); iChair.add(l); });
+  // 3 lámpa
+  var iLamp = new THREE.Group();
+  var lb = new THREE.Mesh(new THREE.CylinderGeometry(.16, .2, .12, 12), std(0x2a2f45, .05)); lb.position.y = -.22; iLamp.add(lb);
+  var lg = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, .34, 12), new THREE.MeshBasicMaterial({color:0xffe6a0})); iLamp.add(lg);
+  var lt = new THREE.Mesh(new THREE.CylinderGeometry(.08, .16, .1, 12), std(0x2a2f45, .05)); lt.position.y = .22; iLamp.add(lt);
+  var lh = new THREE.Mesh(new THREE.TorusGeometry(.1, .018, 6, 16, Math.PI), lm); lh.position.y = .28; iLamp.add(lh);
+  var lampHalo = new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW, color:0xffd27a, transparent:true, opacity:.8, depthWrite:false, blending:THREE.AdditiveBlending})); lampHalo.scale.set(1.3,1.3,1); iLamp.add(lampHalo);
+  // 4 powerbank
+  var iPb = new THREE.Group();
+  iPb.add(new THREE.Mesh(new THREE.BoxGeometry(.3, .58, .1), std(0x20263f, .05)));
+  for (var dI = 0; dI < 4; dI++){ var dot = new THREE.Mesh(new THREE.BoxGeometry(.035, .035, .02), new THREE.MeshBasicMaterial({color:0x7dffb0})); dot.position.set(-.075 + dI*.05, -.2, .055); iPb.add(dot); }
+
+  var spread = [ [0, 1.35, 0], [-1.9, .55, .3], [1.85, .45, .2], [-1.1, -.9, .6], [1.2, -.95, .5] ];
+  [iTent, iMat, iChair, iLamp, iPb].forEach(function(o, idx){
+    o.scale.setScalar(.35); pack.add(o);
+    items.push({obj:o, to:new THREE.Vector3(spread[idx][0], spread[idx][1], spread[idx][2]), rs:.3 + idx*.08, ph:idx*1.4});
+  });
+
+  /* --- kamera útvonal oldalanként --- */
+  var V = function(x,y,z){ return new THREE.Vector3(x,y,z); };
+  var KF = [
+    {p:V(0, 2.1, 8.6),   t:V(.7, 1.15, 0)},   // 0 hero
+    {p:V(6.2, 2.4, 6.2), t:V(.2, 1.0, -.4)},  // 1 folyamat
+    {p:V(-7.6, 2.2, 7.2),t:V(-7.9, 1.6, .6)}, // 2 csomag
+    {p:V(-1, 3.6, 10),   t:V(-1, 4.2, -30)},  // 3 árak
+    {p:V(2, 5.5, 13),    t:V(0, 9, -40)},     // 4 nem kell
+    {p:V(4, 2.4, 9),     t:V(1, 1.4, -2)},    // 5 GYIK
+    {p:V(0, 1.4, 17),    t:V(0, 3.2, -40)}    // 6 záró, hajnal
+  ];
+  var sections = [];
+  var packSec = document.getElementById("csomag");
+  var finalSec = document.getElementById("zaro");
+  var itemLis = Array.from(document.querySelectorAll("#itemList li"));
+  var camPos = KF[0].p.clone(), camTgt = KF[0].t.clone(), wantPos = KF[0].p.clone(), wantTgt = KF[0].t.clone();
+  var mouse = {x:0, y:0, sx:0, sy:0};
+  var packP = 0, packPS = 0, dawnT = 0, dawnS = 0;
+
+  function ease(x){ return x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2; }
+  function collect(){ sections = Array.from(document.querySelectorAll(".view:not([hidden]) [data-cam]")); }
+
+  function onScroll(){
+    var sy = window.scrollY || window.pageYOffset, vh = innerHeight;
+    if (sections.length){
+      var mid = sy + vh * .5, idx = 0, frac = 0;
+      for (var i = 0; i < sections.length; i++){
+        var top = sections[i].getBoundingClientRect().top + sy;
+        var next = i + 1 < sections.length ? sections[i+1].getBoundingClientRect().top + sy : top + sections[i].offsetHeight;
+        if (mid >= top){ idx = i; frac = clamp((mid - top) / Math.max(1, next - top), 0, 1); }
+      }
+      var c1 = +sections[idx].getAttribute("data-cam");
+      var c2 = idx + 1 < sections.length ? +sections[idx+1].getAttribute("data-cam") : c1;
+      var e = c1 === c2 ? 0 : ease(frac);
+      wantPos.copy(KF[c1].p).lerp(KF[c2].p, e);
+      wantTgt.copy(KF[c1].t).lerp(KF[c2].t, e);
+    }
+    // csomag kinyitása (csak a „Mi van benne” oldalon)
+    if (packSec.offsetParent){
+      var r = packSec.getBoundingClientRect();
+      packP = clamp((vh * .1 - r.top) / Math.max(1, r.height - vh * .9), 0, 1);
+    } else packP = 0;
+    var shown = Math.floor(packP * 5.4);
+    itemLis.forEach(function(li, n){ li.classList.toggle("on", n < shown); });
+    // hajnal a záró szekciónál
+    dawnT = finalSec.offsetParent ? clamp((vh - finalSec.getBoundingClientRect().top) / vh, 0, 1) : 0;
+  }
+  hooks.push(function(){ collect(); onScroll(); });
+
+  addEventListener("scroll", onScroll, {passive:true});
+  addEventListener("pointermove", function(e){ mouse.x = e.clientX / innerWidth * 2 - 1; mouse.y = e.clientY / innerHeight * 2 - 1; }, {passive:true});
+  function resize(){
+    var w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false); camera.aspect = w / h;
+    camera.fov = w < 700 ? 62 : 50; camera.updateProjectionMatrix();
+    onScroll();
+  }
+  addEventListener("resize", resize); resize();
+
+  var clock = new THREE.Clock(), running = true, looping = false, time = 0;
+  function wake(){ if (running && !appMode && !looping){ clock.getDelta(); loop(); } }
+  document.addEventListener("visibilitychange", function(){ running = !document.hidden; wake(); });
+  hooks.push(wake);
+
+  function loop(){
+    if (!running || appMode){ looping = false; return; }
+    looping = true;
+    var dt = Math.min(clock.getDelta(), .05);
+    if (!reduce) time += dt;
+    var k = reduce ? 1 : 1 - Math.pow(.02, dt);   // simítás
+    mouse.sx += (mouse.x - mouse.sx) * k * .8; mouse.sy += (mouse.y - mouse.sy) * k * .8;
+    camPos.lerp(wantPos, k * .9); camTgt.lerp(wantTgt, k * .9);
+    camera.position.set(camPos.x + mouse.sx * .7, camPos.y - mouse.sy * .35, camPos.z);
+    camera.lookAt(camTgt.x + mouse.sx * .25, camTgt.y - mouse.sy * .15, camTgt.z);
+
+    // ég: éjszakából hajnalba az oldal végén
+    dawnS += (dawnT - dawnS) * (reduce ? 1 : k * .6);
+    var dawn = dawnS;
+    skyNow.copy(skyNight).lerp(skyDawn, dawn);
+    scene.background.copy(skyNow); scene.fog.color.copy(skyNow);
+    dawnGlow.material.opacity = dawn * .75;
+    starMat.opacity = 1 - dawn * .6;
+    hemi.intensity = .55 + dawn * .25;
+
+    // fő sátor lélegzik
+    var breath = .85 + Math.sin(time * 1.6) * .1 + Math.sin(time * 4.3) * .03;
+    tentLight.intensity = 2.4 * breath; heroTentMat.emissiveIntensity = .3 * breath; tentHalo.material.opacity = .42 * breath;
+
+    // égők pislákolnak
+    var cAttr = bulbGeo.attributes.color;
+    for (var i = 0; i < bulbBase.length; i++){
+      var fl = .55 + .45 * Math.sin(time * 2.2 + bulbPhase[i]);
+      cAttr.setXYZ(i, bulbBase[i].r * fl, bulbBase[i].g * fl, bulbBase[i].b * fl);
+    }
+    cAttr.needsUpdate = true;
+
+    // fénycsóvák
+    beams.forEach(function(b){ b.piv.rotation.z = Math.sin(time * b.sp + b.ph) * .55; b.piv.rotation.x = Math.cos(time * b.sp * .8 + b.ph) * .25; });
+    stageGlow.material.opacity = .38 + Math.sin(time * 3.1) * .08;
+
+    // szentjánosbogarak
+    var fa = ffGeo.attributes.position;
+    for (var f = 0; f < FF; f++){
+      var s = ffSeed[f];
+      fa.setXYZ(f, s[0] + Math.sin(time * s[4] + s[3]) * .8, s[1] + Math.sin(time * s[4] * 1.3 + s[3] * 2) * .4, s[2] + Math.cos(time * s[4] * .9 + s[3]) * .8);
+    }
+    fa.needsUpdate = true;
+
+    // csomag
+    packPS += (packP - packPS) * (reduce ? 1 : k * .8);
+    var o = packPS;
+    crate.scale.setScalar(1 - o * .35); crate.material.opacity = .9 * (1 - o); crate.rotation.y = time * .3; crate.rotation.x = Math.sin(time * .5) * .1;
+    packLight.intensity = 1.6 * (.4 + o);
+    items.forEach(function(it, n){
+      var local = clamp(o * 1.25 - n * .06, 0, 1);
+      var back = local < 1 ? 1 + 1.7 * Math.pow(local - 1, 3) + .7 * Math.pow(local - 1, 2) : 1; // túllendülés
+      it.obj.position.set(it.to.x * back, it.to.y * back + Math.sin(time * 1.2 + it.ph) * .06 * local, it.to.z * back);
+      it.obj.scale.setScalar(.35 + .65 * local);
+      it.obj.rotation.y = time * it.rs + it.ph; it.obj.rotation.x = Math.sin(time * .7 + it.ph) * .18 * local;
+    });
+
+    stars.rotation.y = time * .004;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  loop();
+  snapCam = function(){ collect(); onScroll(); camPos.copy(wantPos); camTgt.copy(wantTgt); dawnS = dawnT; };
+  }
+  var snapCam = null, started3D = false;
+  // a 3D jelenet csak az első nem-foglalási oldalnál indul el
+  function ensure3D(){ if (started3D) return; started3D = true; init3D(); if (snapCam) snapCam(); }
+  route(true);
+  chrome();
+})();
+</script>
+</body>
+</html>

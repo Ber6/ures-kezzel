@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="hu">
+<body style="margin:0;padding:0;background:#0f1633;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f1633;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#18214a;border-radius:20px;">
+        <tr><td style="padding:32px 32px 8px;">
+          <div style="font-size:22px;font-weight:bold;color:#F4F1EA;">&#9650; Üres Kézzel</div>
+        </td></tr>
+        <tr><td style="padding:8px 32px 0;">
+          <h1 style="margin:0 0 16px;font-size:26px;line-height:1.2;color:#F4F1EA;">Erősítsd meg az e-mail-címed</h1>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#dfe2ef;">Szia{{ if .Data.full_name }}, {{ .Data.full_name }}{{ end }}!</p><p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#dfe2ef;">Köszönjük, hogy regisztráltál az Üres Kézzel oldalán. Kattints az alábbi gombra, és már foglalhatsz is fesztiválcsomagot.</p>
+        </td></tr>
+        <tr><td style="padding:8px 32px 24px;">
+          <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#F2C230;color:#141A2E;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 28px;border-radius:999px;">E-mail-cím megerősítése</a>
+        </td></tr>
+        <tr><td style="padding:0 32px 32px;">
+          <p style="margin:0;font-size:13px;line-height:1.5;color:#b7bdd6;">Ha nem te regisztráltál, nyugodtan hagyd figyelmen kívül ezt a levelet.</p>
+        </td></tr>
+      </table>
+      <p style="margin:16px 0 0;font-size:12px;color:#b7bdd6;">Üres Kézzel, egyetemi projekt a PTE KTK-n</p>
+    </td></tr>
+  </table>
+</body>
+</html>
