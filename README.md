@@ -21,7 +21,8 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
 
 - `#/belepes`: belépés, regisztráció, elfelejtett jelszó
 - `#/foglalas`: foglalás (csak belépve; a csomagkártyák „Ezt kérem” gombja előre kiválasztja a csomagot)
-- `#/foglalasaim`: saját foglalások, lemondás, fiók törlése
+- `#/foglalasaim`: saját foglalások, lemondás
+- `#/fiokom`: fiókadatok, név / e-mail / jelszó módosítása, adatok letöltése (JSON), fiók törlése
 - `#/admin`: összes foglalás, szűrés, állapot módosítása, CSV, összesítő (csak az `admins` táblában szereplőknek)
 - `#/adatkezeles`: adatkezelési tájékoztató
 

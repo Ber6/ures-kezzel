@@ -8,10 +8,9 @@ Az Üres Kézzel a Pécsi Tudományegyetem Közgazdaságtudományi Karának „V
 
 | Adat | Érték |
 | --- | --- |
-| Adatkezelő | [A projektcsapat tagjainak neve] |
-| Kapcsolattartó | [Kapcsolattartó neve] |
+| Adatkezelő | Molnár Bertalan, Májlinger Bence, Simon Vanda, Varga Ádám (a projektcsapat tagjai) |
+| Kapcsolattartó | Molnár Bertalan |
 | E-mail | urreskezzel@gmail.com |
-| Postacím | [Cím] |
 | Weboldal | https://ures-kezzel.vercel.app |
 
 Adatvédelmi kérdéseiddel a fenti e-mail-címen fordulhatsz hozzánk. 30 napon belül válaszolunk.
@@ -62,10 +61,10 @@ Az oldal nem használ reklám- vagy követő sütiket, és nem mér látogatotts
 Bármikor kérheted tőlünk a fenti e-mail-címen:
 
 - **Hozzáférés:** tájékoztatást arról, milyen adatot kezelünk rólad, és másolatot is kérhetsz.
-- **Helyesbítés:** a pontatlan adat javítását.
-- **Törlés:** az adataid és a fiókod törlését. A fiókodat a „Foglalásaim” oldalon magad is törölheted.
+- **Helyesbítés:** a pontatlan adat javítását. A neved és az e-mail-címed a „Fiókom” oldalon magad is módosíthatod.
+- **Törlés:** az adataid és a fiókod törlését. A fiókodat a „Fiókom” oldalon magad is törölheted.
 - **Korlátozás:** hogy átmenetileg ne használjuk az adataidat, például amíg egy vitát tisztázunk.
-- **Adathordozhatóság:** hogy géppel olvasható formában megkapd az adataidat.
+- **Adathordozhatóság:** hogy géppel olvasható formában megkapd az adataidat. A „Fiókom” oldalon magad is letöltheted őket.
 - **Tiltakozás:** a jogos érdeken alapuló adatkezelés (technikai naplók) ellen.
 
 A kérésedre legkésőbb 30 napon belül válaszolunk, és ez ingyenes.

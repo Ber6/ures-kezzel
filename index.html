@@ -330,6 +330,17 @@ button.btn-ghost{background:transparent}
 .tbl tr.total td{font-weight:700;background:rgba(242,194,48,.08)}
 .tbl select{min-height:36px;padding:.25rem .5rem;border-radius:10px;border:1px solid var(--line);background:var(--night);color:var(--paper);font:inherit}
 .card h3.sub{font-size:1.4rem;margin:0 0 .8rem}
+.acct-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem 1.5rem;margin:0 0 1.5rem}
+.acct-data dt{color:var(--muted);font-size:.88rem;margin-bottom:.15rem}
+.acct-data dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.acct-sec summary{font-size:1.2rem;padding:1.1rem 0}
+.acct-data + .acct-sec{border-top:1px solid var(--line)}
+/* a <details> tartalma nem örökli a border-box-ot, ezért itt külön megadjuk */
+.acct-sec *{box-sizing:border-box}
+.acct-sec + .danger{border-top:0;margin-top:1.25rem;padding-top:.5rem}
+.acct-sec .form,.acct-sec > p,.acct-sec > .btn{margin-bottom:1.4rem}
+.acct-sec > p{margin-top:0}
+@media (max-width: 600px){ .acct-data{grid-template-columns:1fr} }
 .prose{max-width:76ch}
 .prose h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:750;font-variation-settings:"wdth" 80;margin:0 0 1.5rem}
 .prose h2{font-size:clamp(1.4rem,3vw,1.8rem);font-weight:700;max-width:none;margin:2.4rem 0 .8rem;line-height:1.15}
@@ -365,6 +376,7 @@ footer a:hover{color:var(--paper)}
       <li><a href="#/gyik">GYIK</a></li>
       <li data-auth="out"><a href="#/belepes">Belépés</a></li>
       <li data-auth="in" hidden><a href="#/foglalasaim">Foglalásaim</a></li>
+      <li data-auth="in" hidden><a href="#/fiokom">Fiókom</a></li>
       <li data-auth="admin" hidden><a href="#/admin">Admin</a></li>
       <li data-auth="in" hidden><button type="button" class="navbtn" id="logout">Kijelentkezés</button></li>
     </ul>
@@ -691,7 +703,64 @@ footer a:hover{color:var(--paper)}
             <div id="mine-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
             <ul class="bk-list" id="mine-list"></ul>
             <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Írj nekünk: <b class="team-contact"></b>. Az átvétel részleteit és a telefonszámunkat a fesztivál előtt küldjük el e-mailben.</p>
-            <div class="btn-row"><a class="btn btn-primary" href="#/foglalas">Új foglalás</a></div>
+            <div class="btn-row"><a class="btn btn-primary" href="#/foglalas">Új foglalás</a><a class="btn btn-ghost" href="#/fiokom">Fiókom</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= FIÓKOM ================= -->
+  <div class="view" data-view="fiokom" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle">Fiókom.</h1>
+        <div class="card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <div id="acct-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1.25rem"></div>
+            <dl class="acct-data">
+              <div><dt>Név</dt><dd id="acct-name"></dd></div>
+              <div><dt>E-mail-cím</dt><dd id="acct-email"></dd></div>
+              <div><dt>Regisztráció</dt><dd id="acct-created"></dd></div>
+              <div><dt>Foglalások</dt><dd id="acct-bookings"></dd></div>
+            </dl>
+
+            <details class="acct-sec">
+              <summary>Név módosítása<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+              <form id="form-name" class="form">
+                <div class="field"><label for="acct-new-name">Teljes név</label><input id="acct-new-name" type="text" autocomplete="name" minlength="2" maxlength="100" required><p class="hint">Az új foglalásaid már ezen a néven mennek. Ha egy korábbi foglalásodon is javítani kell, írj nekünk.</p></div>
+                <div id="name-msg" class="msg" role="status" aria-live="polite" hidden></div>
+                <button class="btn btn-primary btn-sm" type="submit">Mentés</button>
+              </form>
+            </details>
+
+            <details class="acct-sec">
+              <summary>E-mail-cím módosítása<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+              <form id="form-email" class="form">
+                <div class="field"><label for="acct-new-email">Új e-mail-cím</label><input id="acct-new-email" type="email" autocomplete="email" required><p class="hint">Az új címre megerősítő levelet küldünk. A csere csak akkor lép életbe, ha a levélben lévő linkre kattintasz.</p></div>
+                <div id="email-msg" class="msg" role="status" aria-live="polite" hidden></div>
+                <button class="btn btn-primary btn-sm" type="submit">Megerősítő levél küldése</button>
+              </form>
+            </details>
+
+            <details class="acct-sec">
+              <summary>Jelszó módosítása<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+              <form id="form-pw" class="form">
+                <div class="field"><label for="acct-pw-old">Jelenlegi jelszó</label><input id="acct-pw-old" type="password" autocomplete="current-password" required></div>
+                <div class="field"><label for="acct-pw-new">Új jelszó</label><input id="acct-pw-new" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
+                <div class="field"><label for="acct-pw-new2">Új jelszó még egyszer</label><input id="acct-pw-new2" type="password" autocomplete="new-password" minlength="8" required></div>
+                <div id="pw-msg" class="msg" role="status" aria-live="polite" hidden></div>
+                <button class="btn btn-primary btn-sm" type="submit">Jelszó mentése</button>
+              </form>
+            </details>
+
+            <details class="acct-sec">
+              <summary>Adataim letöltése<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+              <p class="muted">Letöltheted az összes adatot, amit rólad tárolunk: a fiókod adatait és a foglalásaidat, egy fájlban (JSON).</p>
+              <button type="button" class="btn btn-ghost btn-sm" id="acct-export">Adataim letöltése</button>
+            </details>
+
             <div class="danger">
               <h3>Fiókom törlése</h3>
               <p>Törli a fiókodat és az összes foglalásodat. Ez nem vonható vissza.</p>
@@ -869,6 +938,7 @@ footer a:hover{color:var(--paper)}
     "belepes":  {v:"belepes", app:true, title:"Belépés – Üres Kézzel"},
     "uj-jelszo": {v:"uj-jelszo", app:true, nav:"belepes", title:"Új jelszó – Üres Kézzel"},
     "foglalasaim": {v:"foglalasaim", app:true, title:"Foglalásaim – Üres Kézzel"},
+    "fiokom":   {v:"fiokom", app:true, title:"Fiókom – Üres Kézzel"},
     "admin":    {v:"admin", app:true, title:"Admin – Üres Kézzel"},
     "adatkezeles": {v:"adatkezeles", app:true, title:"Adatkezelési tájékoztató – Üres Kézzel"},
     "top":      {v:"home",   title:"Üres Kézzel – fesztiválcsomagok bérlése"},
