@@ -97,9 +97,9 @@
     $$("[data-body]", el).forEach(function(x){ x.hidden = false; });
     return el;
   }
+  // Az üzenet addig marad, amíg a felhasználó másik oldalra nem lép (egy oldal többször is kirajzolódhat).
   function takeFlash(v){
-    if (state.flash && state.flash.view === v){ var f = state.flash; state.flash = null; return f; }
-    return null;
+    return state.flash && state.flash.view === v ? state.flash : null;
   }
 
   // Csak belépve elérhető oldalak. Kijelentkezve a belépésre visz, utána ide vissza.
@@ -542,6 +542,7 @@
   window.addEventListener("uk:route", function(e){
     state.view = e.detail.view;
     state.params = e.detail.params;
+    if (state.flash && state.flash.view !== state.view) state.flash = null;
     render();
   });
 
@@ -552,11 +553,15 @@
     var linkError = q.get("error_description") || h.get("error_description");
     var fromLink = q.has("code") || q.has("megerositve") || q.has("uj-jelszo") || q.has("email-csere") || !!linkError;
 
-    var s = await sb.auth.getSession(); // ez cseréli be a ?code=… paramétert is belépésre
-    await setUser(s.data.session);
-    state.ready = true;
-
+    // Az induláskor érkező eseményekből derül ki, hogy a ?code=… linkből sikerült-e belépni,
+    // és hogy jelszó-visszaállító link volt-e.
+    var initDone = false, exchanged = false, recovery = false;
     sb.auth.onAuthStateChange(function(event, session){
+      if (!initDone){
+        if (event === "PASSWORD_RECOVERY"){ recovery = true; exchanged = true; }
+        if (event === "SIGNED_IN") exchanged = true;
+        return;
+      }
       // a callbackben ne hívjunk közvetlenül Supabase-t (holtpont), ezért setTimeout
       setTimeout(async function(){
         if (event === "PASSWORD_RECOVERY"){ await setUser(session); return go("#/uj-jelszo"); }
@@ -566,9 +571,23 @@
       }, 0);
     });
 
+    var s = await sb.auth.getSession(); // ez cseréli be a ?code=… paramétert is belépésre
+    await setUser(s.data.session);
+    state.ready = true;
+    initDone = true;
+
     if (fromLink){
       var target = "#/belepes";
       if (linkError) state.flash = { view: "belepes", text: "A link lejárt, vagy már felhasználták. Lépj be, vagy kérj új linket.", kind: "err" };
+      else if (recovery || (q.has("uj-jelszo") && exchanged)) target = "#/uj-jelszo";
+      else if (q.has("code") && !exchanged){
+        // a linket nem abban a böngészőben (vagy nem azon a címen) nyitották meg, ahol kérték
+        target = state.user ? "#/fiokom" : "#/belepes";
+        state.flash = { view: state.user ? "fiokom" : "belepes", kind: "err", text: q.has("megerositve")
+          ? "Az e-mail-címed meg van erősítve. Most már be tudsz lépni."
+          : "Ezt a linket nem tudtuk feldolgozni. Ha a regisztrációdat erősítetted meg, az rendben van, be tudsz lépni. Ha új jelszót kértél, kérj újat az „Elfelejtett jelszó” gombbal, és a levelet ugyanabban a böngészőben nyisd meg." };
+        if (q.has("megerositve")) state.flash.kind = "ok";
+      }
       else if (q.has("uj-jelszo")) target = "#/uj-jelszo";
       else if (q.has("email-csere")){
         // a Supabase a régi és az új címre is küldhet linket; a csere a második után lép életbe

@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Üres Kézzel – fesztiválcsomagok bérlése</title>
 <meta name="description" content="Bérelj komplett fesztiválcsomagot sátorral, matraccal, székkel, lámpával és powerbankkal. A bejárat előtt átveszed, az utolsó napon ugyanott leadod.">
+<script src="config.js"></script>
+<script>
+  // A régi GitHub Pages címről átirányítunk a végleges címre, hogy csak egy cím legyen használatban
+  // (a belépési és jelszó-visszaállító linkek csak ugyanazon a címen működnek, ahol kérték őket).
+  if (/\.github\.io$/.test(location.hostname) && window.UK_CONFIG && UK_CONFIG.SITE_URL)
+    location.replace(UK_CONFIG.SITE_URL + location.search + location.hash);
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -825,7 +832,6 @@ footer a:hover{color:var(--paper)}
   </div>
 </footer>
 
-<script src="config.js"></script>
 <script src="data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
