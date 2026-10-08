@@ -64,6 +64,24 @@ main,header,footer{position:relative;z-index:2}
 .btn-ghost{border-color:rgba(244,241,234,.4);color:var(--paper)}
 .btn-ghost:hover{border-color:var(--paper);background:rgba(244,241,234,.06)}
 .nav .btn{min-height:44px;padding:.55rem 1.2rem;font-size:.95rem}
+/* menü: ha nem fér ki egy sorban, lenyitható lesz (a JS teszi rá a .compact osztályt) */
+.logo,.nav ul,.nav .btn{flex-shrink:0;white-space:nowrap}
+.nav-inner{gap:clamp(1rem,2vw,2rem)}
+.burger{display:none;appearance:none;width:44px;height:44px;flex:none;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--paper);cursor:pointer;place-items:center}
+.burger svg{width:22px;height:22px}
+.burger .x{display:none}
+.nav.compact .burger{display:grid}
+.nav.compact .nav-inner > .btn{margin-left:auto}
+.nav.compact ul{display:none}
+.nav.compact.open{background:var(--night);border-color:var(--line)}
+.nav.compact.open ul{display:flex;flex-direction:column;gap:0;position:absolute;left:0;right:0;top:100%;margin:0;padding:.4rem clamp(1.25rem,4vw,3rem) 1rem;background:var(--night);box-shadow:0 20px 40px -10px rgba(0,0,0,.6);border-bottom:1px solid var(--line);max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px);overflow-y:auto}
+.nav.compact.open ul li{border-bottom:1px solid var(--line)}
+.nav.compact.open ul li:last-child{border-bottom:0}
+.nav.compact.open ul a,.nav.compact.open ul .navbtn{display:block;width:100%;text-align:left;padding:.95rem 0;font-size:1.1rem;color:var(--paper)}
+.nav.compact.open ul a[aria-current="page"]{box-shadow:none;color:var(--lantern)}
+.nav.compact.open .burger .x{display:block}
+.nav.compact.open .burger .bars{display:none}
+@media (max-width: 380px){ .nav .btn{padding:.5rem .9rem} .logo{font-size:1.15rem} }
 
 /* közös */
 .wrap{max-width:1280px;margin:0 auto;padding:0 clamp(1.25rem,4vw,3rem)}
@@ -253,12 +271,7 @@ section.subpage{padding-top:clamp(8rem,16vh,10rem)}
 
 @media (max-width: 900px){
   .nav{background:rgba(15,22,51,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
-  .nav-inner{flex-wrap:wrap;row-gap:.35rem;padding-top:.7rem;padding-bottom:.45rem}
-  .nav .btn{margin-left:auto}
-  .nav ul{order:3;width:100%;margin:0;gap:1.1rem;overflow-x:auto;scrollbar-width:none}
-  .nav ul::-webkit-scrollbar{display:none}
-  .nav ul a{white-space:nowrap;font-size:.92rem}
-  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 125px)}
+  .nav-inner{padding-top:.7rem;padding-bottom:.7rem}
   .plans{grid-template-columns:1fr}
   .plan.featured{transform:none}.plan.featured:hover{transform:translateY(-6px)}
   .nope-list{grid-template-columns:1fr}
@@ -437,7 +450,7 @@ footer a:hover{color:var(--paper)}
       <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 4 L29 27 H3 Z" fill="#F2C230"/><path d="M16 14 L21 27 H11 Z" fill="#0f1633"/></svg>
       Üres Kézzel
     </a>
-    <ul>
+    <ul id="nav-menu">
       <li><a href="#/hogyan">Hogyan működik</a></li>
       <li><a href="#/csomagok">Csomagok</a></li>
       <li><a href="#/fesztivalok">Fesztiválok</a></li>
@@ -449,6 +462,10 @@ footer a:hover{color:var(--paper)}
       <li data-auth="in" hidden><button type="button" class="navbtn" id="logout">Kijelentkezés</button></li>
     </ul>
     <a class="btn btn-primary" href="#/arak">Foglalás</a>
+    <button type="button" class="burger" id="burger" aria-expanded="false" aria-controls="nav-menu" aria-label="Menü">
+      <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
   </div>
 </header>
 
@@ -1059,6 +1076,29 @@ footer a:hover{color:var(--paper)}
     nav.classList.toggle("scrolled", sy > 40);
   }
   addEventListener("scroll", chrome, {passive:true});
+
+  // Menü: ha a sor nem fér ki (keskeny képernyő vagy belépve sok menüpont), lenyitható menü lesz belőle.
+  var navInner = nav.querySelector(".nav-inner"), navUl = nav.querySelector("ul"), burger = document.getElementById("burger");
+  function setMenu(open){
+    nav.classList.toggle("open", open);
+    burger.setAttribute("aria-expanded", String(open));
+  }
+  function fitNav(){
+    var open = nav.classList.contains("open");
+    nav.classList.remove("compact", "open");
+    if (navInner.scrollWidth > navInner.clientWidth + 1) nav.classList.add("compact");
+    if (open && nav.classList.contains("compact")) nav.classList.add("open");
+    else burger.setAttribute("aria-expanded", "false");
+  }
+  burger.addEventListener("click", function(){ setMenu(!nav.classList.contains("open")); });
+  navUl.addEventListener("click", function(e){ if (e.target.closest("a,button")) setMenu(false); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && nav.classList.contains("open")){ setMenu(false); burger.focus(); } });
+  document.addEventListener("click", function(e){ if (nav.classList.contains("open") && !nav.contains(e.target)) setMenu(false); });
+  addEventListener("resize", fitNav);
+  // belépéskor/kilépéskor megjelenő menüpontok után újramérünk
+  new MutationObserver(fitNav).observe(navUl, {attributes:true, subtree:true, attributeFilter:["hidden"]});
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNav);
+  fitNav();
 
   /* ---------- oldalak (hash alapú útválasztás) ---------- */
   var ROUTES = {
