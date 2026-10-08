@@ -43,6 +43,7 @@ Az adataidhoz csak a projektcsapat tagjai férnek hozzá. Nem adjuk el őket, é
 | --- | --- | --- |
 | Supabase Inc. | Fiókkezelés (belépés), adatbázis a foglalásokhoz | Az Európai Unióban, Írországban (AWS eu-west-1) |
 | Vercel Inc. | A weboldal kiszolgálása (tárhely). Személyes adatot csak a technikai naplókban (IP-cím, időpont, böngésző) kezel. | Világszerte, az Egyesült Államokat is beleértve |
+| MailerLite (UAB „MailerLite”, Litvánia) | A hírlevél küldése, csak a feliratkozóknak (név, e-mail-cím) | Az Európai Unióban |
 | Google (Gmail) | A rendszerüzenetek (regisztráció megerősítése, új jelszó) és a csapat leveleinek küldése | Az Európai Unióban és az Egyesült Államokban |
 
 Ha egy szolgáltató az Európai Unión kívüli (például amerikai) cég, az adattovábbítás az Európai Bizottság által elfogadott általános szerződési feltételek vagy az EU–USA adatvédelmi keretrendszer alapján történik.

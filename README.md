@@ -29,6 +29,8 @@ Sima HTML/CSS/JS, nincs build lépés. Háttér: Supabase (Auth + Postgres + Row
   - **Csomagok, Fesztiválok, Beállítások:** szerkesztés (leárazás %-ban, kaució első bérlésnél / rendes, lemondási feltételek)
   - **Napló:** minden admin-módosítás (ki, mikor, mit); nem szerkeszthető, nem törölhető
 
+**Hírlevél (MailerLite):** a feliratkozók a `mailerlite-sync` Supabase-szerverfunkcióval kerülnek át a MailerLite „Üres Kézzel hírlevél” csoportjába: belépéskor és a Fiókom oldali ki-/bekapcsoláskor magától, az admin oldalon pedig a „MailerLite szinkronizálás” gombbal mindenki. A MailerLite API-kulcs a Supabase titkos tárolójában van (`MAILERLITE_API_KEY`), a repóba nem kerül. Körlevelet a MailerLite felületén lehet írni és küldeni.
+
 **Kaució-szabály:** első bérlésnél és probléma után emelt kaució, ha a legutóbbi bérlés rendben zárult, rendes kaució. Két problémás visszahozás után a vásárlónak minden csomag „elfogyott”. Ezt az adatbázis számolja (`my_status`, `booking_before_insert`), nem lehet kijátszani.
 - `#/adatkezeles`: adatkezelési tájékoztató
 
