@@ -568,9 +568,11 @@
     say($("#admin-msg"), "");
     loadContent().then(function(){ setAdminTab(adminTab); });
     $("#admin-count").textContent = "Betöltés…";
+    await sb.rpc("purge_trash"); // tartalék: a 30 napnál régebbi kukás foglalások törlése (naponta a pg_cron is lefut)
     var r = await sb.from("bookings").select("*").order("created_at", { ascending: false });
     if (r.error){ $("#admin-count").textContent = ""; return say($("#admin-msg"), huErr(r.error)); }
     state.rows = r.data;
+    picked = {};
     var sel = $("#admin-filter"), keep = sel.value;
     sel.innerHTML = '<option value="">Minden fesztivál</option>' + festivalNames().map(function(n){
       return '<option value="' + esc(n) + '">' + esc(n) + "</option>";
@@ -578,25 +580,37 @@
     sel.value = keep;
     renderAdmin();
   }
+  // a kukában lévő foglalások nélkül
+  function liveRows(){ return state.rows.filter(function(b){ return !b.deleted_at; }); }
+  function trashRows(){ return state.rows.filter(function(b){ return b.deleted_at; }); }
   // A közös lista, plusz ami a foglalásokban szerepel, de már nincs a listában.
   function festivalNames(){
     var names = DATA.FESTIVALS.map(function(f){ return f.name; });
     state.rows.forEach(function(b){ if (names.indexOf(b.festival) < 0) names.push(b.festival); });
     return names;
   }
+  var adminView = "list", picked = {};
   function filteredRows(){
-    var f = $("#admin-filter").value;
-    return f ? state.rows.filter(function(b){ return b.festival === f; }) : state.rows;
+    var f = $("#admin-filter").value, st = $("#admin-status").value, q = $("#admin-search").value.trim().toLowerCase();
+    return (adminView === "trash" ? trashRows() : liveRows()).filter(function(b){
+      return (!f || b.festival === f) && (!st || b.status === st) && (!q || b.full_name.toLowerCase().indexOf(q) >= 0);
+    });
   }
+  var TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
+  var RESTORE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>';
+  function daysLeft(b){ return Math.max(0, 30 - Math.floor((Date.now() - new Date(b.deleted_at)) / 864e5)); }
   function renderAdmin(){
-    var rows = filteredRows();
-    var active = rows.filter(function(b){ return b.status !== "lemondott"; });
-    $("#admin-count").textContent = rows.length + " foglalás, ebből " + active.length + " aktív (" +
-      active.reduce(function(s, b){ return s + b.people; }, 0) + " fő)";
+    var f = $("#admin-filter").value;
+    var all = liveRows().filter(function(b){ return !f || b.festival === f; });
+    var active = all.filter(function(b){ return b.status !== "lemondott"; });
+    var income = active.reduce(function(s, b){ return s + (b.price || effPrice(PKG[b.package] || { price: 0 })); }, 0);
+    $("#admin-count").textContent = all.length + " foglalás, ebből " + active.length + " aktív (" +
+      active.reduce(function(s, b){ return s + b.people; }, 0) + " fő), " +
+      active.filter(function(b){ return b.status === "megerositett"; }).length + " megerősítve · várható bevétel: " + fmtFt(income);
 
-    // összesítő: fesztivál × csomag, lemondott nélkül
+    // összesítő: fesztivál × csomag, lemondott és kukás nélkül
     var keys = Object.keys(PKG);
-    var fests = $("#admin-filter").value ? [$("#admin-filter").value] : festivalNames();
+    var fests = f ? [f] : festivalNames();
     var tot = {}; keys.forEach(function(k){ tot[k] = 0; });
     var body = fests.map(function(fn){
       var sum = 0;
@@ -612,17 +626,111 @@
       "<thead><tr><th>Fesztivál</th>" + keys.map(function(k){ return "<th>" + esc(PKG[k].name) + "</th>"; }).join("") + "<th>Összesen</th></tr></thead>" +
       "<tbody>" + body + '<tr class="total"><td>Összesen</td>' + keys.map(function(k){ return "<td>" + tot[k] + "</td>"; }).join("") + "<td>" + grand + "</td></tr></tbody>";
 
+    var trash = adminView === "trash", tn = trashRows().length;
+    $("#trash-count").textContent = tn ? "(" + tn + ")" : "";
+    $("#trash-empty").hidden = !trash || !tn;
+    $("#trash-hint").hidden = !trash;
+    $("#admin-datecol").textContent = trash ? "Kukába került" : "Leadva";
+    $$("[data-aview]").forEach(function(x){ x.setAttribute("aria-pressed", String(x.getAttribute("data-aview") === adminView)); });
+
+    var rows = filteredRows();
     $("#admin-table tbody").innerHTML = rows.length ? rows.map(function(b){
       var opts = Object.keys(STATUS).map(function(s){
         return '<option value="' + s + '"' + (s === b.status ? " selected" : "") + ">" + STATUS[s] + "</option>";
       }).join("");
-      return "<tr><td>" + esc(fmtDate(b.created_at)) + "</td><td>" + esc(b.full_name) + "</td><td>" + esc(b.festival) + "</td><td>" +
-        esc((PKG[b.package] || {}).name || b.package) + '</td><td><select data-status="' + esc(b.id) + '" aria-label="Állapot">' + opts + "</select></td></tr>";
-    }).join("") : '<tr><td colspan="5" class="muted">Nincs foglalás.</td></tr>';
+      var on = !!picked[b.id];
+      return '<tr data-id="' + esc(b.id) + '"' + (on ? ' class="picked"' : "") + '><td class="sel"><input type="checkbox" data-pick' + (on ? " checked" : "") + ' aria-label="Kijelölés: ' + esc(b.full_name) + '"></td><td>' +
+        (trash ? esc(fmtDate(b.deleted_at)) + '<br><small class="muted">még ' + daysLeft(b) + " nap</small>" : esc(fmtDate(b.created_at))) +
+        "</td><td>" + esc(b.full_name) + "</td><td>" + esc(b.festival) + "</td><td>" + esc((PKG[b.package] || {}).name || b.package) + "</td><td>" +
+        (b.price ? fmtFt(b.price) : '<span class="muted">–</span>') + "</td><td>" +
+        (trash ? esc(STATUS[b.status] || b.status) : '<select data-status="' + esc(b.id) + '" aria-label="Állapot">' + opts + "</select>") + "</td><td>" +
+        (trash ? '<button type="button" class="icon-btn restore" data-row="restore" title="Visszaállítás" aria-label="Visszaállítás">' + RESTORE_SVG + "</button>" : "") +
+        '<button type="button" class="icon-btn" data-row="' + (trash ? "purge" : "trash") + '" title="' + (trash ? "Végleges törlés" : "Kukába") + '" aria-label="' + (trash ? "Végleges törlés" : "Kukába") + '">' + TRASH_SVG + "</button></td></tr>";
+    }).join("") : '<tr><td colspan="8" class="muted">' + (trash ? "A kuka üres." : "Nincs ilyen foglalás.") + "</td></tr>";
+    renderBulk();
   }
-  $("#admin-filter").addEventListener("change", renderAdmin);
+  function pickedIds(){ return filteredRows().filter(function(b){ return picked[b.id]; }).map(function(b){ return b.id; }); }
+  function renderBulk(){
+    var rows = filteredRows(), ids = pickedIds(), all = $("#admin-selall");
+    all.checked = rows.length > 0 && ids.length === rows.length;
+    all.indeterminate = ids.length > 0 && ids.length < rows.length;
+    $("#admin-bulk").hidden = !ids.length;
+    $("#bulk-count").textContent = ids.length + " kijelölve";
+    $("[data-bulk-list]").hidden = adminView === "trash";
+    $("[data-bulk-trash]").hidden = adminView !== "trash";
+  }
+    $("#admin-filter").addEventListener("change", renderAdmin);
+  $("#admin-status").addEventListener("change", renderAdmin);
+  $("#admin-search").addEventListener("input", renderAdmin);
   $("#admin-reload").addEventListener("click", showAdmin);
+  $$("[data-aview]").forEach(function(b){
+    b.addEventListener("click", function(){ adminView = b.getAttribute("data-aview"); picked = {}; say($("#admin-msg"), ""); renderAdmin(); });
+  });
+  $("#admin-selall").addEventListener("change", function(e){
+    var on = e.target.checked;
+    filteredRows().forEach(function(b){ if (on) picked[b.id] = true; else delete picked[b.id]; });
+    renderAdmin();
+  });
+  // Több foglalás egyszerre: állapot, kukába, visszaállítás, végleges törlés.
+  async function bookingsAction(ids, act){
+    var q = sb.from("bookings"), r;
+    if (act === "purge") r = await q.delete().in("id", ids).select("id");
+    else r = await q.update(act === "trash" ? { deleted_at: new Date().toISOString() } : act === "restore" ? { deleted_at: null } : { status: act }).in("id", ids).select();
+    if (r.error || !r.data.length){ say($("#admin-msg"), r.error ? huErr(r.error) : "Nem sikerült menteni (nincs jogosultság?)."); return 0; }
+    if (act === "purge"){
+      var gone = r.data.map(function(x){ return x.id; });
+      state.rows = state.rows.filter(function(b){ return gone.indexOf(b.id) < 0; });
+    } else r.data.forEach(function(x){ Object.assign(state.rows.find(function(b){ return b.id === x.id; }) || {}, x); });
+    r.data.forEach(function(x){ delete picked[x.id]; });
+    return r.data.length;
+  }
+  var ACT_DONE = { megerositett: "megerősítve", elofoglalas: "visszaállítva előfoglalásra", lemondott: "lemondva", trash: "a kukába került", restore: "visszaállítva", purge: "véglegesen törölve" };
+  function confirmText(act, n, name){
+    var what = name ? "ezt a foglalást (" + name + ")" : n + " foglalást";
+    if (act === "trash") return "Biztosan a kukába teszed " + what + "? 30 napig visszaállítható.";
+    if (act === "purge") return "Biztosan véglegesen törlöd " + what + "? Ez nem vonható vissza.";
+    if (act === "lemondott") return "Biztosan lemondottra állítod " + what + "?";
+    return null;
+  }
+  async function runAction(ids, act, btn, name){
+    if (!ids.length) return;
+    var c = confirmText(act, ids.length, name);
+    if (c && !confirm(c)) return;
+    await busy(btn, async function(){
+      var n = await bookingsAction(ids, act);
+      renderAdmin();
+      if (n) say($("#admin-msg"), (n === 1 ? "1 foglalás " : n + " foglalás ") + ACT_DONE[act] + ".", "ok");
+    });
+  }
+  $("#admin-bulk").addEventListener("click", function(e){
+    var b = e.target.closest("[data-bulk]");
+    if (!b) return;
+    var act = b.getAttribute("data-bulk");
+    if (act === "none"){ picked = {}; return renderAdmin(); }
+    runAction(pickedIds(), act, b);
+  });
+  $("#trash-empty").addEventListener("click", function(){
+    var ids = trashRows().map(function(b){ return b.id; });
+    if (!ids.length || !confirm("Biztosan kiüríted a kukát? " + ids.length + " foglalás véglegesen törlődik.")) return;
+    busy($("#trash-empty"), async function(){
+      var n = await bookingsAction(ids, "purge");
+      renderAdmin();
+      if (n) say($("#admin-msg"), "A kuka ki van ürítve (" + n + " foglalás).", "ok");
+    });
+  });
+  $("#admin-table").addEventListener("click", function(e){
+    var btn = e.target.closest("[data-row]");
+    if (!btn) return;
+    var id = btn.closest("[data-id]").getAttribute("data-id"), b = state.rows.find(function(x){ return x.id === id; });
+    runAction([id], btn.getAttribute("data-row"), btn, b && b.full_name);
+  });
   $("#admin-table").addEventListener("change", async function(e){
+    if (e.target.matches("[data-pick]")){
+      var id0 = e.target.closest("[data-id]").getAttribute("data-id");
+      if (e.target.checked) picked[id0] = true; else delete picked[id0];
+      e.target.closest("tr").classList.toggle("picked", e.target.checked);
+      return renderBulk();
+    }
     var sel = e.target.closest("[data-status]");
     if (!sel) return;
     var id = sel.getAttribute("data-status"), row = state.rows.find(function(b){ return b.id === id; });
@@ -847,7 +955,7 @@
 
   /* ---------- Admin: Helyszín (átvétel és leadás a fesztiválon) ---------- */
   var ciFilter = "all", ciNotes = {}, ciOpen = {};
-  function problemsOf(uid){ return state.rows.filter(function(b){ return b.user_id === uid && b.return_problem; }).length; }
+  function problemsOf(uid){ return liveRows().filter(function(b){ return b.user_id === uid && b.return_problem; }).length; }
   async function renderCheckin(reload){
     var sel = $("#ci-festival"), keep = sel.value;
     var names = activeFestivals().map(function(f){ return f.name; });
@@ -869,7 +977,7 @@
   }
   function drawCheckin(){
     var fest = $("#ci-festival").value, q = $("#ci-search").value.trim().toLowerCase();
-    var rows = state.rows.filter(function(b){ return b.festival === fest && b.status !== "lemondott"; })
+    var rows = liveRows().filter(function(b){ return b.festival === fest && b.status !== "lemondott"; })
       .sort(function(a, b){ return a.full_name.localeCompare(b.full_name, "hu"); });
     var out = rows.filter(function(b){ return b.picked_up_at && !b.returned_at; }).length;
     var waiting = rows.filter(function(b){ return !b.picked_up_at && !b.returned_at; }).length;
@@ -961,7 +1069,7 @@
   var LOG_ACT = { insert: "létrehozta", update: "módosította", delete: "törölte" };
   var LOG_FIELD = { status: "állapot", picked_up_at: "átvette", returned_at: "leadta", return_problem: "probléma", problem_note: "probléma leírása",
     name: "név", price: "ár", people: "létszám", items: "tartalom", featured: "legnépszerűbb", active: "aktív", sort: "sorrend",
-    location: "helyszín", dates: "időpont", value: "érték", note: "megjegyzés", full_name: "név", festival: "fesztivál", package: "csomag", deposit: "kaució", discount: "leárazás (%)" };
+    location: "helyszín", dates: "időpont", value: "érték", note: "megjegyzés", full_name: "név", festival: "fesztivál", package: "csomag", deposit: "kaució", discount: "leárazás (%)", deleted_at: "kukában" };
   function logLabel(x){
     var d = x.new_data || x.old_data || {};
     if (x.tbl === "bookings") return (d.full_name || "") + " · " + (d.festival || "");
