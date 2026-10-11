@@ -106,7 +106,7 @@ ${rows.map(([k, v]) => `            <tr><td style="padding:9px 12px 9px 0;border
           </table>
           <p style="${P}border-left:3px solid #F2C230;padding-left:12px;"><b style="color:#F4F1EA;">Fizetés a helyszínen</b>, a csomag átvételekor. Most nem kell fizetned semmit.</p>
           <p style="${P}">Átvétel a kemping bejárata előtt, leadás az utolsó napon ugyanott.</p>
-          <p style="${P}">Kérdésed van? Hívj minket: <b style="color:#F4F1EA;">${esc(TEAM_PHONE)}</b><br>vagy írj: <a href="mailto:${esc(TEAM_EMAIL)}" style="color:#F2C230;">${esc(TEAM_EMAIL)}</a></p>
+          <p style="${P}">Kérdésed van? Hívj minket: <a href="tel:${esc(TEAM_PHONE.replace(/[^\d+]/g, ""))}" style="color:#F2C230;font-weight:bold;">${esc(TEAM_PHONE)}</a><br>vagy írj: <a href="mailto:${esc(TEAM_EMAIL)}" style="color:#F2C230;">${esc(TEAM_EMAIL)}</a></p>
         </td></tr>
         <tr><td style="padding:8px 32px 32px;">
           <a href="${SITE_URL}/#/foglalasaim" style="display:inline-block;background:#F2C230;color:#141A2E;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 28px;border-radius:999px;">Foglalásaim</a>
