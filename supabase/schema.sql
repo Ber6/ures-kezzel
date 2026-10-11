@@ -141,3 +141,22 @@ grant execute on function public.purge_trash() to authenticated;
 -- napi automatikus ürítés (pg_cron, 3:17 UTC)
 create extension if not exists pg_cron;
 select cron.schedule('purge-booking-trash', '17 3 * * *', $$delete from public.bookings where deleted_at < now() - interval '30 days'$$);
+
+-- ===== 7. lépés: foglalási visszaigazoló e-mail (2026-10-11) =====
+-- Edge Function: supabase/functions/booking-confirmation (verify_jwt = false; a foglalást az azonosító alapján
+-- maga olvassa ki, és foglalásonként csak egyszer küld). Gmail SMTP, 465-ös port.
+-- Secretek: SMTP_PASS (Gmail alkalmazásjelszó, kötelező), TEAM_PHONE, opcionálisan SMTP_USER, TEAM_EMAIL.
+alter table public.bookings add column if not exists confirmation_sent_at timestamptz;
+create or replace function public.notify_booking_confirmation() returns trigger language plpgsql security definer set search_path = public, extensions as $f$
+begin
+  perform net.http_post(
+    url := 'https://qhcavmetzbmenogbcxfv.supabase.co/functions/v1/booking-confirmation',
+    body := jsonb_build_object('type', 'INSERT', 'table', 'bookings', 'record', jsonb_build_object('id', new.id)),
+    headers := jsonb_build_object('Content-Type', 'application/json'),
+    timeout_milliseconds := 10000);
+  return null;
+exception when others then
+  return null; -- a levélküldés hibája soha ne akadályozza a foglalást
+end $f$;
+create trigger booking_confirmation_email after insert on public.bookings for each row execute function public.notify_booking_confirmation();
+revoke execute on function public.notify_booking_confirmation() from public, anon, authenticated;
