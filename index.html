@@ -310,6 +310,7 @@ button.btn-ghost{background:transparent}
 .form .btn{justify-self:start}
 .field label,.field .lbl{display:block;font-weight:600;margin-bottom:.4rem}
 .field input,.field select{width:100%;min-height:48px;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px}
+.field input[type=date]{color-scheme:dark}
 .field input:focus,.field select:focus{outline:none;border-color:var(--lantern);box-shadow:0 0 0 3px rgba(242,194,48,.2)}
 .hint{color:var(--muted);font-size:.9rem;margin:.35rem 0 0}
 .check{display:flex;gap:.75rem;align-items:flex-start;font-size:.97rem;cursor:pointer}
@@ -722,7 +723,7 @@ footer a:hover{color:var(--paper)}
             <div id="bk-done" class="done" hidden>
               <h2 tabindex="-1">Megvan az előfoglalásod!</h2>
               <p class="sum" id="bk-summary"></p>
-              <p>Most nem kell fizetned. Hamarosan jelentkezünk e-mailben. A fesztivál előtt elküldjük az átvétel pontos helyét, idejét és a telefonszámunkat. Kérdésed van? Írj nekünk: <b class="team-contact"></b></p>
+              <p>Most nem kell fizetned. Hamarosan jelentkezünk e-mailben. A visszaigazolást e-mailben is elküldtük. A telefonszámunkat legkésőbb 3 nappal a fesztivál első napja előtt küldjük el e-mailben. Kérdésed van? Írj nekünk: <b class="team-contact"></b></p>
               <div class="btn-row">
                 <a class="btn btn-primary" href="#/foglalasaim">Foglalásaim</a>
                 <a class="btn btn-ghost" href="#/foglalas">Új foglalás</a>
@@ -744,7 +745,7 @@ footer a:hover{color:var(--paper)}
           <div data-body hidden>
             <div id="mine-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
             <ul class="bk-list" id="mine-list"></ul>
-            <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Írj nekünk: <b class="team-contact"></b>. Az átvétel részleteit és a telefonszámunkat a fesztivál előtt küldjük el e-mailben.</p>
+            <p class="muted" style="margin:1.5rem 0 0">Kérdésed van a foglalásoddal kapcsolatban? Írj nekünk: <b class="team-contact"></b>. A telefonszámunkat legkésőbb 3 nappal a fesztivál első napja előtt küldjük el e-mailben.</p>
             <div class="btn-row"><a class="btn btn-primary" href="#/foglalas">Új foglalás</a><a class="btn btn-ghost" href="#/fiokom">Fiókom</a></div>
           </div>
         </div>
@@ -904,7 +905,7 @@ footer a:hover{color:var(--paper)}
               </div>
 
               <div data-apanel="festivals" hidden>
-                <p class="muted">A kikapcsolt fesztivál nem látszik az oldalon, és nem lehet rá foglalni. A korábbi foglalásokon a fesztivál neve úgy marad, ahogy foglaláskor volt.</p>
+                <p class="muted">Az „Első nap” alapján a foglalók 3 nappal a fesztivál előtt automatikusan megkapják e-mailben a csapat telefonszámát. A kikapcsolt fesztivál nem látszik az oldalon, és nem lehet rá foglalni. A korábbi foglalásokon a fesztivál neve úgy marad, ahogy foglaláskor volt.</p>
                 <div id="fest-editors" class="editors"></div>
                 <details class="acct-sec">
                   <summary>Új fesztivál<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
@@ -912,7 +913,8 @@ footer a:hover{color:var(--paper)}
                     <div class="field"><label for="fest-new-name">Név</label><input id="fest-new-name" required maxlength="80"></div>
                     <div class="field-row">
                       <div class="field"><label for="fest-new-location">Helyszín</label><input id="fest-new-location" maxlength="80"></div>
-                      <div class="field"><label for="fest-new-dates">Időpont</label><input id="fest-new-dates" maxlength="60" placeholder="pl. 2027. jún. 2–5."></div>
+                      <div class="field"><label for="fest-new-start">Első nap</label><input id="fest-new-start" type="date"></div>
+                      <div class="field"><label for="fest-new-dates">Időpont (szövegesen)</label><input id="fest-new-dates" maxlength="60" placeholder="pl. 2027. jún. 2–5."></div>
                     </div>
                     <button class="btn btn-primary btn-sm" type="submit">Fesztivál hozzáadása</button>
                   </form>

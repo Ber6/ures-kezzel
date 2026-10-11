@@ -281,7 +281,8 @@
     var fests = activeFestivals();
     var list = $(".fest-list");
     if (list) list.innerHTML = fests.map(function(f){
-      var where = [f.location, f.dates].filter(Boolean).join(", ");
+      var when = f.dates || (f.start_date ? "kezdés: " + new Date(f.start_date + "T12:00:00").toLocaleDateString("hu-HU", { year: "numeric", month: "long", day: "numeric" }) : "");
+      var where = [f.location, when].filter(Boolean).join(", ");
       return "<li><div><b>" + esc(f.name) + '</b><span class="where">' + esc(where) + '</span></div><span class="chip">' + esc(f.status || "Tervezett") + "</span></li>";
     }).join("");
     var chips = $("#fest-chips");
@@ -761,11 +762,12 @@
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
   }
   $("#admin-csv").addEventListener("click", function(){
-    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Fő", "Ár", "Állapot", "Kaució", "Átvette", "Leadta", "Probléma", "Probléma leírása", "Azonosító"];
+    var head = ["Leadva", "Név", "Fesztivál", "Csomag", "Fő", "Ár", "Állapot", "Kaució", "Átvette", "Leadta", "Probléma", "Probléma leírása", "Visszaigazolás elküldve", "Telefonszám elküldve", "Azonosító"];
     downloadCsv("foglalasok-" + new Date().toISOString().slice(0, 10) + ".csv", [head].concat(filteredRows().map(function(b){
       return [fmtDate(b.created_at), b.full_name, b.festival, (PKG[b.package] || {}).name || b.package, b.people, b.price || "", STATUS[b.status] || b.status,
         b.deposit || "", b.picked_up_at ? fmtDate(b.picked_up_at) : "", b.returned_at ? fmtDate(b.returned_at) : "",
-        b.return_problem ? "igen" : "", b.problem_note || "", b.id];
+        b.return_problem ? "igen" : "", b.problem_note || "", b.confirmation_sent_at ? fmtDate(b.confirmation_sent_at) : "",
+        b.phone_sent_at ? fmtDate(b.phone_sent_at) : "", b.id];
     })));
   });
 
@@ -863,8 +865,10 @@
       return '<form class="editor' + (x.active === false ? " off" : "") + '" data-fest="' + esc(x.id) + '">' +
         '<div class="head"><b>' + esc(x.name) + "</b></div>" +
         inp("Név", "name", x.name, 'required maxlength="80"') +
-        '<div class="field-row">' + inp("Helyszín", "location", x.location || "", 'maxlength="80"') +
-        inp("Időpont", "dates", x.dates || "", 'maxlength="60"') + "</div>" +
+        inp("Helyszín", "location", x.location || "", 'maxlength="80"') +
+        '<div class="field-row">' + inp("Első nap", "start_date", x.start_date || "", 'type="date"') +
+        inp("Időpont (szövegesen)", "dates", x.dates || "", 'maxlength="60" placeholder="pl. 2027. jún. 2–5."') + "</div>" +
+        (x.start_date ? "" : '<p class="hint" style="margin:0">Add meg az első napot: 3 nappal előtte a foglalók e-mailben megkapják a telefonszámunkat.</p>') +
         '<div class="field-row">' + inp("Állapot", "status", x.status || "Tervezett", 'maxlength="30" list="fest-status"') +
         inp("Sorrend", "sort", x.sort || 0, 'type="number"') + "</div>" +
         '<div class="checks">' + checkbox("active", "Aktív", x.active !== false) + "</div>" +
@@ -876,6 +880,7 @@
     e.preventDefault();
     var f = e.target, id = f.getAttribute("data-fest");
     var row = { name: f.elements.name.value.trim(), location: f.elements.location.value.trim(), dates: f.elements.dates.value.trim(),
+      start_date: f.elements.start_date.value || null,
       status: f.elements.status.value.trim() || "Tervezett", sort: +f.elements.sort.value || 0, active: f.elements.active.checked };
     busy(f.querySelector("[type=submit]"), async function(){
       var r = await sb.from("festivals").update(row).eq("id", id).select();
@@ -898,7 +903,7 @@
     e.preventDefault();
     var f = e.target;
     var row = { name: $("#fest-new-name").value.trim(), location: $("#fest-new-location").value.trim(),
-      dates: $("#fest-new-dates").value.trim(), sort: DATA.FESTIVALS.length + 1 };
+      dates: $("#fest-new-dates").value.trim(), start_date: $("#fest-new-start").value || null, sort: DATA.FESTIVALS.length + 1 };
     busy(f.querySelector("[type=submit]"), async function(){
       var r = await sb.from("festivals").insert(row).select();
       if (r.error) return say($("#admin-msg"), saveErr(r.error));
@@ -1069,7 +1074,7 @@
   var LOG_ACT = { insert: "létrehozta", update: "módosította", delete: "törölte" };
   var LOG_FIELD = { status: "állapot", picked_up_at: "átvette", returned_at: "leadta", return_problem: "probléma", problem_note: "probléma leírása",
     name: "név", price: "ár", people: "létszám", items: "tartalom", featured: "legnépszerűbb", active: "aktív", sort: "sorrend",
-    location: "helyszín", dates: "időpont", value: "érték", note: "megjegyzés", full_name: "név", festival: "fesztivál", package: "csomag", deposit: "kaució", discount: "leárazás (%)", deleted_at: "kukában" };
+    location: "helyszín", dates: "időpont", value: "érték", note: "megjegyzés", full_name: "név", festival: "fesztivál", package: "csomag", deposit: "kaució", discount: "leárazás (%)", deleted_at: "kukában", start_date: "első nap", confirmation_sent_at: "visszaigazolás elküldve", phone_sent_at: "telefonszám elküldve" };
   function logLabel(x){
     var d = x.new_data || x.old_data || {};
     if (x.tbl === "bookings") return (d.full_name || "") + " · " + (d.festival || "");
