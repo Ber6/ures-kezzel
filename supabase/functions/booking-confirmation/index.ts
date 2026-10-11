@@ -86,22 +86,37 @@ Deno.serve(async (req) => {
     "Üres Kézzel csapat",
   ].join("\n");
 
-  const html = `<!doctype html><html lang="hu"><body style="margin:0;background:#0f1633;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#f4f1ea">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#1a2350;border-radius:20px;padding:28px">
-<tr><td>
-<p style="margin:0 0 6px;color:#F2C230;font-weight:bold;font-size:15px">▲ Üres Kézzel</p>
-<h1 style="margin:0 0 16px;font-size:26px;line-height:1.2;color:#f4f1ea">Megkaptuk az előfoglalásodat!</h1>
-<p style="margin:0 0 18px;font-size:16px;line-height:1.5">Szia ${esc(b.full_name)}! Köszönjük, hogy minket választottál. A foglalásod adatai:</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;margin:0 0 18px">
-${rows.map(([k, v]) => `<tr><td style="padding:8px 0;border-bottom:1px solid #2e3a72;color:#b7bdd6;width:42%">${esc(k)}</td><td style="padding:8px 0;border-bottom:1px solid #2e3a72;font-weight:bold;word-break:break-all">${esc(v)}</td></tr>`).join("")}
-</table>
-<p style="margin:0 0 10px;font-size:15px;line-height:1.5;border-left:3px solid #F2C230;padding-left:12px"><b>Fizetés a helyszínen</b>, a csomag átvételekor. Most nem kell fizetned semmit.</p>
-<p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#dfe2ef">Átvétel a kemping bejárata előtt, leadás az utolsó napon ugyanott.</p>
-<p style="margin:0 0 18px;font-size:15px;line-height:1.5">Kérdésed van? Hívj minket: <b>${esc(TEAM_PHONE)}</b><br>vagy írj: <a href="mailto:${esc(TEAM_EMAIL)}" style="color:#F2C230">${esc(TEAM_EMAIL)}</a></p>
-<p style="margin:0 0 6px"><a href="${SITE_URL}/#/foglalasaim" style="display:inline-block;background:#F2C230;color:#0f1633;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:999px">Foglalásaim</a></p>
-<p style="margin:22px 0 0;font-size:13px;color:#b7bdd6">Üres Kézzel csapat · <a href="https://www.instagram.com/ures.kezzel/" style="color:#b7bdd6">Instagram</a></p>
-</td></tr></table></td></tr></table></body></html>`;
+  // ugyanaz a kinézet, mint a supabase/email-templates/ leveleknél
+  const P = "margin:0 0 16px;font-size:16px;line-height:1.6;color:#dfe2ef;";
+  const html = `<!doctype html>
+<html lang="hu">
+<body style="margin:0;padding:0;background:#0f1633;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f1633;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#18214a;border-radius:20px;">
+        <tr><td style="padding:32px 32px 8px;">
+          <div style="font-size:22px;font-weight:bold;color:#F4F1EA;">&#9650; Üres Kézzel</div>
+        </td></tr>
+        <tr><td style="padding:8px 32px 0;">
+          <h1 style="margin:0 0 16px;font-size:26px;line-height:1.2;color:#F4F1EA;">Megkaptuk az előfoglalásodat!</h1>
+          <p style="${P}">Szia, ${esc(b.full_name)}!</p>
+          <p style="${P}">Köszönjük, hogy minket választottál. A foglalásod adatai:</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;font-size:15px;">
+${rows.map(([k, v]) => `            <tr><td style="padding:9px 12px 9px 0;border-bottom:1px solid #2b3670;color:#b7bdd6;width:42%;">${esc(k)}</td><td style="padding:9px 0;border-bottom:1px solid #2b3670;color:#F4F1EA;font-weight:bold;word-break:break-all;">${esc(v)}</td></tr>`).join("\n")}
+          </table>
+          <p style="${P}border-left:3px solid #F2C230;padding-left:12px;"><b style="color:#F4F1EA;">Fizetés a helyszínen</b>, a csomag átvételekor. Most nem kell fizetned semmit.</p>
+          <p style="${P}">Átvétel a kemping bejárata előtt, leadás az utolsó napon ugyanott.</p>
+          <p style="${P}">Kérdésed van? Hívj minket: <b style="color:#F4F1EA;">${esc(TEAM_PHONE)}</b><br>vagy írj: <a href="mailto:${esc(TEAM_EMAIL)}" style="color:#F2C230;">${esc(TEAM_EMAIL)}</a></p>
+        </td></tr>
+        <tr><td style="padding:8px 32px 32px;">
+          <a href="${SITE_URL}/#/foglalasaim" style="display:inline-block;background:#F2C230;color:#141A2E;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 28px;border-radius:999px;">Foglalásaim</a>
+        </td></tr>
+      </table>
+      <p style="margin:16px 0 0;font-size:12px;color:#b7bdd6;">Üres Kézzel, egyetemi projekt a PTE KTK-n · Instagram: <a href="https://www.instagram.com/ures.kezzel/" style="color:#F2C230;">@ures.kezzel</a></p>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
   try {
     const transport = nodemailer.createTransport({
