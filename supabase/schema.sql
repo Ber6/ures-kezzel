@@ -160,3 +160,22 @@ exception when others then
 end $f$;
 create trigger booking_confirmation_email after insert on public.bookings for each row execute function public.notify_booking_confirmation();
 revoke execute on function public.notify_booking_confirmation() from public, anon, authenticated;
+
+-- ===== 8. lépés: telefonszám a fesztivál előtt (2026-10-11) =====
+-- A visszaigazoló levélben nincs telefonszám. Legkésőbb 3 nappal a fesztivál első napja előtt
+-- a foglalók külön levélben kapják meg (booking-confirmation függvény, kind = 'phone').
+alter table public.festivals add column if not exists start_date date;      -- admin → Fesztiválok → Első nap
+alter table public.bookings add column if not exists phone_sent_at timestamptz;
+-- óránként: akinek a fesztiválja 3 napon belül kezdődik (vagy épp tart), és még nem kapta meg
+select cron.schedule('send-festival-phone', '7 * * * *', $c$
+select net.http_post(
+  url := 'https://qhcavmetzbmenogbcxfv.supabase.co/functions/v1/booking-confirmation',
+  body := jsonb_build_object('id', b.id, 'kind', 'phone'),
+  headers := '{"Content-Type":"application/json"}'::jsonb,
+  timeout_milliseconds := 15000)
+from public.bookings b join public.festivals f on f.name = b.festival
+where b.phone_sent_at is null and b.deleted_at is null and b.status <> 'lemondott'
+  and f.start_date is not null
+  and (now() at time zone 'Europe/Budapest')::date between f.start_date - 3 and f.start_date + 3
+limit 50
+$c$);

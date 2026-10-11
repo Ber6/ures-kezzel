@@ -28,7 +28,7 @@ Ezt a fájlt a claude.ai-os beszélgetésből hoztuk át. Olvasd végig, mielőt
 
 - Regisztráció: név, e-mail, jelszó, plusz egy kötelező jelölőnégyzet: „Elolvastam az adatkezelési tájékoztatót, és elmúltam 18 éves.”
 - Foglalás: fesztivál (legördülő lista), csomag (Solo/Duo/Crew). A létszámot nem kérdezzük, a csomagból adódik (Solo 1, Duo 2, Crew 4).
-- **Telefonszámot NEM kérünk.** A visszaigazoló képernyőn és a „Foglalásaim” oldalon a csapat e-mail-címe jelenik meg (`config.js` → `TEAM_EMAIL`). A csapat telefonszámát csak a fesztivál előtt, e-mailben adjuk ki a foglalóknak.
+- **Telefonszámot NEM kérünk.** A visszaigazoló képernyőn és a „Foglalásaim” oldalon a csapat e-mail-címe jelenik meg (`config.js` → `TEAM_EMAIL`). A csapat telefonszámát csak a fesztivál előtt, legkésőbb 3 nappal az első nap előtt, automatikus e-mailben adjuk ki a foglalóknak.
 - Nincs fizetés, nincs analitika, nincs követő süti.
 
 ## Oldalak és funkciók
@@ -45,7 +45,8 @@ Ezt a fájlt a claude.ai-os beszélgetésből hoztuk át. Olvasd végig, mielőt
    - **Kaució több foglalásnál:** ha egy bérlés lezárul, a vásárló többi, még át nem vett foglalásán a kaució újraszámolódik (`recalc_open_deposits` trigger); amíg van lezáratlan korábbi foglalás, a vásárló a „még nem végleges” magyarázatot látja.
    - **MailerLite:** az adatbázis küldi (`pg_net`): `mailerlite_on_user_change` trigger az `auth.users`-en, `mailerlite_sync_all()` (admin gomb), `mailerlite_last_results()`; kulcs a Vaultban (`mailerlite_api_key`), csoport: „Üres Kézzel hírlevél”. Edge Functionből nem megy (a MailerLite Cloudflare-e blokkolja a Supabase Edge IP-ket). A MailerLite-ban leiratkozottat nem iratkoztatja vissza.
    - **Kuka:** a foglalás törlése a kukába teszi (`bookings.deleted_at`), onnan visszaállítható vagy véglegesen törölhető; 30 nap után magától törlődik (`pg_cron`: `purge-booking-trash`, plusz `purge_trash()` az admin oldal megnyitásakor). Soronként kuka ikon, jelölőnégyzetek, „mind kijelölése”, csoportos Megerősítés / Lemondva / Kukába. A kukás foglalás nem számít bele az összesítőbe, a Helyszín fülbe, a kaucióba és a letiltásba.
-   - **Visszaigazoló e-mail:** új foglaláskor a `booking_confirmation_email` trigger (pg_net) meghívja a `booking-confirmation` Edge Functiont, ami Gmail SMTP-n (465, npm:nodemailer) magyar levelet küld a bérlőnek (név, fesztivál, csomag, létszám, azonosító, fizetés a helyszínen, csapat telefonszáma). Secretek: `SMTP_PASS`, `TEAM_PHONE`. Foglalásonként egyszer küld (`bookings.confirmation_sent_at`).
+   - **Visszaigazoló e-mail:** új foglaláskor a `booking_confirmation_email` trigger (pg_net) meghívja a `booking-confirmation` Edge Functiont, ami Gmail SMTP-n (465, npm:nodemailer) magyar levelet küld a bérlőnek (név, fesztivál, csomag, létszám, azonosító, fizetés a helyszínen). **Telefonszám nincs benne**: kérdés esetén e-mail. Foglalásonként egyszer küld (`bookings.confirmation_sent_at`). Secret: `SMTP_PASS`.
+   - **Telefonszám a fesztivál előtt:** `festivals.start_date` (admin → Fesztiválok → Első nap). A `send-festival-phone` pg_cron feladat óránként meghívja ugyanezt a függvényt (`kind: "phone"`) azokra az aktív foglalásokra, amelyeknek a fesztiválja 3 napon belül kezdődik; a levélben a `TEAM_PHONE` secret szerepel. Foglalásonként egyszer (`bookings.phone_sent_at`). A foglalás a fesztivál nevével kapcsolódik, ezért átnevezés után a régi foglalások nem kapnak levelet.
    - **Hírlevél:** a regisztrációnál (alapból üres) jelölőnégyzet (`user_metadata.newsletter`), a Fiókom oldalon ki/be kapcsolható, az admin CSV-ben letöltheti (`newsletter_subscribers()`).
 5. A navigációban legyen „Belépés”, belépve pedig „Foglalásaim”, „Fiókom” és „Kijelentkezés”.
 
