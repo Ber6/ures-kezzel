@@ -447,6 +447,9 @@ footer a:hover{color:var(--paper)}
 .plan .price small{display:block;font-family:var(--body);font-size:1rem;font-weight:600;color:var(--muted);letter-spacing:0;margin-bottom:.35rem}
 .plan.featured .price small{color:#4a3d10}
 .plan .price.tbd{font-size:2rem}
+.plan .price.est{font-size:clamp(2rem,3.4vw,2.8rem)}
+.plan .price .nw{white-space:nowrap}
+.hero p.sub,.final p{text-shadow:0 1px 14px rgba(15,22,51,.95),0 0 3px rgba(15,22,51,.85)}
 .survey-promo{padding:clamp(3rem,8vh,6rem) 0}
 .promo-card{position:relative;max-width:860px;margin:0 auto;padding:clamp(1.75rem,5vw,3.5rem);border-radius:32px;border:1px solid rgba(242,194,48,.45);background:linear-gradient(135deg,rgba(242,194,48,.14),rgba(232,118,74,.10) 55%,rgba(16,23,52,.75));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
 .promo-card h2{font-size:clamp(2rem,4.5vw,3.4rem);max-width:18ch}
@@ -694,7 +697,11 @@ fieldset.sv-q > legend ~ *{clear:both}
       <div class="wrap faq-grid">
         <h1 class="ptitle reveal">Amit még kérdezni szoktak.</h1>
         <div class="panel">
-          <details open>
+          <details open data-soon hidden>
+            <summary>Mikor indultok?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+            <p>A foglalás még nem nyílt meg, most a csomagokat és a fesztiválokat véglegesítjük. Ha regisztrálsz, e-mailben szólunk, amikor lehet foglalni. Az árak addig is a „várható” árak.</p>
+          </details>
+          <details>
             <summary>Tiszta lesz a matrac és a sátor?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
             <p>Minden bérlés után kimossuk, kiszárítjuk és átnézzük a felszerelést. A hálózsákhoz saját bélést adunk.</p>
           </details>
@@ -708,7 +715,7 @@ fieldset.sv-q > legend ~ *{clear:both}
           </details>
           <details>
             <summary>Lemondhatom a foglalást?<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
-            <p data-setting="lemondasi_feltetelek">[LEMONDÁSI FELTÉTELEK]</p>
+            <p data-setting="lemondasi_feltetelek">A lemondási feltételeket a foglalás megnyitása előtt tesszük közzé.</p>
           </details>
         </div>
       </div>
@@ -757,8 +764,8 @@ fieldset.sv-q > legend ~ *{clear:both}
   <div class="view" data-view="belepes" hidden>
     <section class="app-sec subpage">
       <div class="wrap">
-        <h1 class="ptitle">Lépj be, és foglalj.</h1>
-        <p class="lede">Az előfoglalás ingyenes, most még nem kell fizetned.</p>
+        <h1 class="ptitle" id="login-title">Lépj be, és foglalj.</h1>
+        <p class="lede" id="login-lede">Az előfoglalás ingyenes, most még nem kell fizetned.</p>
         <div class="card">
           <div class="tabs" role="tablist" aria-label="Belépés vagy regisztráció">
             <button type="button" role="tab" data-tab="login" aria-selected="true">Belépés</button>
@@ -823,7 +830,7 @@ fieldset.sv-q > legend ~ *{clear:both}
   <div class="view" data-view="foglalas" hidden>
     <section class="app-sec subpage">
       <div class="wrap">
-        <h1 class="ptitle">Foglald le a csomagod.</h1>
+        <h1 class="ptitle" id="bk-title">Foglald le a csomagod.</h1>
         <p class="lede">Ez egy ingyenes előfoglalás. Mielőtt bármit fizetnél, felvesszük veled a kapcsolatot.</p>
         <div class="card">
           <p class="muted" data-loading>Betöltés…</p>

@@ -357,14 +357,14 @@
   function closedCta(cls){
     return surveyOpen()
       ? '<a class="btn' + cls + '" href="#/kerdoiv" data-track="cta_plan_survey">Kérdőív, −' + surveyPct() + '% kupon</a>'
-      : '<a class="btn' + cls + '" href="#/belepes?tab=signup" data-track="cta_plan_notify">Szólj, ha indul</a>';
+      : '<a class="btn' + cls + '" href="#/belepes?tab=signup" data-track="cta_plan_notify">Szólj, ha indulunk</a>';
   }
   function renderPublic(){
     var open = bookingOpen();
     var cards = activePkgKeys().map(function(k){
       var p = PKG[k];
       var price = open ? '<div class="price">' + priceHtml(p) + '</div><p class="per">egy teljes fesztiválra</p>'
-        : showPrices() ? '<div class="price"><small>várhatóan</small>' + fmtFt(effPrice(p)) + '-tól</div><p class="per">egy teljes fesztiválra, a jelenlegi tervek szerint</p>'
+        : showPrices() ? '<div class="price est"><small>várhatóan</small><span class="nw">' + effPrice(p).toLocaleString("hu-HU").replace(/\s/g, "\u00a0") + '</span> <span class="nw">Ft-tól</span></div><p class="per">egy teljes fesztiválra, a jelenlegi tervek szerint</p>'
         : '<div class="price tbd">Hamarosan</div><p class="per">az árakat az indulás előtt közöljük</p>';
       return '<article class="plan' + (p.featured ? " featured" : "") + '">' +
         (p.featured ? '<span class="tag">A legnépszerűbb</span>' : "") +
@@ -418,6 +418,11 @@
       $$("[data-survey-intro]").forEach(function(el){ el.textContent = S("survey_intro") || ""; });
       $$("[data-survey-badge]").forEach(function(el){ el.textContent = "−" + pct + "%"; });
     }
+    var lt = $("#login-title"), ll = $("#login-lede"), bt = $("#bk-title");
+    if (lt) lt.textContent = open ? "Lépj be, és foglalj." : "Lépj be, vagy regisztrálj.";
+    if (ll) ll.textContent = open ? "Az előfoglalás ingyenes, most még nem kell fizetned."
+      : "Regisztrálj, és e-mailben szólunk, amikor indul a foglalás." + (sv ? " A kérdőív kitöltéséért " + pct + "% kupont kapsz." : "");
+    if (bt) bt.textContent = open ? "Foglald le a csomagod." : "Hamarosan indulunk.";
     var bcs = $("#bk-closed-survey");
     if (bcs){ bcs.hidden = !sv; bcs.textContent = "Kérdőív, " + pct + "% kedvezményért"; }
   }
@@ -426,6 +431,9 @@
   function applySettings(){
     $$("[data-setting]").forEach(function(el){
       var k = el.getAttribute("data-setting"), v = DATA.SETTINGS[k];
+      // ki nem töltött helyőrző ([...]) ne jelenjen meg a látogatóknak
+      if (k === "lemondasi_feltetelek" && (!v || /^\s*\[.*\]\s*$/.test(v)))
+        v = "A lemondási feltételeket a foglalás megnyitása előtt tesszük közzé. Most még nem lehet foglalni, így lemondani sem kell semmit.";
       if (v == null || v === "") return;
       el.textContent = /^kaucio/.test(k) ? fmtFt(settingFt(k)) : v;
     });
