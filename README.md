@@ -63,3 +63,32 @@ Pár perc múlva elérhető: `https://ber6.github.io/ures-kezzel/`
 
 Helyi kipróbálás: `python3 -m http.server` a repó mappájában, majd `http://localhost:8000`
 (a `file://` megnyitás nem jó, mert az adatkezelési tájékoztatót így nem lehet betölteni).
+
+## Hamarosan-mód, kérdőív, kupon, mérés (2026. november)
+
+Minden az **admin oldalon** kapcsolható, kód nélkül:
+
+- **Beállítások → A weboldal állapota**
+  - *Foglalás nyitva*: amíg ki van kapcsolva, az oldalon „Hamarosan indulunk” látszik, és **az adatbázis minden foglalást elutasít** (`booking_closed`), akkor is, ha valaki a gomb nélkül, közvetlenül próbálkozik. Adminok tesztelhetnek.
+  - *Várható árak mutatása*: „várhatóan X Ft-tól”, vagy ár nélkül „Hamarosan”.
+- **Kérdőív fül**: indítás/leállítás, előnézet, cím, bevezető, kedvezmény %, kérdések szerkesztése (rövid/hosszú szöveg, egy vagy több választás „Egyéb” saját válasszal, csúszka 1–5 / 1–7 / 1–10), sorrend, ki/bekapcsolás.
+- **Kuponok fül**: ki kapott kódot, elment-e az e-mail, beváltották-e, újraküldés, CSV.
+
+Hogyan működik:
+- A kérdőív kitöltéséhez belépés és megerősített e-mail kell. Fiókonként egy kitöltés, egy kupon (`UK-XXXXXXXX`).
+- Az ellenőrzés a szerveren történik: `submit_survey()` (kötelező kérdések, érvényes válaszok, rejtett mező, minimum kitöltési idő).
+- A kupont a `booking-confirmation` Edge Function küldi e-mailben (`kind: "coupon"`), és a Fiókom oldalon is látszik.
+- Beváltás: a foglalási űrlap „Kuponkód” mezője; az árat az adatbázis számolja, lemondáskor a kupon újra felhasználható.
+- Látogatómérés süti nélkül (`track()` → `page_events`), 13 hónap után törlődik. DNT/GPC esetén nem mér, adminokat nem mér.
+- **Google Sheet** (Drive → Üres kézzel → Kérdőívek → „Üres Kézzel – weboldal kérdőív és látogatók (élő adat)”): `IMPORTDATA` képletek a `sheet-export` Edge Functionből. A token a Supabase Vaultban van (`sheet_token`). A válaszok lap álnevesített (nincs név, e-mail).
+- Az SQL: `supabase/kerdoiv.sql`.
+
+Kampánylinkek: `https://ures-kezzel.vercel.app/?utm_source=instagram` (a `?` a `#` elé kerüljön), így a Sheet „Források” lapján külön látszik.
+
+### Botvédelem (Cloudflare Turnstile), opcionális
+
+1. Cloudflare-fiók → Turnstile → új widget, domain: `ures-kezzel.vercel.app` → kapsz egy *Site Key*-t és egy *Secret Key*-t.
+2. Supabase → Authentication → Attack Protection → CAPTCHA → Turnstile, ide a **Secret Key**.
+3. `config.js` → `TURNSTILE_SITE_KEY`: ide a **Site Key**. A regisztrációnál, belépésnél és jelszókérésnél megjelenik az ellenőrzés.
+
+A 2. és 3. lépést egyszerre csináld, különben a belépés nem működik.

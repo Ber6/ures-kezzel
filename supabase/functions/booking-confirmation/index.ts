@@ -2,6 +2,7 @@
 //   { id }                 – visszaigazolás új foglaláskor (booking_confirmation_email trigger, pg_net)
 //   { id, kind: "phone" }  – telefonszám legkésőbb 3 nappal a fesztivál első napja előtt
 //                            (pg_cron: send-festival-phone, óránként)
+//   { id, kind: "coupon" } – kuponkód a kérdőív kitöltése után (coupon_email trigger; id = coupons.id)
 // A kérésben csak a foglalás azonosítója számít: a foglalást és a bérlő e-mail-címét a függvény
 // maga olvassa ki, és foglalásonként mindkét levelet csak egyszer küldi (confirmation_sent_at,
 // phone_sent_at), így kívülről nem lehet vele tetszőleges címre levelet küldeni.
@@ -37,7 +38,7 @@ function ft(n: number | null) {
 const P = "margin:0 0 16px;font-size:16px;line-height:1.6;color:#dfe2ef;";
 const A = "color:#F2C230;";
 // ugyanaz a kinézet, mint a supabase/email-templates/ leveleknél
-function layout(title: string, intro: string[], rows: [string, string][], after: string[]) {
+function layout(title: string, intro: string[], rows: [string, string][], after: string[], btn: [string, string] = ["Foglalásaim", "/#/foglalasaim"]) {
   return `<!doctype html>
 <html lang="hu">
 <body style="margin:0;padding:0;background:#0f1633;font-family:Arial,Helvetica,sans-serif;">
@@ -56,7 +57,7 @@ ${rows.map(([k, v]) => `            <tr><td style="padding:9px 12px 9px 0;border
 ${after.map((x) => `          <p style="${P}">${x}</p>`).join("\n")}
         </td></tr>
         <tr><td style="padding:8px 32px 32px;">
-          <a href="${SITE_URL}/#/foglalasaim" style="display:inline-block;background:#F2C230;color:#141A2E;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 28px;border-radius:999px;">Foglalásaim</a>
+          <a href="${SITE_URL}${btn[1]}" style="display:inline-block;background:#F2C230;color:#141A2E;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 28px;border-radius:999px;">${esc(btn[0])}</a>
         </td></tr>
       </table>
       <p style="margin:16px 0 0;font-size:12px;color:#b7bdd6;">Üres Kézzel, egyetemi projekt a PTE KTK-n · Instagram: <a href="https://www.instagram.com/ures.kezzel/" style="${A}">@ures.kezzel</a></p>
@@ -84,9 +85,11 @@ Deno.serve(async (req) => {
     const body = await req.json();
     id = body?.record?.id ?? body?.id; // Database Webhook formátum vagy sima { id }
     if (body?.kind === "phone") kind = "phone";
+    if (body?.kind === "coupon") kind = "coupon";
   } catch { /* üres vagy hibás törzs */ }
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return json({ error: "missing_id" }, 400);
   if (!SMTP_PASS) return json({ error: "missing_smtp_pass" }, 500);
+  if (kind === "coupon") return sendCoupon(id);
   const col = kind === "phone" ? "phone_sent_at" : "confirmation_sent_at";
 
   const { data: b, error } = await sb.from("bookings").select("*").eq("id", id).maybeSingle();
@@ -126,7 +129,7 @@ Deno.serve(async (req) => {
     title = "Megkaptuk az előfoglalásodat!";
     intro = [esc(greet), "Köszönjük, hogy minket választottál. A foglalásod adatai:"];
     rows = [["Név", b.full_name], ["Fesztivál", b.festival], ["Csomag", pkgName], ["Létszám", b.people + " fő"]];
-    if (b.price) rows.push(["Ár", ft(b.price)]);
+    if (b.price) rows.push(["Ár", ft(b.price) + (b.coupon_code ? " (kuponnal: " + b.coupon_code + ")" : "")]);
     if (b.deposit) rows.push(["Kaució", ft(b.deposit) + " (leadás után visszajár)"]);
     rows.push(["Foglalás azonosítója", b.id]);
     after = [
@@ -173,3 +176,50 @@ Deno.serve(async (req) => {
   }
   return json({ ok: true, kind, to_domain: to.split("@")[1] });
 });
+
+// Kuponlevél: a kupont és a címzettet a függvény maga olvassa ki, kuponokként egyszer küld (email_sent_at).
+async function sendCoupon(id: string) {
+  const { data: c, error } = await sb.from("coupons").select("*").eq("id", id).maybeSingle();
+  if (error) return json({ error: error.message }, 500);
+  if (!c) return json({ error: "not_found" }, 404);
+  if (c.email_sent_at) return json({ ok: true, skipped: "already_sent" });
+  const { data: claimed } = await sb.from("coupons").update({ email_sent_at: new Date().toISOString() })
+    .eq("id", id).is("email_sent_at", null).select("id");
+  if (!claimed?.length) return json({ ok: true, skipped: "already_sent" });
+
+  const { data: u } = await sb.auth.admin.getUserById(c.user_id);
+  const to = u?.user?.email;
+  if (!to) return json({ error: "no_email" }, 404);
+  const name = (u?.user?.user_metadata?.full_name as string) || "";
+  const greet = name ? `Szia, ${name}!` : "Szia!";
+  const mail = `<a href="mailto:${esc(TEAM_EMAIL)}" style="${A}">${esc(TEAM_EMAIL)}</a>`;
+  const subject = `Itt a ${c.percent}%-os kuponod – Üres Kézzel`;
+  const title = "Köszönjük, hogy kitöltötted!";
+  const intro = [esc(greet), "Sokat segítettél abban, hogy olyan szolgáltatást építsünk, amilyet tényleg szeretnél. Ígéretünkhöz híven itt a kuponod:"];
+  const rows: [string, string][] = [["Kuponkód", c.code], ["Kedvezmény", c.percent + "% a csomag árából"]];
+  const after = [
+    `<span style="display:block;border-left:3px solid #F2C230;padding-left:12px;">A kupont <b style="color:#F4F1EA;">a szolgáltatás indulása után</b>, az első foglalásodnál tudod beváltani a weboldalon. A kód a fiókodhoz tartozik, egyszer használható, és a Fiókom oldalon is megtalálod.</span>`,
+    "Ha a barátaid is mennek fesztiválra, szólj nekik is: ők is kitölthetik a kérdőívet, és ugyanígy kapnak kupont.",
+    `A kupon nem váltható készpénzre. Az indulás időpontjáról e-mailben értesítünk. Kérdésed van? Írj nekünk: ${mail}`,
+  ];
+  try {
+    const transport = nodemailer.createTransport({
+      host: "smtp.gmail.com", port: 465, secure: true,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
+    await transport.sendMail({
+      from: `"Üres Kézzel" <${SMTP_USER}>`,
+      replyTo: TEAM_EMAIL,
+      to,
+      subject,
+      text: [greet, "", ...intro.slice(1).map(strip), "", ...rows.map(([k, v]) => `${k}: ${v}`), "", ...after.map(strip), "",
+        `Fiókom: ${SITE_URL}/#/fiokom`, "", "Üres Kézzel csapat"].join("\n"),
+      html: layout(title, intro, rows, after, ["Fiókom", "/#/fiokom"]),
+    });
+  } catch (e) {
+    await sb.from("coupons").update({ email_sent_at: null }).eq("id", id);
+    console.error("smtp error", e);
+    return json({ error: "smtp", message: String((e as Error)?.message || e) }, 502);
+  }
+  return json({ ok: true, kind: "coupon", to_domain: to.split("@")[1] });
+}

@@ -1,6 +1,6 @@
 # Üres Kézzel – Adatkezelési tájékoztató
 
-Ez a tájékoztató leírja, milyen személyes adatokat kezelünk, ha regisztrálsz az Üres Kézzel oldalán, és előfoglalást adsz le fesztiválcsomagra. Az adatkezelés az Európai Unió általános adatvédelmi rendelete (GDPR, 2016/679/EU rendelet) és az információs önrendelkezési jogról szóló 2011. évi CXII. törvény (Infotv.) alapján történik.
+Ez a tájékoztató leírja, milyen személyes adatokat kezelünk, ha regisztrálsz az Üres Kézzel oldalán, kitöltöd a kérdőívünket, vagy (az indulás után) előfoglalást adsz le fesztiválcsomagra. Az adatkezelés az Európai Unió általános adatvédelmi rendelete (GDPR, 2016/679/EU rendelet) és az információs önrendelkezési jogról szóló 2011. évi CXII. törvény (Infotv.) alapján történik.
 
 ## 1. Ki kezeli az adataidat?
 
@@ -15,7 +15,7 @@ Az Üres Kézzel a Pécsi Tudományegyetem Közgazdaságtudományi Karának „V
 
 Adatvédelmi kérdéseiddel a fenti e-mail-címen fordulhatsz hozzánk. 30 napon belül válaszolunk.
 
-A szolgáltatás jelenleg tesztüzemben működik. Az előfoglalás nem jár fizetéssel. Mielőtt bármilyen fizetés vagy szerződéskötés történne, a foglalásodat külön megerősítjük veled.
+A szolgáltatás még nem indult el: a foglalás jelenleg zárva van. Amíg nem indulunk, csak regisztrálni és a kérdőívet kitölteni lehet. Az előfoglalás nem jár fizetéssel. Mielőtt bármilyen fizetés vagy szerződéskötés történne, a foglalásodat külön megerősítjük veled.
 
 ## 2. Milyen adatokat kezelünk, miért és meddig?
 
@@ -29,11 +29,16 @@ Csak azt kérjük be, ami a fiókhoz és az előfoglaláshoz feltétlenül kell.
 | Foglalási adatok: fesztivál, csomag, a foglalás időpontja és állapota | Az előfoglalás kezelése, a kitelepülés megtervezése | GDPR 6. cikk (1) b) | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
 | Bérlési előzmények: a csomag átvétele és leadása, a visszahozott felszerelés állapota (volt-e probléma, és mi), a csapat megjegyzései a fiókodhoz, a foglaláshoz tartozó kaució összege | A kaució mértékének meghatározása (első bérlésnél és probléma után magasabb), a felszerelés védelme, visszaélések megelőzése. Ha két bérlésnél is probléma volt, nem tudunk újra csomagot kiadni neked. | GDPR 6. cikk (1) f): jogos érdek | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
 | Hírlevél: név, e-mail-cím, a feliratkozás időpontja | Hírlevél küldése új fesztiválokról és akciókról | GDPR 6. cikk (1) a): hozzájárulás. A regisztrációnál adod meg, és a „Fiókom” oldalon bármikor visszavonhatod. | A leiratkozásig vagy a fiók törléséig |
+| Kérdőív: a kérdőívre adott válaszaid, a kitöltés időpontja és időtartama, és hogy honnan érkeztél (pl. Instagram) | A szolgáltatás kialakítása és fejlesztése (pl. melyik fesztiválra, milyen csomag, milyen áron). A válaszokat név és e-mail-cím nélkül (álnevesítve) elemezzük. | GDPR 6. cikk (1) a): hozzájárulás, amit a kérdőív beküldésekor adsz meg. Bármikor visszavonhatod a fenti e-mail-címen vagy a fiókod törlésével; ez nem érinti a visszavonás előtti adatkezelést. | A fiók törléséig, legkésőbb a projekt végéig. Név nélküli, összesített eredményt ezután is megőrizhetünk. |
+| Kuponkód: a kód, a kedvezmény mértéke, a kiküldés és a beváltás időpontja | A kérdőív kitöltéséért járó kedvezmény nyilvántartása és beváltása, visszaélések megelőzése (fiókonként egy kupon) | GDPR 6. cikk (1) b): a kedvezmény a kitöltésért vállalt ígéretünk teljesítése | A fiók törléséig, legkésőbb a szezon végétől számított 1 évig |
+| Látogatottsági adatok: melyik oldalt nézted meg, honnan érkeztél (pl. instagram.com vagy egy kampánylink), eszköz típusa (mobil, tablet, asztali), böngésző és rendszer típusa, nyelv, képernyőszélesség, időpont | Hogy lássuk, hányan látogatják az oldalt és honnan, és mennyire működik a kérdőív | GDPR 6. cikk (1) f): jogos érdek. Nem használunk hozzá sütit, nem tárolunk semmit a böngésződben, nem rögzítjük az IP-címed, és nem kötjük a fiókodhoz, így ebből nem azonosítunk téged. Ha a böngésződben be van kapcsolva a „Ne kövess” (Do Not Track / Global Privacy Control) beállítás, egyáltalán nem mérünk. | 13 hónapig, utána automatikusan törlődik |
 | Belépési és technikai naplók: IP-cím, időpont, böngésző | A rendszer biztonságos működése, visszaélések kiszűrése | GDPR 6. cikk (1) f): jogos érdek | A szolgáltatók beállításai szerint, jellemzően legfeljebb 90 napig |
 
 A foglalási adatokból név nélküli, összesített statisztikát is készíthetünk, például hogy melyik fesztiválra hány előfoglalás érkezett. Ezt az egyetemi kurzuson bemutathatjuk, de személyes adatot nem tartalmaz.
 
-Ha a fiókodat törlöd, a hozzá tartozó foglalásokat is töröljük. Ha a projekt megszűnik, minden személyes adatot törlünk.
+Ha a fiókodat törlöd, a hozzá tartozó foglalásokat, kérdőív-válaszaidat és kuponodat is töröljük.
+
+**A kuponról:** a kérdőív kitöltéséért kapott kuponkód a szolgáltatás indulása után, az első foglalásodnál váltható be a weboldalon. Fiókhoz kötött, egyszer használható, készpénzre nem váltható. A kupon nem jelent foglalást, és nem kötelez minket arra, hogy a szolgáltatás egy adott időpontban vagy áron elinduljon. Ha a projekt megszűnik, minden személyes adatot törlünk.
 
 ## 3. Ki fér hozzá az adataidhoz?
 
@@ -44,7 +49,9 @@ Az adataidhoz csak a projektcsapat tagjai férnek hozzá. Nem adjuk el őket, é
 | Supabase Inc. | Fiókkezelés (belépés), adatbázis a foglalásokhoz | Az Európai Unióban, Írországban (AWS eu-west-1) |
 | Vercel Inc. | A weboldal kiszolgálása (tárhely). Személyes adatot csak a technikai naplókban (IP-cím, időpont, böngésző) kezel. | Világszerte, az Egyesült Államokat is beleértve |
 | MailerLite (UAB „MailerLite”, Litvánia) | A hírlevél küldése, csak a feliratkozóknak (név, e-mail-cím) | Az Európai Unióban |
-| Google (Gmail) | A rendszerüzenetek (regisztráció megerősítése, új jelszó) és a csapat leveleinek küldése | Az Európai Unióban és az Egyesült Államokban |
+| Google (Gmail) | A rendszerüzenetek (regisztráció megerősítése, új jelszó, kuponkód) és a csapat leveleinek küldése | Az Európai Unióban és az Egyesült Államokban |
+| Google (Google Táblázatok) | A kérdőív álnevesített válaszainak és a kuponok listájának megjelenítése a csapat számára (csak a csapattagok férnek hozzá) | Az Európai Unióban és az Egyesült Államokban |
+| Cloudflare Inc. (Turnstile) | Ha bekapcsoljuk: robotszűrés a regisztrációnál és a belépésnél. Ehhez a Cloudflare technikai adatokat (pl. IP-cím, böngésző) dolgoz fel. | Világszerte, az Egyesült Államokat is beleértve |
 
 Ha egy szolgáltató az Európai Unión kívüli (például amerikai) cég, az adattovábbítás az Európai Bizottság által elfogadott általános szerződési feltételek vagy az EU–USA adatvédelmi keretrendszer alapján történik.
 
@@ -57,7 +64,7 @@ Ha egy szolgáltató az Európai Unión kívüli (például amerikai) cég, az a
 
 ## 5. Sütik és helyi tárolás
 
-Az oldal nem használ reklám- vagy követő sütiket, és nem mér látogatottságot. A bejelentkezés megtartásához a böngésződ helyi tárolójában egy munkamenet-azonosító jön létre. Ez a szolgáltatás működéséhez feltétlenül szükséges, és kijelentkezéskor törlődik.
+Az oldal nem használ reklám- vagy követő sütiket. A látogatottságot süti nélkül, név nélkül, összesítve mérjük (lásd a 2. pontot). A bejelentkezés megtartásához a böngésződ helyi tárolójában egy munkamenet-azonosító jön létre. Ez a szolgáltatás működéséhez feltétlenül szükséges, és kijelentkezéskor törlődik.
 
 ## 6. Milyen jogaid vannak?
 
@@ -68,7 +75,8 @@ Bármikor kérheted tőlünk a fenti e-mail-címen:
 - **Törlés:** az adataid és a fiókod törlését. A fiókodat a „Fiókom” oldalon magad is törölheted.
 - **Korlátozás:** hogy átmenetileg ne használjuk az adataidat, például amíg egy vitát tisztázunk.
 - **Adathordozhatóság:** hogy géppel olvasható formában megkapd az adataidat. A „Fiókom” oldalon magad is letöltheted őket.
-- **Tiltakozás:** a jogos érdeken alapuló adatkezelés (technikai naplók) ellen.
+- **Tiltakozás:** a jogos érdeken alapuló adatkezelés (technikai naplók, látogatottsági adatok) ellen.
+- **A hozzájárulás visszavonása:** a hírlevélről a „Fiókom” oldalon, a kérdőív-válaszaid kezeléséhez adott hozzájárulásról e-mailben vagy a fiókod törlésével.
 
 A kérésedre legkésőbb 30 napon belül válaszolunk, és ez ingyenes.
 
@@ -92,4 +100,4 @@ Regisztrálni és foglalni 18. életévét betöltött személy tud.
 
 Ha megváltozik, hogyan kezeljük az adatokat (például online fizetést vezetünk be), frissítjük ezt a tájékoztatót, és a regisztrált felhasználókat e-mailben értesítjük.
 
-Hatályos: 2026. október 8-tól
+Hatályos: 2026. november 21-től (előző változat: 2026. október 8.)

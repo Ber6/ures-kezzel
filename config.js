@@ -8,4 +8,6 @@ window.UK_CONFIG = {
   SUPABASE_ANON_KEY: "sb_publishable_BUsIVZg07bIn8j3Ht_8-Qg_iUdMd8ax",
   // ez jelenik meg a foglalás után és a Foglalásaim oldalon; telefonszámot csak a fesztivál előtt adunk ki
   TEAM_EMAIL: "urreskezzel@gmail.com",
+  // Botvédelem (Cloudflare Turnstile). Üresen kikapcsolva. Bekapcsolás: README → „Botvédelem”.
+  TURNSTILE_SITE_KEY: "",
 };

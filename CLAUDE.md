@@ -129,3 +129,9 @@ Fishing on Orfű, Sziget, VOLT, Balaton Sound, STRAND Fesztivál, EFOTT, Campus 
 - [ ] Az adatkezelési tájékoztató elérhető a láblécből és a regisztrációnál.
 - [ ] Telefonon és gépen is működik, a 3D háttér nem lassítja a foglalási oldalakat.
 - [ ] Egy rövid README.md magyarul: mi ez, hogyan kell beállítani, hol vannak a kulcsok.
+
+## 2026. november: hamarosan-mód, kérdőív, kupon, mérés
+
+Lásd README „Hamarosan-mód…” és `supabase/kerdoiv.sql`. Kulcsok a `settings` táblában: `booking_open`, `show_prices`, `survey_open`, `survey_discount`, `survey_title`, `survey_intro`.
+Táblák: `survey_questions`, `survey_responses` (válaszok a kérdés szövegével együtt mentve), `coupons`, `page_events`. RPC: `submit_survey`, `track`, `admin_coupons`, `resend_coupon_email`, `sheet_*` (csak service_role).
+Edge Functions: `booking-confirmation` (+ `kind: "coupon"`), `sheet-export` (Google Sheet IMPORTDATA, Vault: `sheet_token`). Biztonsági fejlécek: `vercel.json`.

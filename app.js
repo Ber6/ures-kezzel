@@ -8,7 +8,7 @@
   DATA.SETTINGS = DATA.SETTINGS || {};
   var STATUS = { elofoglalas: "Előfoglalás", megerositett: "Megerősítve", lemondott: "Lemondva" };
   var BASE = location.origin + location.pathname;
-  var BACK_OK = ["foglalas", "foglalasaim", "fiokom", "admin"];
+  var BACK_OK = ["foglalas", "foglalasaim", "fiokom", "admin", "kerdoiv"];
 
   function $(s, r){ return (r || document).querySelector(s); }
   function $$(s, r){ return Array.from((r || document).querySelectorAll(s)); }
@@ -27,6 +27,12 @@
   function priceHtml(p){
     return p.discount ? "<s>" + fmtFt(p.price) + "</s>" + fmtFt(effPrice(p)) : fmtFt(p.price);
   }
+  // weboldal-állapot (admin → Beállítások / Kérdőív); amíg nincs betöltve, a biztonságos alapérték érvényes
+  function S(k){ return DATA.SETTINGS[k]; }
+  function bookingOpen(){ return S("booking_open") === "true"; }
+  function surveyOpen(){ return S("survey_open") === "true"; }
+  function showPrices(){ return S("show_prices") !== "false"; }
+  function surveyPct(){ var n = parseInt(String(S("survey_discount") || "10").replace(/\D/g, ""), 10); return n > 0 ? Math.min(n, 50) : 10; }
   function activeFestivals(){ return DATA.FESTIVALS.filter(function(f){ return f.active !== false; }); }
   function fmtDate(s){
     try { return new Date(s).toLocaleString("hu-HU", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
@@ -48,7 +54,70 @@
   } catch (e) { console.error(e); }
 
   // status: a vásárló kauciója és hogy foglalhat-e (az adatbázis számolja: my_status)
-  var state = { user: null, isAdmin: false, ready: false, view: null, params: new URLSearchParams(), flash: null, rows: [], status: null };
+  var state = { user: null, isAdmin: false, ready: false, view: null, params: new URLSearchParams(), flash: null, rows: [], status: null, contentP: null };
+
+  /* ---------- látogatómérés: süti, tárolás és személyes adat nélkül ----------
+     Csak összesített adatot küldünk (oldal, forrás, eszköztípus). Nem azonosítja a látogatót, nem tesz semmit
+     a böngészőbe, ezért nem kell hozzá sütibanner. Ha a böngészőben be van kapcsolva a „Ne kövess” (DNT/GPC), nem mér. */
+  var TRACK = (function(){
+    var q = new URLSearchParams(location.search);
+    var off = navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true;
+    var ref = "";
+    try { if (document.referrer){ var h = new URL(document.referrer).hostname.replace(/^www\./, ""); if (h !== location.hostname) ref = h; } } catch (e) {}
+    var ua = navigator.userAgent || "", w = window.innerWidth || screen.width || 0;
+    var base = {
+      utm_source: (q.get("utm_source") || "").slice(0, 60), utm_medium: (q.get("utm_medium") || "").slice(0, 60),
+      utm_campaign: (q.get("utm_campaign") || "").slice(0, 60), referrer: ref.slice(0, 100),
+      device: w < 768 ? "mobil" : w < 1100 ? "tablet" : "asztali",
+      browser: /Instagram/.test(ua) ? "Instagram app" : /FBAN|FBAV/.test(ua) ? "Facebook app" : /musical_ly|Bytedance|TikTok/i.test(ua) ? "TikTok app" :
+        /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /SamsungBrowser/.test(ua) ? "Samsung" : /Firefox\//.test(ua) ? "Firefox" :
+        /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "egyéb",
+      os: /Android/.test(ua) ? "Android" : /iPhone|iPad|iPod/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : /Mac OS X/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : "egyéb",
+      lang: (navigator.language || "").slice(0, 10), screen_w: Math.round(w)
+    };
+    var first = true, lastPath = "/";
+    function send(ev, extra){
+      if (off || !sb || state.isAdmin) return;
+      var e = Object.assign({}, base, extra || {}, { event: ev, logged_in: !!state.user });
+      try { sb.rpc("track", { e: e }).then(function(){}, function(){}); } catch (x) {}
+    }
+    return {
+      pageview: function(path){
+        if (path === "/admin") { first = false; return; }
+        lastPath = path; send("pageview", { path: path, entry: first }); first = false;
+      },
+      event: function(ev){ if (/^[a-z0-9_]{1,40}$/.test(ev)) send(ev, { path: lastPath, entry: false }); },
+      source: function(){ return base.utm_source || base.referrer || ""; }
+    };
+  })();
+  document.addEventListener("click", function(e){
+    var t = e.target.closest && e.target.closest("[data-track],[data-cta],a[href*='instagram.com']");
+    if (!t) return;
+    TRACK.event(t.getAttribute("data-track") || (t.getAttribute("data-cta") ? "cta_" + t.getAttribute("data-cta") : "instagram_click"));
+  });
+
+  /* ---------- botvédelem (Cloudflare Turnstile): csak ha a config.js-ben meg van adva a TURNSTILE_SITE_KEY ---------- */
+  var CAPTCHA = { on: !!CFG.TURNSTILE_SITE_KEY, started: false, tokens: {}, ids: {} };
+  function captchaInit(){
+    if (!CAPTCHA.on || CAPTCHA.started) return;
+    CAPTCHA.started = true;
+    loadScript("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit").then(function(){
+      $$("[data-captcha]").forEach(function(el){
+        var k = el.getAttribute("data-captcha");
+        el.hidden = false;
+        CAPTCHA.ids[k] = window.turnstile.render(el, {
+          sitekey: CFG.TURNSTILE_SITE_KEY, language: "hu", theme: "dark",
+          callback: function(t){ CAPTCHA.tokens[k] = t; },
+          "expired-callback": function(){ CAPTCHA.tokens[k] = null; }
+        });
+      });
+    }).catch(function(e){ console.warn("captcha", e); });
+  }
+  function captchaMissing(k){ return CAPTCHA.on && !CAPTCHA.tokens[k]; }
+  function captchaOpt(k){ return CAPTCHA.on ? { captchaToken: CAPTCHA.tokens[k] } : {}; }
+  function captchaReset(k){
+    if (CAPTCHA.on && window.turnstile && CAPTCHA.ids[k] != null){ try { window.turnstile.reset(CAPTCHA.ids[k]); } catch (e) {} CAPTCHA.tokens[k] = null; }
+  }
 
   /* ---------- magyar hibaüzenetek ---------- */
   function huErr(err){
@@ -66,6 +135,15 @@
     if (/Failed to fetch|NetworkError|Load failed/i.test(all)) return "Nem sikerült elérni a szervert. Ellenőrizd az internetkapcsolatot, és próbáld újra.";
     if (/JWT|session missing|not authenticated/i.test(all)) return "Lejárt a belépésed. Lépj be újra.";
     if (/sold_out/i.test(all)) return "Sajnos ez a csomag jelenleg elfogyott.";
+    if (/booking_closed/i.test(all)) return "A foglalás még nem nyílt meg. Hamarosan indulunk!";
+    if (/invalid_coupon/i.test(all)) return "Ez a kuponkód nem érvényes, már fel lett használva, vagy nem a te fiókodhoz tartozik.";
+    if (/survey_closed/i.test(all)) return "A kérdőív jelenleg nem tölthető ki.";
+    if (/already_done/i.test(all)) return "Ezt a kérdőívet már kitöltötted. A kuponodat a Fiókom oldalon találod.";
+    if (/email_not_confirmed/i.test(all)) return "Előbb erősítsd meg az e-mail-címed a regisztrációs levélben lévő linkkel.";
+    if (/too_fast|bot_suspected/i.test(all)) return "Ez túl gyors volt. Kérjük, olvasd el a kérdéseket, és válaszolj rájuk.";
+    if (/missing_required/i.test(all)) return "Néhány kötelező kérdésre még nem válaszoltál.";
+    if (/invalid_option|invalid_scale|invalid_answers/i.test(all)) return "Közben változtak a kérdések. Töltsd újra az oldalt, és küldd be újra.";
+    if (/captcha/i.test(all)) return "Az ellenőrzés (nem vagy robot) nem sikerült. Pipáld ki újra, és próbáld meg ismét.";
     if (/row-level security|permission denied/i.test(all)) return "Ehhez nincs jogosultságod.";
     return "Valami hiba történt, próbáld újra később. (" + m + ")";
   }
@@ -145,6 +223,7 @@
     switch (state.view){
       case "belepes": return showLogin();
       case "foglalas": return guard() && showBooking();
+      case "kerdoiv": return guard() && showSurvey();
       case "foglalasaim": return guard() && showMine();
       case "fiokom": return guard() && showAccount();
       case "admin": return guard() && showAdmin();
@@ -164,7 +243,7 @@
   function afterLogin(){
     var p = new URLSearchParams(state.params);
     var back = p.get("vissza");
-    if (BACK_OK.indexOf(back) < 0) back = "foglalas";
+    if (BACK_OK.indexOf(back) < 0) back = bookingOpen() ? "foglalas" : surveyOpen() ? "kerdoiv" : "fiokom";
     p.delete("vissza"); p.delete("tab");
     var qs = p.toString();
     location.replace("#/" + back + (qs ? "?" + qs : ""));
@@ -177,6 +256,8 @@
     var f = takeFlash("belepes");
     if (f) say($("#login-msg"), f.text, f.kind);
     else if (state.params.get("vissza") === "foglalas") say($("#login-msg"), "A foglaláshoz lépj be, vagy regisztrálj. Egy perc az egész.", "ok");
+    else if (state.params.get("vissza") === "kerdoiv") say($("#login-msg"), "A kérdőívhez lépj be, vagy regisztrálj, így a kuponkódot a fiókodhoz tudjuk kötni. Egy perc az egész.", "ok");
+    captchaInit();
     if (!sb) say($("#login-msg"), "A belépés most nem érhető el. Próbáld újra később.");
   }
 
@@ -191,8 +272,10 @@
     e.preventDefault();
     var msg = $("#login-msg"); say(msg, "");
     if (!sb) return say(msg, "A belépés most nem érhető el.");
+    if (captchaMissing("login")) return say(msg, "Pipáld ki az ellenőrzést (nem vagy robot).");
     busy($("#form-login button[type=submit]"), async function(){
-      var r = await sb.auth.signInWithPassword({ email: $("#login-email").value.trim(), password: $("#login-password").value });
+      var r = await sb.auth.signInWithPassword({ email: $("#login-email").value.trim(), password: $("#login-password").value, options: captchaOpt("login") });
+      captchaReset("login");
       if (r.error) return say(msg, huErr(r.error));
       $("#login-password").value = "";
       await setUser(r.data.session);
@@ -208,13 +291,19 @@
     var email = $("#signup-email").value.trim();
     if (name.length < 2) return say(msg, "Add meg a teljes neved.");
     if (!$("#signup-consent").checked) return say(msg, "A regisztrációhoz el kell fogadnod az adatkezelési tájékoztatót, és be kell töltened a 18. életévedet.");
+    if (captchaMissing("signup")) return say(msg, "Pipáld ki az ellenőrzést (nem vagy robot).");
+    // a megerősítő link után oda visszük, ahova indult (pl. a kérdőívhez)
+    var back = state.params.get("vissza");
+    var redirect = BASE + "?megerositve=1" + (BACK_OK.indexOf(back) >= 0 ? "&vissza=" + back : "");
     busy($("#form-signup button[type=submit]"), async function(){
       var r = await sb.auth.signUp({
         email: email,
         password: $("#signup-password").value,
-        options: { data: newsletterData(name, $("#signup-newsletter").checked), emailRedirectTo: BASE + "?megerositve=1" }
+        options: Object.assign({ data: newsletterData(name, $("#signup-newsletter").checked), emailRedirectTo: redirect }, captchaOpt("signup"))
       });
+      captchaReset("signup");
       if (r.error) return say(msg, huErr(r.error));
+      TRACK.event("signup");
       // Ha a cím már foglalt, a Supabase nem ad hibát, csak egy üres "identities" listát.
       if (r.data.user && r.data.user.identities && r.data.user.identities.length === 0)
         return say(msg, "Ezzel az e-mail-címmel már regisztráltak. Lépj be, vagy kérj új jelszót.");
@@ -233,8 +322,10 @@
     e.preventDefault();
     var msg = $("#reset-msg"); say(msg, "");
     if (!sb) return say(msg, "A jelszó-visszaállítás most nem érhető el.");
+    if (captchaMissing("reset")) return say(msg, "Pipáld ki az ellenőrzést (nem vagy robot).");
     busy($("#form-reset button[type=submit]"), async function(){
-      var r = await sb.auth.resetPasswordForEmail($("#reset-email").value.trim(), { redirectTo: BASE + "?uj-jelszo=1" });
+      var r = await sb.auth.resetPasswordForEmail($("#reset-email").value.trim(), Object.assign({ redirectTo: BASE + "?uj-jelszo=1" }, captchaOpt("reset")));
+      captchaReset("reset");
       if (r.error) return say(msg, huErr(r.error));
       say(msg, "Ha van ilyen címmel fiók, küldtünk rá egy levelet a jelszó visszaállításához. Nyisd meg ugyanebben a böngészőben.", "ok");
     });
@@ -263,16 +354,24 @@
 
   /* ---------- Nyilvános tartalom: csomagkártyák, fesztiválok, beállítások ---------- */
   var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+  function closedCta(cls){
+    return surveyOpen()
+      ? '<a class="btn' + cls + '" href="#/kerdoiv" data-track="cta_plan_survey">Kérdőív, −' + surveyPct() + '% kupon</a>'
+      : '<a class="btn' + cls + '" href="#/belepes?tab=signup" data-track="cta_plan_notify">Szólj, ha indul</a>';
+  }
   function renderPublic(){
+    var open = bookingOpen();
     var cards = activePkgKeys().map(function(k){
       var p = PKG[k];
+      var price = open ? '<div class="price">' + priceHtml(p) + '</div><p class="per">egy teljes fesztiválra</p>'
+        : showPrices() ? '<div class="price"><small>várhatóan</small>' + fmtFt(effPrice(p)) + '-tól</div><p class="per">egy teljes fesztiválra, a jelenlegi tervek szerint</p>'
+        : '<div class="price tbd">Hamarosan</div><p class="per">az árakat az indulás előtt közöljük</p>';
       return '<article class="plan' + (p.featured ? " featured" : "") + '">' +
         (p.featured ? '<span class="tag">A legnépszerűbb</span>' : "") +
-        (p.discount ? '<span class="sale" aria-label="' + p.discount + ' százalék kedvezmény">−' + p.discount + "%</span>" : "") +
-        "<h3>" + esc(p.name) + '</h3><p class="who">' + p.people + ' főre</p><div class="price">' + priceHtml(p) +
-        '</div><p class="per">egy teljes fesztiválra</p><ul>' +
+        (p.discount && open ? '<span class="sale" aria-label="' + p.discount + ' százalék kedvezmény">−' + p.discount + "%</span>" : "") +
+        "<h3>" + esc(p.name) + '</h3><p class="who">' + p.people + ' főre</p>' + price + '<ul>' +
         (p.items || []).map(function(it){ return "<li>" + CHECK + esc(it) + "</li>"; }).join("") +
-        '</ul>' + (blocked()
+        '</ul>' + (!open ? closedCta(p.featured ? "" : " btn-ghost") : blocked()
           ? '<span class="btn soldout' + (p.featured ? "" : " btn-ghost") + '" aria-disabled="true">Elfogyott</span>'
           : '<a class="btn' + (p.featured ? "" : " btn-ghost") + '" href="#/foglalas?csomag=' + encodeURIComponent(k) + '">Ezt kérem</a>') + "</article>";
     }).join("");
@@ -290,7 +389,37 @@
       (fests.length > 4 ? '<span class="chip">és még több</span>' : "");
 
     applySettings();
+    applyComingSoon();
     buildBookingForm();
+  }
+  // „Hamarosan” állapot: gombok, címek, kérdőív-ajánló a főoldalon
+  function applyComingSoon(){
+    var open = bookingOpen(), sv = surveyOpen(), pct = surveyPct();
+    $$("[data-soon]").forEach(function(el){ el.hidden = open; });
+    $$("[data-cta]").forEach(function(a){
+      if (!a.dataset.origText){ a.dataset.origText = a.textContent; a.dataset.origHref = a.getAttribute("href"); }
+      var nav = a.getAttribute("data-cta") === "nav";
+      if (open){ a.textContent = a.dataset.origText; a.setAttribute("href", a.dataset.origHref); }
+      else if (sv){ a.textContent = nav ? "Kérdőív −" + pct + "%" : "Kitöltöm a kérdőívet, −" + pct + "%"; a.setAttribute("href", "#/kerdoiv"); }
+      else { a.textContent = nav ? "Értesítést kérek" : "Szólj, ha indulunk"; a.setAttribute("href", "#/belepes?tab=signup"); }
+    });
+    $$("[data-prices-title]").forEach(function(el){ el.textContent = open ? "Válaszd ki a csomagod." : "Ezekkel a csomagokkal indulunk."; });
+    $$("[data-prices-lede]").forEach(function(el){
+      el.textContent = open ? "Az árak a teljes fesztiválra szólnak, nem napidíjasak."
+        : showPrices() ? "A várható árak a teljes fesztiválra szólnak, nem napidíjasak. A foglalás hamarosan nyílik."
+        : "Az árakat az indulás előtt tesszük közzé. A foglalás hamarosan nyílik.";
+    });
+    var fl = $("#final-lede");
+    if (fl) fl.textContent = open ? "Foglald le a csomagod, és csak a jókedvet hozd." : "Hamarosan indulunk. Regisztrálj, és szólunk, amikor lehet foglalni.";
+    var promo = $("#kerdoiv-promo");
+    if (promo){
+      promo.hidden = !sv;
+      $$("[data-survey-title]").forEach(function(el){ el.textContent = S("survey_title") || "Segíts 2 percben, és kapsz kedvezményt!"; });
+      $$("[data-survey-intro]").forEach(function(el){ el.textContent = S("survey_intro") || ""; });
+      $$("[data-survey-badge]").forEach(function(el){ el.textContent = "−" + pct + "%"; });
+    }
+    var bcs = $("#bk-closed-survey");
+    if (bcs){ bcs.hidden = !sv; bcs.textContent = "Kérdőív, " + pct + "% kedvezményért"; }
   }
   // a beállítások (kaució stb.) beírása a [data-setting] elemekbe; az index.html is hívja, ha új ilyen elemet rajzol
   function settingFt(k){ return parseInt(String(DATA.SETTINGS[k] || "").replace(/\D/g, ""), 10) || 0; }
@@ -361,11 +490,26 @@
       (deposit > reg && reg ? "Ha azt mindennel együtt, rendben visszahozod, itt " + fmtFt(reg) + " lesz a kaució."
         : "Ha annál a visszahozással probléma lesz, itt " + fmtFt(high) + "-ra nőhet a kaució.");
   }
-  function showBooking(){
+  async function showBooking(){
     showBody("foglalas");
+    if (state.contentP) await state.contentP;
     $("#bk-done").hidden = true;
-    $("#form-booking").hidden = false;
+    var closed = !bookingOpen();
+    $("#bk-closed").hidden = !closed || state.isAdmin;
+    $("#bk-admin-note").hidden = !(closed && state.isAdmin);
+    $("#form-booking").hidden = closed && !state.isAdmin;
+    applyComingSoon();
+    if (closed && !state.isAdmin) return;
     say($("#bk-msg"), "");
+    // saját, még fel nem használt kupon előtöltése
+    $("#bk-coupon-hint").hidden = true;
+    sb.from("coupons").select("code,percent,used_at").eq("user_id", state.user.id).is("used_at", null).limit(1).then(function(r){
+      if (r.error || !r.data || !r.data.length) return;
+      var c = r.data[0];
+      if (!$("#bk-coupon").value) $("#bk-coupon").value = c.code;
+      $("#bk-coupon-hint").textContent = "A kuponod (" + c.percent + "% kedvezmény) be van írva. A végleges árat a foglalás után látod.";
+      $("#bk-coupon-hint").hidden = false;
+    });
     var name = (state.user.user_metadata && state.user.user_metadata.full_name) || "";
     $("#bk-hello").textContent = name ? "Szia, " + name + "! Válaszd ki, hova és melyik csomagot kéred." : "Válaszd ki, hova és melyik csomagot kéred.";
     $("#bk-name-field").hidden = !!name;
@@ -403,14 +547,15 @@
     if (!festival) return say(msg, "Válassz fesztivált.");
     if (!pkgEl) return say(msg, "Válassz csomagot.");
     busy($("#form-booking button[type=submit]"), async function(){
-      var r = await sb.from("bookings")
-        .insert({ user_id: state.user.id, full_name: name, festival: festival, package: pkgEl.value, people: PKG[pkgEl.value].people })
-        .select().single();
+      var row = { user_id: state.user.id, full_name: name, festival: festival, package: pkgEl.value, people: PKG[pkgEl.value].people };
+      var code = $("#bk-coupon").value.trim().toUpperCase();
+      if (code) row.coupon_code = code;
+      var r = await sb.from("bookings").insert(row).select().single();
       if (r.error) return say(msg, huErr(r.error));
       var b = r.data;
       var note = provisionalNote(b.deposit, openBookings(state.ownBookings || [], b.id));
       $("#bk-summary").innerHTML = "<b>" + esc(b.festival) + "</b><br>" + esc(PKG[b.package].name) + " · " + b.people + " fő · " +
-        fmtFt(b.price != null ? b.price : effPrice(PKG[b.package])) +
+        fmtFt(b.price != null ? b.price : effPrice(PKG[b.package])) + (b.coupon_code ? " (kuponnal)" : "") +
         (b.deposit ? "<br>Kaució: " + fmtFt(b.deposit) + " (átvételkor, a leadás után visszajár)" : "") +
         (note ? '<span class="prov">' + esc(note) + "</span>" : "");
       showContact();
@@ -486,6 +631,16 @@
     $("#acct-newsletter").checked = !!(u.user_metadata && u.user_metadata.newsletter);
     say($("#nl-msg"), "");
     $("#acct-bookings").textContent = "…";
+    $("#acct-coupon-row").hidden = true; $("#acct-survey").hidden = true;
+    sb.from("coupons").select("code,percent,used_at").eq("user_id", u.id).then(function(c){
+      if (c.error) return;
+      if (c.data && c.data.length){
+        var k = c.data[0];
+        $("#acct-coupon").innerHTML = '<span class="coupon-code">' + esc(k.code) + "</span> " + k.percent + "% kedvezmény · " +
+          (k.used_at ? "felhasználva" : "a szolgáltatás indulása után, az első foglalásodnál beváltható");
+        $("#acct-coupon-row").hidden = false;
+      } else if (surveyOpen()) $("#acct-survey").hidden = false;
+    });
     var r = await sb.from("bookings").select("status").eq("user_id", u.id);
     if (r.error) return $("#acct-bookings").textContent = "–";
     var active = r.data.filter(function(b){ return b.status !== "lemondott"; }).length;
@@ -545,12 +700,18 @@
       var u = state.user;
       var r = await sb.from("bookings").select("*").eq("user_id", u.id).order("created_at", { ascending: true });
       if (r.error) return say($("#acct-msg"), huErr(r.error));
+      var sv = await sb.from("survey_responses").select("created_at,answers").eq("user_id", u.id);
+      var cp = await sb.from("coupons").select("code,percent,created_at,used_at").eq("user_id", u.id);
       var out = {
         letoltve: new Date().toISOString(),
         fiok: { nev: userName(), email: u.email, regisztracio: u.created_at, email_megerositve: u.email_confirmed_at || null, utolso_belepes: u.last_sign_in_at || null },
         foglalasok: r.data.map(function(b){
           return { leadva: b.created_at, fesztival: b.festival, csomag: (PKG[b.package] || {}).name || b.package, fo: b.people, allapot: STATUS[b.status] || b.status, nev_a_foglalason: b.full_name };
-        })
+        }),
+        kerdoiv: (sv.data || []).map(function(x){
+          return { kitoltve: x.created_at, valaszok: (x.answers || []).map(function(a){ return { kerdes: a.label, valasz: a.value }; }) };
+        }),
+        kuponok: (cp.data || []).map(function(x){ return { kod: x.code, kedvezmeny_szazalek: x.percent, kapta: x.created_at, felhasznalva: x.used_at }; })
       };
       var blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
       var a = document.createElement("a");
@@ -558,6 +719,317 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
     });
+  });
+
+  /* ---------- Kérdőív (#/kerdoiv) ---------- */
+  var SV = { qs: [], byId: {}, started: 0, preview: false };
+  var KIND_LABEL = { text: "Rövid szöveges válasz", textarea: "Hosszú szöveges válasz", single: "Feleletválasztós (egy válasz)", multi: "Feleletválasztós (több válasz)", scale: "Csúszka (skála)" };
+  function svShowDone(code){
+    $("#form-survey").hidden = true;
+    $("#sv-code").textContent = code || "";
+    $("#sv-done").hidden = false;
+  }
+  async function showSurvey(){
+    showBody("kerdoiv");
+    if (state.contentP) await state.contentP;
+    var preview = state.params.get("elonezet") === "1" && state.isAdmin;
+    $("#sv-title").textContent = S("survey_title") || "Kérdőív.";
+    $("#sv-intro").textContent = S("survey_intro") || "";
+    say($("#sv-msg"), ""); say($("#sv-form-msg"), "");
+    $("#sv-done").hidden = true; $("#sv-closed").hidden = true; $("#form-survey").hidden = true;
+    if (!surveyOpen() && !preview){ $("#sv-closed").hidden = false; return; }
+    if (!preview){
+      var done = await sb.from("coupons").select("code").eq("user_id", state.user.id).limit(1);
+      if (done.data && done.data.length){
+        say($("#sv-msg"), "Ezt a kérdőívet már kitöltötted, köszönjük! A kuponodat itt látod, és a Fiókom oldalon is megtalálod.", "ok");
+        return svShowDone(done.data[0].code);
+      }
+    } else {
+      say($("#sv-msg"), surveyOpen() ? "Előnézet (admin): így látják a kitöltők. Innen nem lehet beküldeni." :
+        "Előnézet (admin): a kérdőív még nincs élesítve, csak te látod. Innen nem lehet beküldeni.", "ok");
+    }
+    var r = await sb.from("survey_questions").select("*").eq("active", true).order("sort").order("created_at");
+    if (r.error) return say($("#sv-msg"), huErr(r.error));
+    if (!r.data.length) return say($("#sv-msg"), "Még nincs kérdés a kérdőívben.");
+    SV.qs = r.data; SV.byId = {}; SV.preview = preview; SV.started = Date.now();
+    r.data.forEach(function(q){ SV.byId[q.id] = q; });
+    $("#sv-questions").innerHTML = r.data.map(svQuestion).join("");
+    $("#sv-consent").checked = false; $("#sv-hp").value = "";
+    $("#sv-submit").disabled = preview;
+    $("#form-survey").hidden = false;
+    svProgress();
+    if (!preview) TRACK.event("survey_view");
+  }
+  function svQuestion(q, i){
+    var id = "q-" + q.id;
+    var head = '<span class="sv-num">' + (i + 1) + ".</span>" + esc(q.label) + (q.required ? '<span class="req" title="Kötelező">*</span>' : "");
+    var help = q.help ? '<p class="hint">' + esc(q.help) + "</p>" : "";
+    if (q.kind === "single" || q.kind === "multi"){
+      var type = q.kind === "single" ? "radio" : "checkbox";
+      var opts = (q.options || []).map(function(o){
+        return '<label class="sv-opt"><input type="' + type + '" name="' + id + '" value="' + esc(o) + '"><span>' + esc(o) + "</span></label>";
+      }).join("");
+      if (q.allow_other) opts += '<label class="sv-opt"><input type="' + type + '" name="' + id + '" value="__other__"><span>Egyéb</span></label>' +
+        '<input type="text" class="sv-other" data-other maxlength="300" placeholder="Írd be a saját válaszod" aria-label="Egyéb válasz" hidden>';
+      return '<fieldset class="sv-q" data-q="' + q.id + '"><legend>' + head + "</legend>" + help +
+        (q.kind === "multi" ? "" : "") + '<div class="sv-opts">' + opts + "</div></fieldset>";
+    }
+    if (q.kind === "scale"){
+      var min = q.scale_min, max = q.scale_max, mid = Math.round((min + max) / 2), ticks = "";
+      for (var n = min; n <= max; n++) ticks += "<span>" + n + "</span>";
+      return '<div class="sv-q" data-q="' + q.id + '"><span class="sv-label" id="' + id + '-l">' + head + "</span>" + help +
+        '<div class="sv-scale untouched"><output>Húzd a csúszkát</output>' +
+        '<input type="range" min="' + min + '" max="' + max + '" step="1" value="' + mid + '" aria-labelledby="' + id + '-l">' +
+        '<div class="sv-ticks" aria-hidden="true">' + ticks + "</div>" +
+        ((q.min_label || q.max_label) ? '<div class="sv-ends"><span>' + esc(q.min_label) + "</span><span>" + esc(q.max_label) + "</span></div>" : "") +
+        "</div></div>";
+    }
+    var input = q.kind === "textarea"
+      ? '<textarea id="' + id + '" rows="4" maxlength="3000"></textarea>'
+      : '<input type="text" id="' + id + '" maxlength="300" autocomplete="off">';
+    return '<div class="sv-q" data-q="' + q.id + '"><label class="sv-label" for="' + id + '">' + head + "</label>" + help + input + "</div>";
+  }
+  // a kitöltött válaszok összegyűjtése; a hiányzó kötelezőket is visszaadja
+  function svCollect(){
+    var out = {}, missing = [], answered = 0;
+    $$("#sv-questions [data-q]").forEach(function(box){
+      var q = SV.byId[box.getAttribute("data-q")], v = null, other = "", needOther = false;
+      if (q.kind === "single" || q.kind === "multi"){
+        var picked = $$("input:checked", box).map(function(x){ return x.value; });
+        var oth = $("[data-other]", box);
+        needOther = picked.indexOf("__other__") >= 0;
+        if (oth){ oth.hidden = !needOther; other = oth.value.trim(); }
+        v = q.kind === "single" ? (picked[0] || null) : (picked.length ? picked : null);
+      } else if (q.kind === "scale"){
+        var sc = $(".sv-scale", box);
+        v = sc.classList.contains("untouched") ? null : Number($("input", box).value);
+      } else {
+        v = $("input,textarea", box).value.trim() || null;
+      }
+      var ok = v !== null && !(needOther && !other);
+      if (ok) answered++;
+      box.classList.toggle("done", ok);
+      if (ok) box.classList.remove("bad");
+      if (!ok && q.required) missing.push(box);
+      out[q.id] = { value: v, other: other };
+    });
+    return { out: out, missing: missing, answered: answered };
+  }
+  function svProgress(){
+    var c = svCollect(), total = SV.qs.length;
+    $("#sv-bar").style.width = (total ? Math.round(100 * c.answered / total) : 0) + "%";
+    $("#sv-count").textContent = c.answered + " / " + total + " kérdés megválaszolva" + (c.missing.length ? " · még " + c.missing.length + " kötelező" : " · minden kötelező kész");
+  }
+  function svTouch(e){
+    var sc = e.target.closest && e.target.closest(".sv-scale");
+    if (sc){
+      sc.classList.remove("untouched");
+      $("output", sc).textContent = $("input", sc).value;
+    }
+    svProgress();
+  }
+  ["input", "change"].forEach(function(t){ $("#form-survey").addEventListener(t, svTouch); });
+  $("#form-survey").addEventListener("pointerdown", function(e){
+    // a csúszkára kattintás akkor is válasz, ha a középső értéken marad
+    if (e.target.matches && e.target.matches('.sv-scale input[type="range"]')) setTimeout(function(){ svTouch(e); }, 0);
+  });
+  $("#form-survey").addEventListener("submit", function(e){
+    e.preventDefault();
+    var msg = $("#sv-form-msg"); say(msg, "");
+    if (SV.preview) return say(msg, "Előnézetben nem lehet beküldeni.");
+    var c = svCollect();
+    if (c.missing.length){
+      c.missing.forEach(function(b){ b.classList.add("bad"); });
+      c.missing[0].scrollIntoView({ behavior: "smooth", block: "center" });
+      return say(msg, c.missing.length === 1 ? "Még egy kötelező kérdés hiányzik (pirossal jelöltük)." : "Még " + c.missing.length + " kötelező kérdés hiányzik (pirossal jelöltük).");
+    }
+    if (!$("#sv-consent").checked) return say(msg, "A beküldéshez pipáld ki a hozzájárulást.");
+    var secs = Math.round((Date.now() - SV.started) / 1000);
+    busy($("#sv-submit"), async function(){
+      var r = await sb.rpc("submit_survey", { p_answers: c.out, p_duration: secs, p_source: TRACK.source() || null, p_hp: $("#sv-hp").value });
+      if (r.error) return say(msg, huErr(r.error));
+      TRACK.event("survey_submit");
+      say($("#sv-msg"), "");
+      svShowDone(r.data && r.data.code);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      $("#sv-done h2").focus({ preventScroll: true });
+    });
+  });
+  $("#sv-share").addEventListener("click", async function(){
+    var url = location.origin + location.pathname + "?utm_source=ajanlas";
+    var text = "Töltsd ki te is az Üres Kézzel kérdőívét, és kapsz egy " + surveyPct() + "%-os kupont a fesztiválcsomagjukra:";
+    try {
+      if (navigator.share) return await navigator.share({ title: "Üres Kézzel", text: text, url: url });
+      await navigator.clipboard.writeText(text + " " + url);
+      say($("#sv-msg"), "A link a vágólapra került, illeszd be a barátaidnak.", "ok");
+    } catch (x) { /* a megosztást a felhasználó bezárta */ }
+  });
+
+  /* ---------- Admin: Kérdőív ---------- */
+  var SVA = { qs: [] };
+  async function renderSurveyAdmin(){
+    var on = surveyOpen();
+    $("#sva-dot").classList.toggle("on", on);
+    $("#sva-state").textContent = on ? "A kérdőív élesben fut" : "A kérdőív ki van kapcsolva";
+    $("#sva-toggle").textContent = on ? "Kérdőív leállítása" : "Kérdőív indítása";
+    $("#sva-toggle").classList.toggle("btn-primary", !on);
+    $("#sva-toggle").classList.toggle("btn-ghost", on);
+    $("#sva-title").value = S("survey_title") || "";
+    $("#sva-intro").value = S("survey_intro") || "";
+    $("#sva-discount").value = surveyPct();
+    $("#sva-stats").textContent = "Betöltés…";
+    var r = await Promise.all([
+      sb.from("survey_questions").select("*").order("sort").order("created_at"),
+      sb.from("survey_responses").select("id", { count: "exact", head: true }),
+      sb.from("coupons").select("id,email_sent_at")
+    ]);
+    if (r[0].error) return say($("#admin-msg"), huErr(r[0].error));
+    SVA.qs = r[0].data;
+    var sent = (r[2].data || []).filter(function(c){ return c.email_sent_at; }).length;
+    $("#sva-stats").textContent = (on ? "Bárki kitöltheti, aki regisztrált. " : "Csak előnézetben látod, a látogatóknak nem jelenik meg. ") +
+      (r[1].count || 0) + " kitöltés · " + (r[2].data || []).length + " kupon, ebből " + sent + " e-mail elküldve · " +
+      SVA.qs.filter(function(q){ return q.active; }).length + " aktív kérdés";
+    drawSurveyEditors();
+  }
+  function drawSurveyEditors(){
+    $("#sva-list").innerHTML = SVA.qs.map(function(q, i){
+      var kinds = Object.keys(KIND_LABEL).map(function(k){ return '<option value="' + k + '"' + (q.kind === k ? " selected" : "") + ">" + KIND_LABEL[k] + "</option>"; }).join("");
+      var scales = [5, 7, 10].map(function(n){ return '<option value="' + n + '"' + (q.scale_max === n ? " selected" : "") + ">1–" + n + "</option>"; }).join("");
+      var choice = q.kind === "single" || q.kind === "multi";
+      return '<div class="editor' + (q.active ? "" : " off") + '" data-qid="' + q.id + '">' +
+        '<div class="head"><span><b>' + (i + 1) + '. kérdés</b><span class="qtype">' + (q.active ? "aktív" : "kikapcsolva") + "</span></span>" +
+        '<span class="btn-row" style="margin:0"><button type="button" class="btn btn-ghost btn-sm" data-act="up" aria-label="Feljebb"' + (i ? "" : " disabled") + ">↑</button>" +
+        '<button type="button" class="btn btn-ghost btn-sm" data-act="down" aria-label="Lejjebb"' + (i < SVA.qs.length - 1 ? "" : " disabled") + ">↓</button></span></div>" +
+        '<div class="field"><label>Kérdés<input name="label" maxlength="300" value="' + esc(q.label) + '"></label></div>' +
+        '<div class="row2"><div class="field"><label>Típus<select name="kind">' + kinds + "</select></label></div>" +
+        '<div class="field"><label>Segédszöveg (nem kötelező)<input name="help" maxlength="500" value="' + esc(q.help) + '"></label></div></div>' +
+        '<div class="field" data-for="choice"' + (choice ? "" : " hidden") + '><label>Válaszlehetőségek, soronként egy<textarea name="options" rows="5">' + esc((q.options || []).join("\n")) + "</textarea></label></div>" +
+        '<div class="row2" data-for="scale"' + (q.kind === "scale" ? "" : " hidden") + '><div class="field"><label>Skála<select name="scale_max">' + scales + "</select></label></div>" +
+        '<div class="field"><label>Felirat a bal végén<input name="min_label" maxlength="60" value="' + esc(q.min_label) + '" placeholder="pl. Egyáltalán nem"></label></div>' +
+        '<div class="field"><label>Felirat a jobb végén<input name="max_label" maxlength="60" value="' + esc(q.max_label) + '" placeholder="pl. Nagyon"></label></div></div>' +
+        '<div class="checks"><span data-for="choice"' + (choice ? "" : " hidden") + ">" + checkbox("allow_other", "„Egyéb” (saját válasz) lehetőség", q.allow_other) + "</span>" +
+        checkbox("required", "Kötelező", q.required) + checkbox("active", "Aktív (látszik a kérdőívben)", q.active) + "</div>" +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-act="save">Mentés</button>' +
+        '<button type="button" class="btn btn-ghost btn-danger btn-sm" data-act="del">Törlés</button></div></div>';
+    }).join("") || '<p class="muted">Még nincs kérdés.</p>';
+  }
+  $("#sva-list").addEventListener("change", function(e){
+    if (e.target.name !== "kind") return;
+    var ed = e.target.closest(".editor"), k = e.target.value, choice = k === "single" || k === "multi";
+    $$('[data-for="choice"]', ed).forEach(function(x){ x.hidden = !choice; });
+    $$('[data-for="scale"]', ed).forEach(function(x){ x.hidden = k !== "scale"; });
+  });
+  $("#sva-list").addEventListener("click", function(e){
+    var btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    var ed = btn.closest(".editor"), id = ed.getAttribute("data-qid"), act = btn.getAttribute("data-act");
+    var idx = SVA.qs.findIndex(function(q){ return q.id === id; });
+    busy(btn, async function(){
+      if (act === "up" || act === "down"){
+        var other = SVA.qs[act === "up" ? idx - 1 : idx + 1];
+        if (!other) return;
+        var a = SVA.qs[idx].sort, b = other.sort;
+        if (a === b){ a = idx * 10; b = (act === "up" ? idx - 1 : idx + 1) * 10; }
+        var r1 = await sb.from("survey_questions").update({ sort: b }).eq("id", id);
+        var r2 = await sb.from("survey_questions").update({ sort: a }).eq("id", other.id);
+        if (r1.error || r2.error) return say($("#admin-msg"), huErr(r1.error || r2.error));
+        return renderSurveyAdmin();
+      }
+      if (act === "del"){
+        if (!confirm("Biztosan törlöd ezt a kérdést? A már beküldött válaszok megmaradnak, de ha már vannak kitöltések, inkább kapcsold ki.")) return;
+        var d = await sb.from("survey_questions").delete().eq("id", id);
+        if (d.error) return say($("#admin-msg"), huErr(d.error));
+        say($("#admin-msg"), "A kérdés törölve.", "ok");
+        return renderSurveyAdmin();
+      }
+      var f = function(n){ return ed.querySelector('[name="' + n + '"]'); };
+      var kind = f("kind").value, label = f("label").value.trim();
+      var opts = lines(f("options").value);
+      if (!label) return say($("#admin-msg"), "A kérdés szövege nem lehet üres.");
+      if ((kind === "single" || kind === "multi") && opts.length < 2 && !f("allow_other").checked) return say($("#admin-msg"), "Feleletválasztós kérdéshez legalább két válaszlehetőség kell.");
+      if (opts.length > 30) return say($("#admin-msg"), "Legfeljebb 30 válaszlehetőség lehet.");
+      var row = { label: label, kind: kind, help: f("help").value.trim(), options: opts, allow_other: f("allow_other").checked,
+        scale_min: 1, scale_max: parseInt(f("scale_max").value, 10) || 10, min_label: f("min_label").value.trim(), max_label: f("max_label").value.trim(),
+        required: f("required").checked, active: f("active").checked };
+      var r = await sb.from("survey_questions").update(row).eq("id", id).select();
+      if (r.error || !r.data.length) return say($("#admin-msg"), r.error ? huErr(r.error) : "Nem sikerült menteni.");
+      say($("#admin-msg"), "A kérdés el van mentve" + (row.active ? ", és már látszik a kérdőívben." : " (kikapcsolva, a kérdőívben nem látszik)."), "ok");
+      renderSurveyAdmin();
+    });
+  });
+  $("#sva-add").addEventListener("click", function(){
+    busy($("#sva-add"), async function(){
+      var max = SVA.qs.reduce(function(m, q){ return Math.max(m, q.sort || 0); }, 0);
+      var r = await sb.from("survey_questions").insert({ sort: max + 10, kind: "single", label: "Új kérdés", options: ["Igen", "Nem"], active: false, required: true }).select();
+      if (r.error) return say($("#admin-msg"), huErr(r.error));
+      await renderSurveyAdmin();
+      say($("#admin-msg"), "Új kérdés a lista végén. Írd át, pipáld be az „Aktív” mezőt, és mentsd el.", "ok");
+      var last = $("#sva-list .editor:last-child");
+      if (last){ last.scrollIntoView({ behavior: "smooth", block: "center" }); var inp = last.querySelector('[name="label"]'); if (inp) inp.select(); }
+    });
+  });
+  $("#sva-toggle").addEventListener("click", function(){
+    var on = surveyOpen();
+    if (!on && !confirm("Biztosan elindítod a kérdőívet? Ettől kezdve a főoldalon megjelenik, bárki kitöltheti, és kitöltéskor kuponkódot kap e-mailben.")) return;
+    if (on && !confirm("Biztosan leállítod a kérdőívet? A már kiküldött kuponok érvényesek maradnak.")) return;
+    busy($("#sva-toggle"), async function(){
+      var r = await sb.from("settings").upsert([{ key: "survey_open", value: on ? "false" : "true" }]).select();
+      if (r.error || !r.data.length) return say($("#admin-msg"), r.error ? saveErr(r.error) : "Nem sikerült menteni.");
+      await loadContent();
+      say($("#admin-msg"), on ? "A kérdőív leállítva." : "A kérdőív elindult, a főoldalon már látszik.", "ok");
+    }).then(renderSurveyAdmin); // a busy() a végén visszaírja a régi feliratot, ezért utána rajzolunk
+  });
+  $("#sva-texts").addEventListener("submit", function(e){
+    e.preventDefault();
+    var pct = Math.max(1, Math.min(50, parseInt($("#sva-discount").value, 10) || 10));
+    var rows = [{ key: "survey_title", value: $("#sva-title").value.trim() }, { key: "survey_intro", value: $("#sva-intro").value.trim() }, { key: "survey_discount", value: String(pct) }];
+    busy($("#sva-texts [type=submit]"), async function(){
+      var r = await sb.from("settings").upsert(rows).select();
+      if (r.error || !r.data.length) return say($("#admin-msg"), r.error ? saveErr(r.error) : "Nem sikerült menteni.");
+      await loadContent();
+      renderSurveyAdmin();
+      say($("#admin-msg"), "A kérdőív szövegei el vannak mentve.", "ok");
+    });
+  });
+
+  /* ---------- Admin: Kuponok ---------- */
+  var CP = [];
+  async function loadCoupons(){
+    $("#cp-count").textContent = "Betöltés…";
+    var r = await sb.rpc("admin_coupons");
+    if (r.error){ $("#cp-count").textContent = ""; return say($("#admin-msg"), huErr(r.error)); }
+    CP = r.data || [];
+    drawCoupons();
+  }
+  function cpFiltered(){
+    var q = $("#cp-search").value.trim().toLowerCase();
+    return CP.filter(function(c){ return !q || [c.code, c.full_name, c.email].join(" ").toLowerCase().indexOf(q) >= 0; });
+  }
+  function drawCoupons(){
+    var list = cpFiltered();
+    $("#cp-count").textContent = CP.length + " kupon · " + CP.filter(function(c){ return c.email_sent_at; }).length + " e-mail elküldve · " +
+      CP.filter(function(c){ return c.used_at; }).length + " beváltva";
+    $("#cp-table tbody").innerHTML = list.length ? list.map(function(c){
+      return "<tr><td><b>" + esc(c.code) + "</b></td><td>" + esc(c.full_name || "") + "</td><td>" + esc(c.email || "") + "</td><td>" + c.percent + "%</td><td>" +
+        esc(fmtDate(c.created_at)) + "</td><td>" + (c.email_sent_at ? esc(fmtDate(c.email_sent_at)) : '<span class="muted">még nem</span>') + "</td><td>" +
+        (c.used_at ? esc(fmtDate(c.used_at)) : "–") + '</td><td><button type="button" class="btn btn-ghost btn-sm" data-resend="' + esc(c.id) + '">Újraküldés</button></td></tr>';
+    }).join("") : '<tr><td colspan="8" class="muted">Még nincs kupon. A kérdőív kitöltésekor jönnek létre.</td></tr>';
+  }
+  $("#cp-search").addEventListener("input", drawCoupons);
+  $("#cp-reload").addEventListener("click", loadCoupons);
+  $("#cp-table").addEventListener("click", function(e){
+    var b = e.target.closest("[data-resend]");
+    if (!b) return;
+    if (!confirm("Újraküldöd a kuponlevelet?")) return;
+    busy(b, async function(){
+      var r = await sb.rpc("resend_coupon_email", { c: b.getAttribute("data-resend") });
+      if (r.error) return say($("#admin-msg"), huErr(r.error));
+      say($("#admin-msg"), "A levél újraküldése elindult. Pár másodperc múlva frissítsd a listát.", "ok");
+    });
+  });
+  $("#cp-csv").addEventListener("click", function(){
+    downloadCsv("kuponok-" + new Date().toISOString().slice(0, 10) + ".csv", [["Kód", "Név", "E-mail", "Kedvezmény (%)", "Kitöltve", "E-mail elküldve", "Beváltva"]].concat(
+      cpFiltered().map(function(c){ return [c.code, c.full_name || "", c.email || "", c.percent, fmtDate(c.created_at), c.email_sent_at ? fmtDate(c.email_sent_at) : "", c.used_at ? fmtDate(c.used_at) : ""]; })));
   });
 
   /* ---------- Admin ---------- */
@@ -783,6 +1255,8 @@
     if (t === "settings") fillSettings();
     if (t === "checkin") renderCheckin(true);
     if (t === "log") loadLog();
+    if (t === "survey") renderSurveyAdmin();
+    if (t === "coupons") loadCoupons();
   }
   $$("[data-atab]").forEach(function(b){
     b.addEventListener("click", function(){ say($("#admin-msg"), ""); setAdminTab(b.getAttribute("data-atab")); });
@@ -913,12 +1387,18 @@
   });
 
   var SETTING_KEYS = ["kaucio_elso", "kaucio", "lemondasi_feltetelek"];
+  var SETTING_FLAGS = ["booking_open", "show_prices"];
   function fillSettings(){
     SETTING_KEYS.forEach(function(k){ $("#set-" + k).value = /^kaucio/.test(k) ? settingFt(k) : (DATA.SETTINGS[k] || ""); });
+    $("#set-booking_open").checked = bookingOpen();
+    $("#set-show_prices").checked = showPrices();
   }
   $("#settings-form").addEventListener("submit", function(e){
     e.preventDefault();
     var rows = SETTING_KEYS.map(function(k){ return { key: k, value: $("#set-" + k).value.trim() }; });
+    SETTING_FLAGS.forEach(function(k){ rows.push({ key: k, value: $("#set-" + k).checked ? "true" : "false" }); });
+    if ($("#set-booking_open").checked && !bookingOpen() &&
+        !confirm("Biztosan megnyitod a foglalást? Ettől kezdve bárki valódi foglalást adhat le. Előtte legyenek kész a lemondási feltételek, az ÁSZF és az adatkezelési tájékoztató.")) return;
     busy($("#settings-form [type=submit]"), async function(){
       var r = await sb.from("settings").upsert(rows).select();
       if (r.error || !r.data.length) return say($("#admin-msg"), r.error ? saveErr(r.error) : "Nem sikerült menteni.");
@@ -1070,7 +1550,7 @@
   });
 
   /* ---------- Admin: napló ---------- */
-  var LOG_TBL = { bookings: "Foglalás", packages: "Csomag", festivals: "Fesztivál", settings: "Beállítás", user_notes: "Megjegyzés", admins: "Admin-jog" };
+  var LOG_TBL = { bookings: "Foglalás", packages: "Csomag", festivals: "Fesztivál", settings: "Beállítás", user_notes: "Megjegyzés", admins: "Admin-jog", survey_questions: "Kérdőív-kérdés", coupons: "Kupon" };
   var LOG_ACT = { insert: "létrehozta", update: "módosította", delete: "törölte" };
   var LOG_FIELD = { status: "állapot", picked_up_at: "átvette", returned_at: "leadta", return_problem: "probléma", problem_note: "probléma leírása",
     name: "név", price: "ár", people: "létszám", items: "tartalom", featured: "legnépszerűbb", active: "aktív", sort: "sorrend",
@@ -1080,6 +1560,8 @@
     if (x.tbl === "bookings") return (d.full_name || "") + " · " + (d.festival || "");
     if (x.tbl === "settings") return d.key;
     if (x.tbl === "user_notes") return (d.note || "").slice(0, 60);
+    if (x.tbl === "survey_questions") return (d.label || "").slice(0, 70);
+    if (x.tbl === "coupons") return d.code || "";
     return d.name || x.record_id || "";
   }
   function logVal(v){
@@ -1145,6 +1627,7 @@
   window.addEventListener("uk:route", function(e){
     state.view = e.detail.view;
     state.params = e.detail.params;
+    TRACK.pageview("/" + (e.detail.key || ""));
     if (state.flash && state.flash.view !== state.view) state.flash = null;
     render();
   });
@@ -1174,7 +1657,7 @@
       }, 0);
     });
 
-    loadContent().catch(function(e){ console.warn(e); });
+    state.contentP = loadContent().catch(function(e){ console.warn(e); });
     var s = await sb.auth.getSession(); // ez cseréli be a ?code=… paramétert is belépésre
     await setUser(s.data.session);
     state.ready = true;
@@ -1202,7 +1685,11 @@
           ? "Megerősítve. Ha a másik címedre is jött levél, kattints abban is a linkre, a csere utána lép életbe."
           : "Az e-mail-címed frissült." };
       }
-      else if (state.user){ target = "#/foglalas"; }
+      else if (state.user){
+        await state.contentP;
+        var back = q.get("vissza");
+        target = "#/" + (BACK_OK.indexOf(back) >= 0 ? back : bookingOpen() ? "foglalas" : surveyOpen() ? "kerdoiv" : "fiokom");
+      }
       else state.flash = { view: "belepes", text: "Az e-mail-címed meg van erősítve. Most már be tudsz lépni.", kind: "ok" };
       history.replaceState(null, "", location.pathname);
       go(target);

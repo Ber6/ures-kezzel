@@ -438,6 +438,68 @@ footer a:hover{color:var(--paper)}
   .pkg-pick b{font-size:1.15rem}
   .form .btn{justify-self:stretch}
 }
+
+/* ---------- hamarosan, kérdőív, kupon ---------- */
+.soon-pill{display:inline-flex;align-items:center;gap:.55rem;margin:0 0 1.25rem;padding:.4rem 1rem;border-radius:999px;border:1px solid rgba(242,194,48,.5);background:rgba(15,22,51,.6);color:var(--lantern);font-weight:600;font-size:.95rem;letter-spacing:.01em}
+.soon-pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--lantern);box-shadow:0 0 0 0 rgba(242,194,48,.7);animation:soonPulse 2s infinite}
+@keyframes soonPulse{70%{box-shadow:0 0 0 10px rgba(242,194,48,0)}100%{box-shadow:0 0 0 0 rgba(242,194,48,0)}}
+@media (prefers-reduced-motion: reduce){.soon-pill::before{animation:none}}
+.plan .price small{display:block;font-family:var(--body);font-size:.95rem;font-weight:500;color:var(--muted);letter-spacing:0;margin-bottom:.35rem}
+.plan .price.tbd{font-size:2rem}
+.survey-promo{padding:clamp(3rem,8vh,6rem) 0}
+.promo-card{position:relative;max-width:860px;margin:0 auto;padding:clamp(1.75rem,5vw,3.5rem);border-radius:32px;border:1px solid rgba(242,194,48,.45);background:linear-gradient(135deg,rgba(242,194,48,.14),rgba(232,118,74,.10) 55%,rgba(16,23,52,.75));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
+.promo-card h2{font-size:clamp(2rem,4.5vw,3.4rem);max-width:18ch}
+.promo-card p{color:var(--paper);opacity:.88;max-width:56ch;margin:1rem 0 1.75rem;font-size:1.1rem}
+.promo-card .hint{opacity:1;font-size:.92rem;margin:1.25rem 0 0}
+.promo-badge{position:absolute;top:1.4rem;right:1.4rem;background:var(--ember);color:#fff;font-family:var(--display);font-weight:800;font-size:clamp(1.4rem,3vw,2rem);padding:.4rem 1rem;border-radius:999px;transform:rotate(5deg);box-shadow:0 10px 26px -8px rgba(232,118,74,.8)}
+@media (max-width:560px){.promo-badge{position:static;display:inline-block;margin-bottom:1rem}}
+.sv-card{max-width:760px}
+.sv-head{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);z-index:3;margin:-.25rem 0 1.5rem;padding:.75rem 0;background:linear-gradient(var(--night-2) 70%,transparent);border-radius:12px}
+.sv-progress{height:8px;border-radius:999px;background:rgba(244,241,234,.12);overflow:hidden}
+.sv-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lantern),var(--ember));border-radius:999px;transition:width .35s cubic-bezier(.2,.8,.2,1)}
+.sv-head .hint{margin-top:.5rem}
+.sv-q{border:1px solid var(--line);border-radius:22px;padding:clamp(1.1rem,3vw,1.6rem);background:rgba(15,22,51,.55);margin:0 0 1rem;transition:border-color .25s, background .25s}
+.sv-q.done{border-color:rgba(242,194,48,.45)}
+.sv-q.bad{border-color:var(--ember);background:rgba(232,118,74,.08)}
+.sv-q legend,.sv-q .sv-label{font-family:var(--display);font-weight:700;font-size:1.25rem;line-height:1.25;padding:0;margin:0 0 .35rem;display:block}
+.sv-q .sv-num{color:var(--lantern);margin-right:.4rem}
+.sv-q .req{color:var(--ember);margin-left:.2rem}
+.sv-q .hint{margin:0 0 .9rem}
+.sv-opts{display:grid;gap:.5rem}
+.sv-opt{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1.5px solid var(--line);border-radius:14px;cursor:pointer;transition:border-color .2s, background .2s}
+.sv-opt:hover{border-color:rgba(244,241,234,.4)}
+.sv-opt input{width:20px;height:20px;margin:0;accent-color:var(--lantern);flex:none}
+.sv-opt:has(input:checked){border-color:var(--lantern);background:rgba(242,194,48,.10)}
+.sv-other{margin-top:.5rem}
+.sv-q input[type=text],.sv-q textarea{width:100%;min-height:48px;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px;box-sizing:border-box}
+.sv-q input[type=text]:focus,.sv-q textarea:focus{outline:none;border-color:var(--lantern);box-shadow:0 0 0 3px rgba(242,194,48,.2)}
+.sv-scale{padding:.25rem .25rem 0}
+.sv-scale output{display:inline-flex;align-items:center;justify-content:center;min-width:3rem;height:3rem;border-radius:999px;background:var(--lantern);color:var(--ink);font-family:var(--display);font-weight:800;font-size:1.4rem;margin-bottom:.75rem}
+.sv-scale.untouched output{background:rgba(244,241,234,.12);color:var(--muted);font-size:.9rem;font-family:var(--body);font-weight:600;padding:0 1rem}
+.sv-scale input[type=range]{width:100%;accent-color:var(--lantern);height:32px;cursor:pointer}
+.sv-scale.untouched input[type=range]{opacity:.6}
+.sv-ticks{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);padding:0 .35rem}
+.sv-ends{display:flex;justify-content:space-between;gap:1rem;font-size:.9rem;color:var(--paper);opacity:.8;margin-top:.35rem}
+fieldset.sv-q{min-width:0}
+fieldset.sv-q > legend{float:left;width:100%}
+fieldset.sv-q > legend ~ *{clear:both}
+.hp{position:absolute !important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.coupon-code{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:.08em;padding:.25rem .7rem;border-radius:10px;border:1.5px dashed var(--lantern);color:var(--lantern);background:rgba(242,194,48,.08)}
+.soon-box{border:1px solid rgba(242,194,48,.45);border-radius:20px;padding:1.25rem 1.4rem;background:rgba(242,194,48,.08)}
+.soon-box h2{font-size:clamp(1.6rem,3.5vw,2.2rem);margin:0 0 .5rem}
+.soon-box p{color:var(--paper);opacity:.88;margin:0 0 1rem}
+#admin-panel .tabs{flex-wrap:wrap;border-radius:22px}
+.sva-status{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;padding:1.1rem 1.25rem;border:1px solid var(--line);border-radius:20px;background:rgba(15,22,51,.55);margin:0 0 1.5rem}
+.sva-status b{font-family:var(--display);font-size:1.35rem}
+.sva-status .muted{margin:.2rem 0 0}
+.state-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:.55rem;background:#7c84a8;vertical-align:middle}
+.state-dot.on{background:#5fd38a;box-shadow:0 0 0 4px rgba(95,211,138,.2)}
+.sv-editors{display:grid;gap:1rem;margin:1rem 0 1.25rem}
+.sv-editors .editor{grid-template-columns:1fr}
+.sv-editors .editor .row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem}
+.sv-editors .editor .head b{font-size:1.1rem}
+.sv-editors .qtype{font-size:.8rem;font-weight:600;padding:.2rem .6rem;border-radius:999px;background:var(--ink);color:var(--lantern);margin-left:.5rem}
+.toggle-row{display:grid;gap:.75rem;padding:1rem 1.15rem;border:1px solid var(--line);border-radius:18px;background:rgba(15,22,51,.45)}
 </style>
 </head>
 <body>
@@ -462,7 +524,7 @@ footer a:hover{color:var(--paper)}
       <li data-auth="admin" hidden><a href="#/admin">Admin</a></li>
       <li data-auth="in" hidden><button type="button" class="navbtn" id="logout">Kijelentkezés</button></li>
     </ul>
-    <a class="btn btn-primary" href="#/arak">Foglalás</a>
+    <a class="btn btn-primary" href="#/arak" data-cta="nav">Foglalás</a>
     <button type="button" class="burger" id="burger" aria-expanded="false" aria-controls="nav-menu" aria-label="Menü">
       <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -476,10 +538,11 @@ footer a:hover{color:var(--paper)}
   <div class="view" data-view="home">
     <section class="hero" data-cam="0">
       <div class="wrap">
+        <p class="soon-pill" data-soon hidden>Hamarosan indulunk</p>
         <h1 id="headline">Gyere üres kézzel.</h1>
         <p class="sub">Bérelj komplett fesztiválcsomagot sátorral, matraccal, székkel, lámpával és powerbankkal. A bejárat előtt átveszed, az utolsó napon ugyanott leadod.</p>
         <div class="ctas">
-          <a class="btn btn-primary" href="#/arak">Csomagot választok</a>
+          <a class="btn btn-primary" href="#/arak" data-cta="hero">Csomagot választok</a>
           <a class="btn btn-ghost" href="#/folyamat">Hogyan működik?</a>
         </div>
       </div>
@@ -508,8 +571,8 @@ footer a:hover{color:var(--paper)}
     <section class="prices" id="csomagok" data-cam="3">
       <div class="wrap">
         <div class="head">
-          <h2 class="reveal">Válaszd ki a csomagod.</h2>
-          <p class="lede" style="margin:0">Az árak a teljes fesztiválra szólnak, nem napidíjasak.</p>
+          <h2 class="reveal" data-prices-title>Válaszd ki a csomagod.</h2>
+          <p class="lede" style="margin:0" data-prices-lede>Az árak a teljes fesztiválra szólnak, nem napidíjasak.</p>
         </div>
         <div class="plans"></div>
         <div class="extras">
@@ -519,12 +582,24 @@ footer a:hover{color:var(--paper)}
       </div>
     </section>
 
+    <section class="survey-promo" id="kerdoiv-promo" hidden>
+      <div class="wrap">
+        <div class="promo-card">
+          <span class="promo-badge" data-survey-badge>−10%</span>
+          <h2 data-survey-title>Segíts 2 percben, és kapsz kedvezményt!</h2>
+          <p data-survey-intro></p>
+          <a class="btn btn-primary" href="#/kerdoiv" data-track="cta_survey">Kitöltöm, 2–3 perc</a>
+          <p class="hint">A kitöltéshez be kell lépned, hogy a kuponkódot a fiókodhoz tudjuk kötni. Szólj a barátaidnak is: mindenki saját kódot kap.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="final" id="zaro" data-cam="6">
       <div class="wrap">
         <h2 class="reveal">Idén gyere üres kézzel.</h2>
-        <p>Foglald le a csomagod, és csak a jókedvet hozd.</p>
+        <p id="final-lede">Foglald le a csomagod, és csak a jókedvet hozd.</p>
         <div class="ctas">
-          <a class="btn btn-primary" href="#/arak">Csomagot választok</a>
+          <a class="btn btn-primary" href="#/arak" data-cta="final">Csomagot választok</a>
           <a class="btn btn-ghost" href="https://www.instagram.com/ures.kezzel/" target="_blank" rel="noopener">Kövess Instagramon: @ures.kezzel</a>
         </div>
       </div>
@@ -639,6 +714,44 @@ footer a:hover{color:var(--paper)}
     </section>
   </div>
 
+  <!-- ================= KÉRDŐÍV ================= -->
+  <div class="view" data-view="kerdoiv" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h1 class="ptitle" id="sv-title">Kérdőív.</h1>
+        <p class="lede" id="sv-intro"></p>
+        <div class="card sv-card">
+          <p class="muted" data-loading>Betöltés…</p>
+          <div data-body hidden>
+            <div id="sv-msg" class="msg" role="status" aria-live="polite" hidden style="margin-bottom:1rem"></div>
+            <div id="sv-closed" hidden>
+              <p>A kérdőív most nem érhető el. Kövess minket Instagramon, ott szólunk, amikor újra kitölthető.</p>
+              <div class="btn-row"><a class="btn btn-primary" href="#/">Vissza a főoldalra</a></div>
+            </div>
+            <form id="form-survey" class="form" novalidate hidden>
+              <div class="sv-head">
+                <div class="sv-progress" aria-hidden="true"><span id="sv-bar"></span></div>
+                <p class="hint" id="sv-count"></p>
+              </div>
+              <div id="sv-questions"></div>
+              <div class="hp" aria-hidden="true"><label>Ezt a mezőt hagyd üresen<input id="sv-hp" type="text" tabindex="-1" autocomplete="off"></label></div>
+              <label class="check"><input id="sv-consent" type="checkbox"><span>Hozzájárulok, hogy az Üres Kézzel csapat a válaszaimat a szolgáltatás fejlesztéséhez felhasználja az <a href="#/adatkezeles" target="_blank">adatkezelési tájékoztató</a> szerint. A hozzájárulást bármikor visszavonhatom.</span></label>
+              <div id="sv-form-msg" class="msg" role="status" aria-live="polite" hidden></div>
+              <button class="btn btn-primary" type="submit" id="sv-submit">Beküldöm, és kérem a kupont</button>
+            </form>
+            <div id="sv-done" class="done" hidden>
+              <h2 tabindex="-1">Köszönjük, sokat segítettél!</h2>
+              <p class="sum">A kuponkódod: <span class="coupon-code" id="sv-code"></span></p>
+              <p>Elküldtük e-mailben is, és a Fiókom oldalon is megtalálod. A szolgáltatás indulása után, az első foglalásodnál tudod beváltani.</p>
+              <p>Ha a barátaid is fesztiválra mennek, küldd el nekik az oldalt: ők is kitölthetik, és ők is kapnak saját kódot.</p>
+              <div class="btn-row"><button type="button" class="btn btn-primary" id="sv-share">Link küldése a barátaimnak</button><a class="btn btn-ghost" href="#/fiokom">Fiókom</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <!-- ================= BELÉPÉS / REGISZTRÁCIÓ ================= -->
   <div class="view" data-view="belepes" hidden>
     <section class="app-sec subpage">
@@ -654,6 +767,7 @@ footer a:hover{color:var(--paper)}
           <form id="form-login" class="form">
             <div class="field"><label for="login-email">E-mail-cím</label><input id="login-email" type="email" autocomplete="email" required></div>
             <div class="field"><label for="login-password">Jelszó</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+            <div class="captcha" data-captcha="login" hidden></div>
             <div id="login-msg" class="msg" role="status" aria-live="polite" hidden></div>
             <button class="btn btn-primary" type="submit">Belépés</button>
             <button class="linkbtn" type="button" id="to-reset">Elfelejtett jelszó</button>
@@ -665,6 +779,7 @@ footer a:hover{color:var(--paper)}
             <div class="field"><label for="signup-password">Jelszó</label><input id="signup-password" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Legalább 8 karakter.</p></div>
             <label class="check"><input id="signup-consent" type="checkbox" required><span>Elolvastam az <a href="#/adatkezeles">adatkezelési tájékoztatót</a>, és elmúltam 18 éves.</span></label>
             <label class="check"><input id="signup-newsletter" type="checkbox"><span>Kérek hírlevelet az új fesztiválokról és akciókról. Bármikor leiratkozhatsz a Fiókom oldalon.</span></label>
+            <div class="captcha" data-captcha="signup" hidden></div>
             <div id="signup-msg" class="msg" role="status" aria-live="polite" hidden></div>
             <button class="btn btn-primary" type="submit">Regisztrálok</button>
           </form>
@@ -673,6 +788,7 @@ footer a:hover{color:var(--paper)}
             <h2>Új jelszó kérése</h2>
             <p class="muted" style="margin:0">Add meg az e-mail-címed, és küldünk egy linket, amivel új jelszót állíthatsz be.</p>
             <div class="field"><label for="reset-email">E-mail-cím</label><input id="reset-email" type="email" autocomplete="email" required></div>
+            <div class="captcha" data-captcha="reset" hidden></div>
             <div id="reset-msg" class="msg" role="status" aria-live="polite" hidden></div>
             <button class="btn btn-primary" type="submit">Link küldése</button>
             <button class="linkbtn" type="button" id="back-login">Vissza a belépéshez</button>
@@ -711,11 +827,18 @@ footer a:hover{color:var(--paper)}
         <div class="card">
           <p class="muted" data-loading>Betöltés…</p>
           <div data-body hidden>
+            <div id="bk-closed" class="soon-box" hidden>
+              <h2>Hamarosan indulunk!</h2>
+              <p>A foglalás még nem nyílt meg. Ha regisztráltál, e-mailben szólunk, amikor lehet foglalni.</p>
+              <div class="btn-row" style="margin:0"><a class="btn btn-primary" href="#/kerdoiv" id="bk-closed-survey" hidden>Kérdőív, 10% kedvezményért</a><a class="btn btn-ghost" href="#/arak">Csomagok</a></div>
+            </div>
+            <p class="msg ok" id="bk-admin-note" hidden>A foglalás le van zárva. Adminként tesztelni tudsz, de ez valódi foglalásként kerül az adatbázisba.</p>
             <form id="form-booking" class="form">
               <p id="bk-hello" style="margin:0"></p>
               <div class="field" id="bk-name-field" hidden><label for="bk-name">Teljes név</label><input id="bk-name" type="text" autocomplete="name" minlength="2" maxlength="100"></div>
               <div class="field"><label for="bk-festival">Fesztivál</label><select id="bk-festival" required></select></div>
               <fieldset class="pkg-pick" id="bk-packages"><legend>Csomag</legend></fieldset>
+              <div class="field"><label for="bk-coupon">Kuponkód (nem kötelező)</label><input id="bk-coupon" type="text" maxlength="20" autocomplete="off" placeholder="UK-XXXXXXXX" style="text-transform:uppercase"><p class="hint" id="bk-coupon-hint" hidden></p></div>
               <p class="hint" id="bk-deposit" hidden></p>
               <div id="bk-msg" class="msg" role="status" aria-live="polite" hidden></div>
               <button class="btn btn-primary" type="submit">Előfoglalás leadása</button>
@@ -767,7 +890,9 @@ footer a:hover{color:var(--paper)}
               <div><dt>E-mail-cím</dt><dd id="acct-email"></dd></div>
               <div><dt>Regisztráció</dt><dd id="acct-created"></dd></div>
               <div><dt>Foglalások</dt><dd id="acct-bookings"></dd></div>
+              <div id="acct-coupon-row" hidden><dt>Kuponom</dt><dd id="acct-coupon"></dd></div>
             </dl>
+            <p class="soon-box" id="acct-survey" hidden style="margin-top:1.25rem">Töltsd ki a rövid kérdőívünket, és kapsz egy kuponkódot az első foglalásodra. <a href="#/kerdoiv">Kitöltöm</a></p>
 
             <details class="acct-sec">
               <summary>Név módosítása<span class="pm"><svg viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></span></summary>
@@ -837,6 +962,8 @@ footer a:hover{color:var(--paper)}
               <div class="tabs" role="tablist" aria-label="Admin">
                 <button type="button" role="tab" data-atab="bookings" aria-selected="true">Foglalások</button>
                 <button type="button" role="tab" data-atab="checkin" aria-selected="false">Helyszín</button>
+                <button type="button" role="tab" data-atab="survey" aria-selected="false">Kérdőív</button>
+                <button type="button" role="tab" data-atab="coupons" aria-selected="false">Kuponok</button>
                 <button type="button" role="tab" data-atab="packages" aria-selected="false">Csomagok</button>
                 <button type="button" role="tab" data-atab="festivals" aria-selected="false">Fesztiválok</button>
                 <button type="button" role="tab" data-atab="settings" aria-selected="false">Beállítások</button>
@@ -883,6 +1010,39 @@ footer a:hover{color:var(--paper)}
                   <tbody></tbody>
                 </table>
               </div>
+              </div>
+
+              <div data-apanel="survey" hidden>
+                <div class="sva-status">
+                  <div><span class="state-dot" id="sva-dot"></span><b id="sva-state">Kérdőív</b><p class="muted" id="sva-stats"></p></div>
+                  <div class="btn-row" style="margin:0">
+                    <a class="btn btn-ghost btn-sm" href="#/kerdoiv?elonezet=1" target="_blank" rel="noopener">Előnézet</a>
+                    <button type="button" class="btn btn-primary btn-sm" id="sva-toggle">Kérdőív indítása</button>
+                  </div>
+                </div>
+                <form id="sva-texts" class="form" style="max-width:720px">
+                  <div class="field"><label for="sva-title">Cím (a főoldalon és a kérdőív tetején)</label><input id="sva-title" maxlength="120"></div>
+                  <div class="field"><label for="sva-intro">Bevezető szöveg</label><textarea id="sva-intro" rows="3" maxlength="600"></textarea></div>
+                  <div class="field" style="max-width:260px"><label for="sva-discount">Kedvezmény a kitöltésért (%)</label><input id="sva-discount" type="number" min="1" max="50"><p class="hint">Csak az új kuponokra vonatkozik, a már kiküldötteket nem módosítja.</p></div>
+                  <button class="btn btn-primary btn-sm" type="submit">Szövegek mentése</button>
+                </form>
+                <h3 class="sub" style="margin-top:2rem">Kérdések</h3>
+                <p class="muted">Mentés után azonnal élesek. A beküldött válaszoknál a kérdés akkori szövege marad meg, így a régi adatok nem vesznek el. Ha már vannak kitöltések, egy kérdést inkább kapcsolj ki, mint töröld. Az „Egyéb” lehetőségnél a kitöltő saját választ írhat be.</p>
+                <div id="sva-list" class="sv-editors"></div>
+                <div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" id="sva-add">+ Új kérdés</button></div>
+              </div>
+
+              <div data-apanel="coupons" hidden>
+                <div class="toolbar">
+                  <div class="field"><label for="cp-search">Keresés (név, e-mail, kód)</label><input id="cp-search" type="search"></div>
+                  <div class="btn-row" style="margin:0">
+                    <button type="button" class="btn btn-ghost btn-sm" id="cp-reload">Frissítés</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="cp-csv">CSV letöltése</button>
+                  </div>
+                </div>
+                <p class="muted" id="cp-count"></p>
+                <div class="tbl-wrap"><table class="tbl" id="cp-table"><thead><tr><th>Kód</th><th>Név</th><th>E-mail</th><th>%</th><th>Kitöltve</th><th>E-mail elküldve</th><th>Beváltva</th><th></th></tr></thead><tbody></tbody></table></div>
+                <p class="muted">Az élő lista a Google Sheetben is megvan (Kérdőívek mappa, Kuponok lap).</p>
               </div>
 
               <div data-apanel="packages" hidden>
@@ -940,7 +1100,7 @@ footer a:hover{color:var(--paper)}
                 <div class="toolbar">
                   <div class="field"><label for="log-filter">Mi változott</label><select id="log-filter">
                     <option value="">Minden</option><option value="bookings">Foglalások</option><option value="packages">Csomagok</option>
-                    <option value="festivals">Fesztiválok</option><option value="settings">Beállítások</option><option value="user_notes">Megjegyzések</option><option value="admins">Adminok</option>
+                    <option value="festivals">Fesztiválok</option><option value="settings">Beállítások</option><option value="user_notes">Megjegyzések</option><option value="survey_questions">Kérdőív</option><option value="coupons">Kuponok</option><option value="admins">Adminok</option>
                   </select></div>
                   <button type="button" class="btn btn-ghost btn-sm" id="log-reload">Frissítés</button>
                 </div>
@@ -950,6 +1110,11 @@ footer a:hover{color:var(--paper)}
 
               <div data-apanel="settings" hidden>
                 <form id="settings-form" class="form" style="max-width:580px">
+                  <div class="toggle-row">
+                    <b>A weboldal állapota</b>
+                    <label class="check"><input id="set-booking_open" type="checkbox"><span><b>Foglalás nyitva.</b> Amíg ki van kapcsolva, az oldalon „Hamarosan” látszik, és az adatbázis minden foglalást elutasít.</span></label>
+                    <label class="check"><input id="set-show_prices" type="checkbox"><span><b>Várható árak mutatása</b> („várhatóan X Ft-tól”). Kikapcsolva a csomagok ár nélkül látszanak, így az árak nem befolyásolják a kérdőívben adott árbecslést.</span></label>
+                  </div>
                   <div class="field-row">
                     <div class="field"><label for="set-kaucio_elso">Kaució első bérlésnél (Ft)</label><input id="set-kaucio_elso" type="number" min="0" step="1000"></div>
                     <div class="field"><label for="set-kaucio">Kaució rendes (Ft)</label><input id="set-kaucio" type="number" min="0" step="1000"></div>
@@ -1112,6 +1277,7 @@ footer a:hover{color:var(--paper)}
     "fesztivalok": {v:"fesztivalok", title:"Fesztiválok – Üres Kézzel"},
     "foglalas": {v:"foglalas", app:true, title:"Foglalás – Üres Kézzel"},
     "belepes":  {v:"belepes", app:true, title:"Belépés – Üres Kézzel"},
+    "kerdoiv":  {v:"kerdoiv", app:true, title:"Kérdőív – Üres Kézzel"},
     "uj-jelszo": {v:"uj-jelszo", app:true, nav:"belepes", title:"Új jelszó – Üres Kézzel"},
     "foglalasaim": {v:"foglalasaim", app:true, title:"Foglalásaim – Üres Kézzel"},
     "fiokom":   {v:"fiokom", app:true, title:"Fiókom – Üres Kézzel"},
