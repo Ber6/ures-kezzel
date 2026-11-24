@@ -768,13 +768,20 @@
     svProgress();
     if (!preview) TRACK.event("survey_view");
   }
+  // véletlen sorrend (az elsőnek felsorolt válasz így nem kap előnyt); a záró „Semmi / Még nem tudom / Nem…” jellegű válasz a végén marad
+  var SV_TAIL = /^(semmi|egyik sem|még nem|nem tudom|nem |ilyet nem)/i;
+  function svShuffle(list){
+    var a = list.slice(), tail = a.length && SV_TAIL.test(a[a.length - 1]) ? [a.pop()] : [];
+    for (var k = a.length - 1; k > 0; k--){ var j = Math.floor(Math.random() * (k + 1)), t = a[k]; a[k] = a[j]; a[j] = t; }
+    return a.concat(tail);
+  }
   function svQuestion(q, i){
     var id = "q-" + q.id;
     var head = '<span class="sv-num">' + (i + 1) + ".</span>" + esc(q.label) + (q.required ? '<span class="req" title="Kötelező">*</span>' : "");
     var help = q.help ? '<p class="hint">' + esc(q.help) + "</p>" : "";
     if (q.kind === "single" || q.kind === "multi"){
       var type = q.kind === "single" ? "radio" : "checkbox";
-      var opts = (q.options || []).map(function(o){
+      var opts = (q.shuffle ? svShuffle(q.options || []) : (q.options || [])).map(function(o){
         return '<label class="sv-opt"><input type="' + type + '" name="' + id + '" value="' + esc(o) + '"><span>' + esc(o) + "</span></label>";
       }).join("");
       if (q.allow_other) opts += '<label class="sv-opt"><input type="' + type + '" name="' + id + '" value="__other__"><span>Egyéb</span></label>' +
@@ -915,7 +922,8 @@
         '<div class="row2" data-for="scale"' + (q.kind === "scale" ? "" : " hidden") + '><div class="field"><label>Skála<select name="scale_max">' + scales + "</select></label></div>" +
         '<div class="field"><label>Felirat a bal végén<input name="min_label" maxlength="60" value="' + esc(q.min_label) + '" placeholder="pl. Egyáltalán nem"></label></div>' +
         '<div class="field"><label>Felirat a jobb végén<input name="max_label" maxlength="60" value="' + esc(q.max_label) + '" placeholder="pl. Nagyon"></label></div></div>' +
-        '<div class="checks"><span data-for="choice"' + (choice ? "" : " hidden") + ">" + checkbox("allow_other", "„Egyéb” (saját válasz) lehetőség", q.allow_other) + "</span>" +
+        '<div class="checks"><span data-for="choice"' + (choice ? "" : " hidden") + ">" + checkbox("allow_other", "„Egyéb” (saját válasz) lehetőség", q.allow_other) +
+          checkbox("shuffle", "Véletlen válaszsorrend (árnál, kornál ne)", q.shuffle) + "</span>" +
         checkbox("required", "Kötelező", q.required) + checkbox("active", "Aktív (látszik a kérdőívben)", q.active) + "</div>" +
         '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-act="save">Mentés</button>' +
         '<button type="button" class="btn btn-ghost btn-danger btn-sm" data-act="del">Törlés</button></div></div>';
@@ -956,7 +964,7 @@
       if (!label) return say($("#admin-msg"), "A kérdés szövege nem lehet üres.");
       if ((kind === "single" || kind === "multi") && opts.length < 2 && !f("allow_other").checked) return say($("#admin-msg"), "Feleletválasztós kérdéshez legalább két válaszlehetőség kell.");
       if (opts.length > 30) return say($("#admin-msg"), "Legfeljebb 30 válaszlehetőség lehet.");
-      var row = { label: label, kind: kind, help: f("help").value.trim(), options: opts, allow_other: f("allow_other").checked,
+      var row = { label: label, kind: kind, help: f("help").value.trim(), options: opts, allow_other: f("allow_other").checked, shuffle: f("shuffle").checked,
         scale_min: 1, scale_max: parseInt(f("scale_max").value, 10) || 10, min_label: f("min_label").value.trim(), max_label: f("max_label").value.trim(),
         required: f("required").checked, active: f("active").checked };
       var r = await sb.from("survey_questions").update(row).eq("id", id).select();

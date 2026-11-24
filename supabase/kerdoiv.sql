@@ -13,6 +13,7 @@ create table if not exists public.survey_questions (
   help text not null default '' check (char_length(help) <= 500),
   options text[] not null default '{}' check (cardinality(options) <= 30),
   allow_other boolean not null default false,
+  shuffle boolean not null default false,   -- véletlen válaszsorrend (a záró „Semmi/Nem…” a végén marad)
   required boolean not null default true,
   scale_min int not null default 1 check (scale_min between 0 and 1),
   scale_max int not null default 10 check (scale_max between 3 and 10),
@@ -267,3 +268,6 @@ revoke execute on function public.gen_coupon_code() from public, anon, authentic
 revoke execute on function public.notify_coupon_email() from public, anon, authenticated;
 revoke execute on function public.booking_coupon_after() from public, anon, authenticated;
 revoke execute on function public.booking_before_insert() from public, anon, authenticated;
+
+-- 2026-11-24: meglévő adatbázisba
+alter table public.survey_questions add column if not exists shuffle boolean not null default false;
