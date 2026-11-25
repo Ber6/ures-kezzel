@@ -247,6 +247,7 @@
       case "admin": return guard() && showAdmin();
       case "uj-jelszo": return showNewPassword();
       case "adatkezeles": return showPrivacy();
+      case "tovabb": return showShare();
     }
   }
 
@@ -684,16 +685,22 @@
       say(msg, "A neved el van mentve.", "ok");
     });
   });
-  $("#form-newsletter").addEventListener("submit", function(e){
-    e.preventDefault();
-    var on = $("#acct-newsletter").checked, msg = $("#nl-msg");
-    busy($("#form-newsletter button[type=submit]"), async function(){
+  // a pipa azonnal ment (külön „Mentés” gomb nélkül sokan azt hitték, a pipálás elég)
+  async function saveNewsletter(){
+    var box = $("#acct-newsletter"), on = box.checked, msg = $("#nl-msg");
+    box.disabled = true;
+    say(msg, "Mentés…", "ok");
+    try {
       var r = await sb.auth.updateUser({ data: newsletterData(null, on) });
-      if (r.error) return say(msg, huErr(r.error));
+      if (r.error){ box.checked = !on; return say(msg, huErr(r.error)); }
       state.user = r.data.user;
-      say(msg, on ? "Feliratkoztál a hírlevélre." : "Leiratkoztál a hírlevélről.", "ok");
-    });
-  });
+      say(msg, on ? "Feliratkoztál a hírlevélre. Leiratkozni itt, vagy bármelyik hírlevél alján tudsz." : "Leiratkoztál a hírlevélről.", "ok");
+    } catch (x) {
+      box.checked = !on; say(msg, huErr(x));
+    } finally { box.disabled = false; }
+  }
+  $("#acct-newsletter").addEventListener("change", saveNewsletter);
+  $("#form-newsletter").addEventListener("submit", function(e){ e.preventDefault(); saveNewsletter(); });
   $("#form-email").addEventListener("submit", function(e){
     e.preventDefault();
     var msg = $("#email-msg"), email = $("#acct-new-email").value.trim(); say(msg, "");
@@ -960,13 +967,41 @@
     });
   });
   $("#sv-share").addEventListener("click", async function(){
-    var url = location.origin + location.pathname + "?utm_source=ajanlas";
+    var url = location.origin + location.pathname + "?utm_source=ajanlas#/kerdoiv";
     var text = "Töltsd ki te is az Üres Kézzel kérdőívét, és kapsz egy " + surveyPct() + "%-os kupont a fesztiválcsomagjukra:";
     try {
       if (navigator.share) return await navigator.share({ title: "Üres Kézzel", text: text, url: url });
       await navigator.clipboard.writeText(text + " " + url);
       say($("#sv-msg"), "A link a vágólapra került, illeszd be a barátaidnak.", "ok");
     } catch (x) { /* a megosztást a felhasználó bezárta */ }
+  });
+
+  /* ---------- Továbbküldés (#/tovabb): a kuponlevél gombja (?utm_source=kuponlevel) ide visz ----------
+     A megosztott link külön forrást kap (utm_source=tovabbkuldes), így a Sheet Források lapján
+     látszik, hányan érkeztek a kuponlevélből továbbküldött linkkel. */
+  var SHARE_URL = location.origin + location.pathname + "?utm_source=tovabbkuldes#/kerdoiv";
+  function shareText(){ return "Töltsd ki te is az Üres Kézzel 3 perces fesztiválos kérdőívét, és kapsz egy " + surveyPct() + "%-os kupont a fesztiválcsomagjukra:"; }
+  function showShare(){
+    showBody("tovabb");
+    say($("#sh-msg"), "");
+    $("#sh-lede").textContent = "Ők is kitölthetik a 3 perces kérdőívet, és ők is kapnak saját, " + surveyPct() + "%-os kuponkódot.";
+    var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+    var m = $("#sh-messenger");
+    m.hidden = !mobile; // a Messenger-link csak telefonon nyitja meg az appot
+    m.href = "fb-messenger://share/?link=" + encodeURIComponent(SHARE_URL);
+    $("#sh-native").hidden = !navigator.share;
+  }
+  $("#sh-native").addEventListener("click", async function(){
+    try { await navigator.share({ title: "Üres Kézzel", text: shareText(), url: SHARE_URL }); }
+    catch (x) { /* a megosztást a felhasználó bezárta */ }
+  });
+  $("#sh-copy").addEventListener("click", async function(){
+    try {
+      await navigator.clipboard.writeText(shareText() + " " + SHARE_URL);
+      say($("#sh-msg"), "A link a vágólapra került, illeszd be Messengeren vagy Instagramon a barátaidnak.", "ok");
+    } catch (x) {
+      say($("#sh-msg"), "Másold ki innen: " + SHARE_URL, "ok");
+    }
   });
 
   /* ---------- Admin: Kérdőív ---------- */

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Az oldal egyetlen HTML-fájl, az aloldalak a # utáni részben vannak, ezeket a keresők nem kezelik külön címként. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://ures-kezzel.vercel.app/</loc>
+    <lastmod>2026-11-26</lastmod>
+  </url>
+</urlset>

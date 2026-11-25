@@ -20,6 +20,8 @@ const SMTP_PASS = Deno.env.get("SMTP_PASS") || "";
 const TEAM_PHONE = Deno.env.get("TEAM_PHONE") || "[CSAPAT TELEFONSZÁM]";
 const TEAM_EMAIL = Deno.env.get("TEAM_EMAIL") || "urreskezzel@gmail.com";
 const SITE_URL = "https://ures-kezzel.vercel.app";
+// a kuponlevél gombja: továbbküldő oldal; külön forrás, hogy a Sheetben látszódjon, hányan jöttek a levélből
+const SHARE_PATH = "/?utm_source=kuponlevel#/tovabb";
 
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false },
@@ -204,7 +206,7 @@ async function sendCoupon(id: string) {
   const rows: [string, string][] = [["Kuponkód", c.code], ["Kedvezmény", c.percent + "% a csomag árából"]];
   const after = [
     `<span style="display:block;border-left:3px solid #F2C230;padding-left:12px;">A kupont <b style="color:#F4F1EA;">a szolgáltatás indulása után</b>, az első foglalásodnál tudod beváltani a weboldalon. <b style="color:#F4F1EA;">A kupon egyszer használható.</b> ${c.user_id ? "A kód a fiókodhoz tartozik, és a Fiókom oldalon is megtalálod." : "Foglaláskor ezzel az e-mail-címmel (" + esc(to) + ") regisztrálj, mert a kód ehhez a címhez tartozik."}</span>`,
-    "Ha a barátaid is mennek fesztiválra, szólj nekik is: ők is kitölthetik a kérdőívet, és ugyanígy kapnak kupont.",
+    "Ha a barátaid is mennek fesztiválra, küldd tovább nekik egy gombnyomással (lent): ők is kitölthetik a kérdőívet, és ők is kapnak saját kupont.",
     `A kupon nem váltható készpénzre. Az indulás időpontjáról e-mailben értesítünk. Kérdésed van? Írj nekünk: ${mail}`,
   ];
   try {
@@ -218,8 +220,8 @@ async function sendCoupon(id: string) {
       to,
       subject,
       text: [greet, "", ...intro.slice(1).map(strip), "", ...rows.map(([k, v]) => `${k}: ${v}`), "", ...after.map(strip), "",
-        c.user_id ? `Fiókom: ${SITE_URL}/#/fiokom` : `Weboldal: ${SITE_URL}/`, "", "Üres Kézzel csapat"].join("\n"),
-      html: layout(title, intro, rows, after, c.user_id ? ["Fiókom", "/#/fiokom"] : ["Megnézem a weboldalt", "/"]),
+        `Küldd tovább a barátaidnak: ${SITE_URL}${SHARE_PATH}`, "", "Üres Kézzel csapat"].join("\n"),
+      html: layout(title, intro, rows, after, ["Küldd tovább a barátaidnak", SHARE_PATH]),
     });
   } catch (e) {
     await sb.from("coupons").update({ email_sent_at: null }).eq("id", id);
