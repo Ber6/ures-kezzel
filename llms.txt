@@ -1,0 +1,19 @@
+# Üres Kézzel
+
+> Fesztiválfelszerelés-kölcsönző egyetemi projekt a PTE KTK-n (Pécs). Sátor, matrac, kempingszék, lámpa és powerbank egy csomagban, a teljes fesztiválra. A csomagot a kemping bejárata előtt veszed át, és az utolsó napon ugyanott adod le. A szolgáltatás még nem indult el, a foglalás jelenleg zárva van.
+
+## Fő oldalak
+
+- [Főoldal](https://ures-kezzel.vercel.app/): mi ez, hogyan működik, csomagok
+- [Hogyan működik](https://ures-kezzel.vercel.app/#/hogyan)
+- [Csomagok](https://ures-kezzel.vercel.app/#/csomagok): Solo (1 fő), Duo (2 fő), Crew (4 fő)
+- [Fesztiválok](https://ures-kezzel.vercel.app/#/fesztivalok)
+- [GYIK](https://ures-kezzel.vercel.app/#/gyik)
+- [Kérdőív](https://ures-kezzel.vercel.app/#/kerdoiv): 3 perces kérdőív, a kitöltésért kuponkód jár
+- [Adatkezelési tájékoztató](https://ures-kezzel.vercel.app/#/adatkezeles)
+
+## Kapcsolat
+
+- E-mail: urreskezzel@gmail.com
+- Instagram: https://www.instagram.com/ures.kezzel/
+- TikTok: https://www.tiktok.com/@ures.kezzel

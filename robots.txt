@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /supabase/
+
+Sitemap: https://ures-kezzel.vercel.app/sitemap.xml
