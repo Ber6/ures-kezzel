@@ -1173,7 +1173,6 @@ fieldset.sv-q > legend ~ *{clear:both}
 <script src="data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -1352,9 +1351,18 @@ fieldset.sv-q > legend ~ *{clear:both}
   if (typeof THREE === "undefined") { document.documentElement.classList.add("no-webgl"); return; }
   var canvas = document.getElementById("scene");
   var renderer;
-  try { renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:"high-performance"}); }
+  var small = innerWidth < 700, dpr = window.devicePixelRatio || 1;
+  try { renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:!small && dpr < 2, powerPreference:"high-performance"}); }
   catch(e){ document.documentElement.classList.add("no-webgl"); return; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // szoftveres (GPU nélküli) rajzolásnál – lassú gépek, tesztelők – állókép: csak görgetéskor rajzolunk újra
+  var lite = false;
+  try {
+    var gl = renderer.getContext(), dbg = gl.getExtension("WEBGL_debug_renderer_info");
+    var gpu = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : "";
+    lite = /swiftshader|llvmpipe|software|basic render/i.test(gpu);
+  } catch(e){}
+  var pr = Math.min(dpr, small ? 1.5 : 2);
+  renderer.setPixelRatio(lite ? 1 : pr);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   var scene = new THREE.Scene();
@@ -1591,26 +1599,38 @@ fieldset.sv-q > legend ~ *{clear:both}
     camera.fov = w < 700 ? 62 : 50; camera.updateProjectionMatrix();
     onScroll();
   }
-  addEventListener("resize", resize); resize();
+  addEventListener("resize", function(){ resize(); if (lite) wake(); }); resize();
 
-  var clock = new THREE.Clock(), running = true, looping = false, time = 0;
+  var clock = new THREE.Clock(), running = true, looping = false, time = 0, calm = reduce || lite;
+  var slowN = 0, frames = 0, lastDraw = 0;
   function wake(){ if (running && !appMode && !looping){ clock.getDelta(); loop(); } }
+  // lite módban görgetéskor (max. ~15 kép/mp) rajzolunk egy képet
+  addEventListener("scroll", function(){ if (lite && performance.now() - lastDraw > 66) wake(); }, {passive:true});
   document.addEventListener("visibilitychange", function(){ running = !document.hidden; wake(); });
   hooks.push(wake);
 
   function loop(){
     if (!running || appMode){ looping = false; return; }
     looping = true;
-    var dt = Math.min(clock.getDelta(), .05);
-    if (!reduce) time += dt;
-    var k = reduce ? 1 : 1 - Math.pow(.02, dt);   // simítás
+    var rawDt = clock.getDelta(), dt = Math.min(rawDt, .05);
+    // ha a gép nem bírja (sok 45 ms feletti képkocka), előbb kisebb felbontás, aztán állókép
+    if (!lite && frames++ > 5){
+      slowN = rawDt > .045 ? slowN + 1 : Math.max(0, slowN - 1);
+      if (slowN > 20){
+        slowN = 0;
+        if (renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); resize(); }
+        else { lite = true; calm = true; }
+      }
+    }
+    if (!calm) time += dt;
+    var k = calm ? 1 : 1 - Math.pow(.02, dt);   // simítás
     mouse.sx += (mouse.x - mouse.sx) * k * .8; mouse.sy += (mouse.y - mouse.sy) * k * .8;
     camPos.lerp(wantPos, k * .9); camTgt.lerp(wantTgt, k * .9);
     camera.position.set(camPos.x + mouse.sx * .7, camPos.y - mouse.sy * .35, camPos.z);
     camera.lookAt(camTgt.x + mouse.sx * .25, camTgt.y - mouse.sy * .15, camTgt.z);
 
     // ég: éjszakából hajnalba az oldal végén
-    dawnS += (dawnT - dawnS) * (reduce ? 1 : k * .6);
+    dawnS += (dawnT - dawnS) * (calm ? 1 : k * .6);
     var dawn = dawnS;
     skyNow.copy(skyNight).lerp(skyDawn, dawn);
     scene.background.copy(skyNow); scene.fog.color.copy(skyNow);
@@ -1643,7 +1663,7 @@ fieldset.sv-q > legend ~ *{clear:both}
     fa.needsUpdate = true;
 
     // csomag
-    packPS += (packP - packPS) * (reduce ? 1 : k * .8);
+    packPS += (packP - packPS) * (calm ? 1 : k * .8);
     var o = packPS;
     crate.scale.setScalar(1 - o * .35); crate.material.opacity = .9 * (1 - o); crate.rotation.y = time * .3; crate.rotation.x = Math.sin(time * .5) * .1;
     packLight.intensity = 1.6 * (.4 + o);
@@ -1657,6 +1677,8 @@ fieldset.sv-q > legend ~ *{clear:both}
 
     stars.rotation.y = time * .004;
     renderer.render(scene, camera);
+    lastDraw = performance.now();
+    if (lite){ looping = false; return; }
     requestAnimationFrame(loop);
   }
   loop();
@@ -1664,7 +1686,18 @@ fieldset.sv-q > legend ~ *{clear:both}
   }
   var snapCam = null, started3D = false;
   // a 3D jelenet csak az első nem-foglalási oldalnál indul el
-  function ensure3D(){ if (started3D) return; started3D = true; init3D(); if (snapCam) snapCam(); }
+  function ensure3D(){
+    if (started3D) return; started3D = true;
+    var go = function(){
+      var sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+      sc.onload = function(){ init3D(); if (snapCam) snapCam(); };
+      sc.onerror = function(){ document.documentElement.classList.add("no-webgl"); };
+      document.body.appendChild(sc);
+    };
+    var idle = function(){ (window.requestIdleCallback || function(f){ setTimeout(f, 200); })(go, { timeout: 2500 }); };
+    if (document.readyState === "complete") idle(); else addEventListener("load", idle, { once: true });
+  }
   route(true);
   chrome();
 })();
