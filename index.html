@@ -600,7 +600,7 @@ fieldset.sv-q > legend ~ *{clear:both}
           <h2 data-survey-title>Segíts 2 percben, és kapsz kedvezményt!</h2>
           <p data-survey-intro></p>
           <a class="btn btn-primary" href="#/kerdoiv" data-track="cta_survey">Kitöltöm, 2–3 perc</a>
-          <p class="hint">A kitöltéshez be kell lépned, hogy a kuponkódot a fiókodhoz tudjuk kötni. Szólj a barátaidnak is: mindenki saját kódot kap.</p>
+          <p class="hint">Regisztráció nélkül, a végén csak az e-mail-címed kérjük, oda küldjük a kupont. Szólj a barátaidnak is: mindenki saját kódot kap.</p>
         </div>
       </div>
     </section>
@@ -751,7 +751,11 @@ fieldset.sv-q > legend ~ *{clear:both}
               <div id="sv-questions"></div>
               <div class="hp" aria-hidden="true"><label>Ezt a mezőt hagyd üresen<input id="sv-hp" type="text" tabindex="-1" autocomplete="off"></label></div>
               <div id="sv-final" hidden>
-              <label class="check"><input id="sv-consent" type="checkbox"><span>Hozzájárulok, hogy az Üres Kézzel csapat a válaszaimat a szolgáltatás fejlesztéséhez felhasználja az <a href="#/adatkezeles" target="_blank">adatkezelési tájékoztató</a> szerint. A hozzájárulást bármikor visszavonhatom.</span></label>
+              <div class="sv-q"><label class="sv-label" for="sv-email">Hova küldjük a kuponkódot?<span class="req" title="Kötelező">*</span></label>
+                <p class="hint" id="sv-email-hint">Erre a címre küldjük a kuponkódot. Nem kell regisztrálnod.</p>
+                <input id="sv-email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="te@pelda.hu" style="width:100%;min-height:48px;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px;box-sizing:border-box">
+              </div>
+              <label class="check"><input id="sv-consent" type="checkbox"><span>Hozzájárulok, hogy az Üres Kézzel csapat a válaszaimat a szolgáltatás fejlesztéséhez felhasználja, és az e-mail-címemre elküldje a kuponkódot, az <a href="#/adatkezeles" target="_blank">adatkezelési tájékoztató</a> szerint. A hozzájárulást bármikor visszavonhatom.</span></label>
               </div>
               <div id="sv-form-msg" class="msg" role="status" aria-live="polite" hidden></div>
               <div class="btn-row sv-nav">
@@ -763,9 +767,10 @@ fieldset.sv-q > legend ~ *{clear:both}
             <div id="sv-done" class="done" hidden>
               <h2 tabindex="-1">Köszönjük, sokat segítettél!</h2>
               <p class="sum">A kuponkódod: <span class="coupon-code" id="sv-code"></span></p>
-              <p>Elküldtük e-mailben is, és a Fiókom oldalon is megtalálod. A szolgáltatás indulása után, az első foglalásodnál tudod beváltani.</p>
+              <p id="sv-done-mail">Elküldtük e-mailben is.</p>
+              <p id="sv-done-redeem">A szolgáltatás indulása után, az első foglalásodnál tudod beváltani. A kupon egyszer használható.</p>
               <p>Ha a barátaid is fesztiválra mennek, küldd el nekik az oldalt: ők is kitölthetik, és ők is kapnak saját kódot.</p>
-              <div class="btn-row"><button type="button" class="btn btn-primary" id="sv-share">Link küldése a barátaimnak</button><a class="btn btn-ghost" href="#/fiokom">Fiókom</a></div>
+              <div class="btn-row"><button type="button" class="btn btn-primary" id="sv-share">Link küldése a barátaimnak</button><a class="btn btn-ghost" href="#/fiokom" id="sv-done-account">Fiókom</a></div>
             </div>
           </div>
         </div>

@@ -178,6 +178,7 @@ Deno.serve(async (req) => {
 });
 
 // Kuponlevél: a kupont és a címzettet a függvény maga olvassa ki, kuponokként egyszer küld (email_sent_at).
+// Címzett: a fiók e-mail-címe, vagy regisztráció nélküli kitöltésnél a kérdőívben megadott cím (coupons.email).
 async function sendCoupon(id: string) {
   const { data: c, error } = await sb.from("coupons").select("*").eq("id", id).maybeSingle();
   if (error) return json({ error: error.message }, 500);
@@ -187,10 +188,14 @@ async function sendCoupon(id: string) {
     .eq("id", id).is("email_sent_at", null).select("id");
   if (!claimed?.length) return json({ ok: true, skipped: "already_sent" });
 
-  const { data: u } = await sb.auth.admin.getUserById(c.user_id);
-  const to = u?.user?.email;
+  // fiókhoz kötött kupon: a fiók e-mail-címe; regisztráció nélküli kitöltés: a kérdőívben megadott cím
+  let to: string | undefined = c.email || undefined, name = "";
+  if (c.user_id) {
+    const { data: u } = await sb.auth.admin.getUserById(c.user_id);
+    to = u?.user?.email || to;
+    name = (u?.user?.user_metadata?.full_name as string) || "";
+  }
   if (!to) return json({ error: "no_email" }, 404);
-  const name = (u?.user?.user_metadata?.full_name as string) || "";
   const greet = name ? `Szia, ${name}!` : "Szia!";
   const mail = `<a href="mailto:${esc(TEAM_EMAIL)}" style="${A}">${esc(TEAM_EMAIL)}</a>`;
   const subject = `Itt a ${c.percent}%-os kuponod – Üres Kézzel`;
@@ -198,7 +203,7 @@ async function sendCoupon(id: string) {
   const intro = [esc(greet), "Sokat segítettél abban, hogy olyan szolgáltatást építsünk, amilyet tényleg szeretnél. Ígéretünkhöz híven itt a kuponod:"];
   const rows: [string, string][] = [["Kuponkód", c.code], ["Kedvezmény", c.percent + "% a csomag árából"]];
   const after = [
-    `<span style="display:block;border-left:3px solid #F2C230;padding-left:12px;">A kupont <b style="color:#F4F1EA;">a szolgáltatás indulása után</b>, az első foglalásodnál tudod beváltani a weboldalon. A kód a fiókodhoz tartozik, egyszer használható, és a Fiókom oldalon is megtalálod.</span>`,
+    `<span style="display:block;border-left:3px solid #F2C230;padding-left:12px;">A kupont <b style="color:#F4F1EA;">a szolgáltatás indulása után</b>, az első foglalásodnál tudod beváltani a weboldalon. <b style="color:#F4F1EA;">A kupon egyszer használható.</b> ${c.user_id ? "A kód a fiókodhoz tartozik, és a Fiókom oldalon is megtalálod." : "Foglaláskor ezzel az e-mail-címmel (" + esc(to) + ") regisztrálj, mert a kód ehhez a címhez tartozik."}</span>`,
     "Ha a barátaid is mennek fesztiválra, szólj nekik is: ők is kitölthetik a kérdőívet, és ugyanígy kapnak kupont.",
     `A kupon nem váltható készpénzre. Az indulás időpontjáról e-mailben értesítünk. Kérdésed van? Írj nekünk: ${mail}`,
   ];
@@ -213,8 +218,8 @@ async function sendCoupon(id: string) {
       to,
       subject,
       text: [greet, "", ...intro.slice(1).map(strip), "", ...rows.map(([k, v]) => `${k}: ${v}`), "", ...after.map(strip), "",
-        `Fiókom: ${SITE_URL}/#/fiokom`, "", "Üres Kézzel csapat"].join("\n"),
-      html: layout(title, intro, rows, after, ["Fiókom", "/#/fiokom"]),
+        c.user_id ? `Fiókom: ${SITE_URL}/#/fiokom` : `Weboldal: ${SITE_URL}/`, "", "Üres Kézzel csapat"].join("\n"),
+      html: layout(title, intro, rows, after, c.user_id ? ["Fiókom", "/#/fiokom"] : ["Megnézem a weboldalt", "/"]),
     });
   } catch (e) {
     await sb.from("coupons").update({ email_sent_at: null }).eq("id", id);
