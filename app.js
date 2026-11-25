@@ -138,7 +138,10 @@
     if (/booking_closed/i.test(all)) return "A foglalás még nem nyílt meg. Hamarosan indulunk!";
     if (/invalid_coupon/i.test(all)) return "Ez a kuponkód nem érvényes, már fel lett használva, vagy nem a te fiókodhoz tartozik.";
     if (/survey_closed/i.test(all)) return "A kérdőív jelenleg nem tölthető ki.";
-    if (/already_done/i.test(all)) return "Ezt a kérdőívet már kitöltötted. A kuponodat a Fiókom oldalon találod.";
+    if (/already_done/i.test(all)) return "Ezzel az e-mail-címmel már kitöltötték a kérdőívet. A kupont arra a címre küldtük el (nézd meg a spam mappát is).";
+    if (/invalid_email/i.test(all)) return "Ez az e-mail-cím nem tűnik érvényesnek. Ellenőrizd, mert erre küldjük a kupont.";
+    if (/consent_required/i.test(all)) return "A beküldéshez pipáld ki a hozzájárulást.";
+    if (/rate_limited/i.test(all)) return "Most nagyon sokan töltik ki egyszerre. Várj egy percet, és küldd be újra.";
     if (/email_not_confirmed/i.test(all)) return "Előbb erősítsd meg az e-mail-címed a regisztrációs levélben lévő linkkel.";
     if (/too_fast|bot_suspected/i.test(all)) return "Ez túl gyors volt. Kérjük, olvasd el a kérdéseket, és válaszolj rájuk.";
     if (/missing_required/i.test(all)) return "Néhány kötelező kérdésre még nem válaszoltál.";
@@ -220,11 +223,25 @@
     return true;
   }
 
+  // Belépés nélkül is elérhető oldalak (pl. kérdőív): csak a munkamenet betöltését várjuk meg.
+  function softGuard(){
+    if (!sb){
+      $$("[data-loading]", viewEl(state.view)).forEach(function(x){ x.textContent = "A kérdőív most nem érhető el. Próbáld újra később."; });
+      return false;
+    }
+    return !!state.ready;
+  }
+  // a felhasználó kuponjai: a fiókhoz kötöttek és a fiók e-mail-címére (belépés nélkül) kapottak
+  function myCoupons(cols){
+    var u = state.user, q = sb.from("coupons").select(cols);
+    return u.email ? q.or("user_id.eq." + u.id + ",email.eq." + String(u.email).toLowerCase()) : q.eq("user_id", u.id);
+  }
+
   function render(){
     switch (state.view){
       case "belepes": return showLogin();
       case "foglalas": return guard() && showBooking();
-      case "kerdoiv": return guard() && showSurvey();
+      case "kerdoiv": return softGuard() && showSurvey();
       case "foglalasaim": return guard() && showMine();
       case "fiokom": return guard() && showAccount();
       case "admin": return guard() && showAdmin();
@@ -512,7 +529,7 @@
     say($("#bk-msg"), "");
     // saját, még fel nem használt kupon előtöltése
     $("#bk-coupon-hint").hidden = true;
-    sb.from("coupons").select("code,percent,used_at").eq("user_id", state.user.id).is("used_at", null).limit(1).then(function(r){
+    myCoupons("code,percent,used_at").is("used_at", null).limit(1).then(function(r){
       if (r.error || !r.data || !r.data.length) return;
       var c = r.data[0];
       if (!$("#bk-coupon").value) $("#bk-coupon").value = c.code;
@@ -641,7 +658,7 @@
     say($("#nl-msg"), "");
     $("#acct-bookings").textContent = "…";
     $("#acct-coupon-row").hidden = true; $("#acct-survey").hidden = true;
-    sb.from("coupons").select("code,percent,used_at").eq("user_id", u.id).then(function(c){
+    myCoupons("code,percent,used_at").then(function(c){
       if (c.error) return;
       if (c.data && c.data.length){
         var k = c.data[0];
@@ -709,8 +726,10 @@
       var u = state.user;
       var r = await sb.from("bookings").select("*").eq("user_id", u.id).order("created_at", { ascending: true });
       if (r.error) return say($("#acct-msg"), huErr(r.error));
-      var sv = await sb.from("survey_responses").select("created_at,answers").eq("user_id", u.id);
-      var cp = await sb.from("coupons").select("code,percent,created_at,used_at").eq("user_id", u.id);
+      var cp = await myCoupons("id,code,percent,created_at,used_at");
+      var cids = (cp.data || []).map(function(x){ return x.id; });
+      var sv = await sb.from("survey_responses").select("created_at,answers")
+        .or("user_id.eq." + u.id + (cids.length ? ",coupon_id.in.(" + cids.join(",") + ")" : ""));
       var out = {
         letoltve: new Date().toISOString(),
         fiok: { nev: userName(), email: u.email, regisztracio: u.created_at, email_megerositve: u.email_confirmed_at || null, utolso_belepes: u.last_sign_in_at || null },
@@ -733,9 +752,14 @@
   /* ---------- Kérdőív (#/kerdoiv) ---------- */
   var SV = { qs: [], byId: {}, started: 0, preview: false };
   var KIND_LABEL = { text: "Rövid szöveges válasz", textarea: "Hosszú szöveges válasz", single: "Feleletválasztós (egy válasz)", multi: "Feleletválasztós (több válasz)", scale: "Csúszka (skála)", number: "Szám (forint)", page: "Új oldal (cím + szöveg, nem kérdés)" };
-  function svShowDone(code){
+  function svShowDone(code, email){
     $("#form-survey").hidden = true;
     $("#sv-code").textContent = code || "";
+    $("#sv-done-mail").textContent = email ? "Elküldtük e-mailben is ide: " + email + " (ha nem látod, nézd meg a spam mappát)." : "Elküldtük e-mailben is.";
+    $("#sv-done-redeem").textContent = state.user
+      ? "A Fiókom oldalon is megtalálod. A szolgáltatás indulása után, az első foglalásodnál tudod beváltani. A kupon egyszer használható."
+      : "A szolgáltatás indulása után, az első foglalásodnál tudod beváltani: ehhez ezzel az e-mail-címmel regisztrálj. A kupon egyszer használható.";
+    $("#sv-done-account").hidden = !state.user;
     $("#sv-done").hidden = false;
   }
   async function showSurvey(){
@@ -747,13 +771,13 @@
     say($("#sv-msg"), ""); say($("#sv-form-msg"), "");
     $("#sv-done").hidden = true; $("#sv-closed").hidden = true; $("#form-survey").hidden = true;
     if (!surveyOpen() && !preview){ $("#sv-closed").hidden = false; return; }
-    if (!preview){
-      var done = await sb.from("coupons").select("code").eq("user_id", state.user.id).limit(1);
+    if (!preview && state.user){
+      var done = await myCoupons("code").eq("source", "kerdoiv").limit(1);
       if (done.data && done.data.length){
         say($("#sv-msg"), "Ezt a kérdőívet már kitöltötted, köszönjük! A kuponodat itt látod, és a Fiókom oldalon is megtalálod.", "ok");
-        return svShowDone(done.data[0].code);
+        return svShowDone(done.data[0].code, state.user.email);
       }
-    } else {
+    } else if (preview) {
       say($("#sv-msg"), surveyOpen() ? "Előnézet (admin): így látják a kitöltők. Innen nem lehet beküldeni." :
         "Előnézet (admin): a kérdőív még nincs élesítve, csak te látod. Innen nem lehet beküldeni.", "ok");
     }
@@ -779,6 +803,13 @@
     }).join("");
     SV.pages = pages.length;
     $("#sv-consent").checked = false; $("#sv-hp").value = "";
+    // belépve a fiók e-mail-címére megy a kupon; belépés nélkül itt adja meg
+    var em = $("#sv-email");
+    em.value = state.user ? state.user.email || "" : "";
+    em.readOnly = !!state.user;
+    $("#sv-email-hint").textContent = state.user
+      ? "Be vagy lépve, ezért a fiókod e-mail-címére küldjük a kupont."
+      : "Erre a címre küldjük a kuponkódot. Nem kell regisztrálnod.";
     $("#sv-submit").disabled = preview;
     $("#form-survey").hidden = false;
     svGo(0, true);
@@ -914,14 +945,16 @@
       c.missing[0].scrollIntoView({ behavior: "smooth", block: "center" });
       return say(msg, c.missing.length === 1 ? "Még egy kötelező kérdés hiányzik (pirossal jelöltük)." : "Még " + c.missing.length + " kötelező kérdés hiányzik (pirossal jelöltük).");
     }
+    var email = $("#sv-email").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ $("#sv-email").focus(); return say(msg, "Add meg az e-mail-címed, erre küldjük a kupont."); }
     if (!$("#sv-consent").checked) return say(msg, "A beküldéshez pipáld ki a hozzájárulást.");
     var secs = Math.round((Date.now() - SV.started) / 1000);
     busy($("#sv-submit"), async function(){
-      var r = await sb.rpc("submit_survey", { p_answers: c.out, p_duration: secs, p_source: TRACK.source() || null, p_hp: $("#sv-hp").value });
+      var r = await sb.rpc("submit_survey_public", { p_email: email, p_answers: c.out, p_consent: true, p_duration: secs, p_source: TRACK.source() || null, p_hp: $("#sv-hp").value });
       if (r.error) return say(msg, huErr(r.error));
       TRACK.event("survey_submit");
       say($("#sv-msg"), "");
-      svShowDone(r.data && r.data.code);
+      svShowDone(r.data && r.data.code, r.data && r.data.email);
       window.scrollTo({ top: 0, behavior: "smooth" });
       $("#sv-done h2").focus({ preventScroll: true });
     });

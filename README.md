@@ -75,8 +75,8 @@ Minden az **admin oldalon** kapcsolható, kód nélkül:
 - **Kuponok fül**: ki kapott kódot, elment-e az e-mail, beváltották-e, újraküldés, CSV.
 
 Hogyan működik:
-- A kérdőív kitöltéséhez belépés és megerősített e-mail kell. Fiókonként egy kitöltés, egy kupon (`UK-XXXXXXXX`).
-- Az ellenőrzés a szerveren történik: `submit_survey()` (kötelező kérdések, érvényes válaszok, rejtett mező, minimum kitöltési idő).
+- A kérdőív **regisztráció nélkül** kitölthető: a végén csak egy e-mail-címet kérünk, oda megy a kupon (belépve a fiók címe számít). E-mail-címenként és fiókonként egy kitöltés, egy kupon (`UK-XXXXXXXX`), egyszer használható. Beváltani az a fiók tudja, amelyiknek ugyanez az e-mail-címe (`supabase/kerdoiv-email.sql`).
+- Az ellenőrzés a szerveren történik: `submit_survey_public()` (kötelező kérdések, érvényes válaszok, rejtett mező, minimum kitöltési idő).
 - A kupont a `booking-confirmation` Edge Function küldi e-mailben (`kind: "coupon"`), és a Fiókom oldalon is látszik.
 - Beváltás: a foglalási űrlap „Kuponkód” mezője; az árat az adatbázis számolja, lemondáskor a kupon újra felhasználható.
 - Látogatómérés süti nélkül (`track()` → `page_events`), 13 hónap után törlődik. DNT/GPC esetén nem mér, adminokat nem mér.
