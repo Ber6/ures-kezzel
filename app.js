@@ -248,6 +248,7 @@
       case "uj-jelszo": return showNewPassword();
       case "adatkezeles": return showPrivacy();
       case "tovabb": return showShare();
+      case "szamlalo": return showCounter();
     }
   }
 
@@ -1006,6 +1007,41 @@
     } catch (x) {
       say($("#sh-msg"), "Másold ki innen: " + SHARE_URL, "ok");
     }
+  });
+
+  /* ---------- Nyilvános számláló (#/szamlalo): a kitöltések száma és a cél, belépés nélkül ----------
+     Csak egy számot kér le (survey_progress RPC), személyes adatot nem. 20 mp-enként frissül, amíg nyitva van. */
+  var CTR = { timer: null };
+  async function ctrLoad(){
+    if (!sb) return;
+    var r = await sb.rpc("survey_progress");
+    if (r.error || !r.data) return;
+    var n = r.data.count || 0, goal = r.data.goal || 150, pct = Math.min(100, Math.round(100 * n / goal));
+    $("#ctr-count").textContent = n.toLocaleString("hu-HU");
+    $("#ctr-goal").textContent = "/ " + goal;
+    $("#ctr-bar").style.width = Math.max(pct, n ? 3 : 0) + "%";
+    $("#ctr-sub").textContent = n >= goal
+      ? "Megvan a cél, köszönjük mindenkinek! Aki még nem töltötte ki, most is kitöltheti."
+      : "A célunk " + goal + " kitöltés december 1-ig. Még " + (goal - n) + " hiányzik, segíts, hogy összejöjjön!";
+  }
+  function showCounter(){
+    showBody("szamlalo");
+    say($("#ctr-msg"), "");
+    ctrLoad();
+    clearInterval(CTR.timer);
+    CTR.timer = setInterval(function(){
+      if (state.view !== "szamlalo"){ clearInterval(CTR.timer); return; }
+      if (!document.hidden) ctrLoad();
+    }, 20000);
+  }
+  $("#ctr-share").addEventListener("click", async function(){
+    var url = location.origin + location.pathname + "?utm_source=szamlalo#/kerdoiv";
+    var text = "Egyetemista csapat egy fesztiválos kérdőívhez keres kitöltőket. 3 perc, és " + surveyPct() + "% kupont adnak érte:";
+    try {
+      if (navigator.share) return await navigator.share({ title: "Üres Kézzel", text: text, url: url });
+      await navigator.clipboard.writeText(text + " " + url);
+      say($("#ctr-msg"), "A link a vágólapra került.", "ok");
+    } catch (x) { /* bezárta */ }
   });
 
   /* ---------- Admin: Kérdőív ---------- */

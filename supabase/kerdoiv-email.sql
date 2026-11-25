@@ -218,3 +218,15 @@ $$;
 -- a sátorfelállítás kérdése kikapcsolva (nem tudjuk garantálni, ne keltsünk ilyen elvárást)
 update public.survey_questions set active = false
   where kind = 'number' and label like 'És ha a sátradat is felállítaná%';
+
+-- 2026-11-26: nyilvános számláló (#/szamlalo) – csak a kitöltések száma és a cél
+insert into public.settings (key, value) values ('survey_goal', '150') on conflict (key) do nothing;
+create or replace function public.survey_progress() returns json
+language sql stable security definer set search_path = public as $$
+  select json_build_object(
+    'count', (select count(*) from public.survey_responses),
+    'goal', coalesce(nullif(regexp_replace(coalesce(public.setting('survey_goal'), ''), '\D', '', 'g'), '')::int, 150),
+    'at', now());
+$$;
+revoke execute on function public.survey_progress() from public;
+grant execute on function public.survey_progress() to anon, authenticated;

@@ -458,6 +458,11 @@ footer a:hover{color:var(--paper)}
   .form .btn{justify-self:stretch}
 }
 
+/* ---------- nyilvános számláló (#/szamlalo) ---------- */
+.ctr-num{font-family:var(--display);font-weight:800;font-variation-settings:"wdth" 84,"opsz" 96;font-size:clamp(5rem,22vw,11rem);line-height:.9;color:var(--lantern);margin:0}
+.ctr-num small{font-size:.32em;color:var(--paper);opacity:.75;font-weight:700;margin-left:.15em}
+.ctr-bar{height:18px;border-radius:999px;background:rgba(244,241,234,.12);overflow:hidden;margin:1.5rem 0 .5rem}
+.ctr-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lantern),var(--ember));border-radius:999px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
 /* ---------- hamarosan, kérdőív, kupon ---------- */
 .soon-pill{display:inline-flex;align-items:center;gap:.55rem;margin:0 0 1.25rem;padding:.4rem 1rem;border-radius:999px;border:1px solid rgba(242,194,48,.5);background:rgba(15,22,51,.6);color:var(--lantern);font-weight:600;font-size:.95rem;letter-spacing:.01em}
 .soon-pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--lantern);box-shadow:0 0 0 0 rgba(242,194,48,.7);animation:soonPulse 2s infinite}
@@ -1176,6 +1181,29 @@ fieldset.sv-q > legend ~ *{clear:both}
     </section>
   </div>
 
+  <!-- ================= NYILVÁNOS SZÁMLÁLÓ (bióba, csapatnak) ================= -->
+  <div class="view" data-view="szamlalo" hidden>
+    <section class="app-sec subpage">
+      <div class="wrap">
+        <h2 class="ptitle" role="heading" aria-level="1">Hol tartunk?</h2>
+        <p class="lede">Egyetemista csapat vagyunk a PTE KTK-n, és egy fesztiválfelszerelés-kölcsönzőt építünk. Ennyien segítettek már a kérdőívünkkel:</p>
+        <div class="card">
+          <div data-body>
+            <p class="ctr-num" aria-live="polite"><span id="ctr-count">…</span><small id="ctr-goal"></small></p>
+            <div class="ctr-bar" aria-hidden="true"><span id="ctr-bar"></span></div>
+            <p class="hint" id="ctr-sub"></p>
+            <div class="btn-row">
+              <a class="btn btn-primary" href="#/kerdoiv" data-track="ctr_fill">Kitöltöm, 3 perc, −10% kupon</a>
+              <button type="button" class="btn btn-ghost" id="ctr-share" data-track="ctr_share">Továbbküldöm</button>
+            </div>
+            <div id="ctr-msg" class="msg" role="status" aria-live="polite" hidden></div>
+            <p class="hint" style="margin-top:1rem">Magától frissül.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <!-- ================= TOVÁBBKÜLDÉS (a kuponlevél gombja ide visz) ================= -->
   <div class="view" data-view="tovabb" hidden>
     <section class="app-sec subpage">
@@ -1352,6 +1380,7 @@ fieldset.sv-q > legend ~ *{clear:both}
     "admin":    {v:"admin", app:true, title:"Admin – Üres Kézzel"},
     "adatkezeles": {v:"adatkezeles", app:true, title:"Adatkezelési tájékoztató – Üres Kézzel"},
     "tovabb":   {v:"tovabb", app:true, title:"Küldd tovább – Üres Kézzel"},
+    "szamlalo": {v:"szamlalo", app:true, title:"Hol tartunk? – Üres Kézzel kérdőív"},
     "top":      {v:"home",   title:"Üres Kézzel – fesztiválcsomagok bérlése"},
     "hogyan":   {v:"hogyan", title:"Hogyan működik – Üres Kézzel"},
     "csomag":   {v:"csomag", nav:"csomagok", title:"Csomagok – Üres Kézzel"},
