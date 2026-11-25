@@ -754,8 +754,12 @@
   var KIND_LABEL = { text: "Rövid szöveges válasz", textarea: "Hosszú szöveges válasz", single: "Feleletválasztós (egy válasz)", multi: "Feleletválasztós (több válasz)", scale: "Csúszka (skála)", number: "Szám (forint)", page: "Új oldal (cím + szöveg, nem kérdés)" };
   function svShowDone(code, email){
     $("#form-survey").hidden = true;
+    // belépés nélkül a kódot csak e-mailben küldjük (a szerver nem is adja vissza)
     $("#sv-code").textContent = code || "";
-    $("#sv-done-mail").textContent = email ? "Elküldtük e-mailben is ide: " + email + " (ha nem látod, nézd meg a spam mappát)." : "Elküldtük e-mailben is.";
+    $("#sv-done-code").hidden = !code;
+    $("#sv-done-mail").textContent = code
+      ? (email ? "Elküldtük e-mailben is ide: " + email + "." : "Elküldtük e-mailben is.")
+      : "A kuponkódot elküldtük ide: " + (email || "a megadott e-mail-címre") + ". Ha pár percen belül nem látod, nézd meg a spam vagy a promóciók mappát.";
     $("#sv-done-redeem").textContent = state.user
       ? "A Fiókom oldalon is megtalálod. A szolgáltatás indulása után, az első foglalásodnál tudod beváltani. A kupon egyszer használható."
       : "A szolgáltatás indulása után, az első foglalásodnál tudod beváltani: ehhez ezzel az e-mail-címmel regisztrálj. A kupon egyszer használható.";
