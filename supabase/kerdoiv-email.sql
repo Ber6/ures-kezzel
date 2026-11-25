@@ -118,7 +118,8 @@ begin
     returning id, code into v_cid, v_code;
   insert into public.survey_responses (user_id, answers, duration_s, source, coupon_id)
     values (uid, out_, p_duration, left(p_source, 80), v_cid);
-  return json_build_object('ok', true, 'percent', pct, 'code', v_code, 'email', e);
+  -- belépés nélkül a kód csak e-mailben megy ki (különben kitalált címekkel végtelen kódot lehetne kérni)
+  return json_build_object('ok', true, 'percent', pct, 'email', e, 'code', case when uid is not null then v_code end);
 exception when unique_violation then
   raise exception 'already_done';
 end $$;
