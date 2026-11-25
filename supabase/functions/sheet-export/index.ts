@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
   if (lap === "valaszok") {
     const [qs, rs] = await Promise.all([
-      sb.from("survey_questions").select("id,label,sort,active,created_at").order("sort").order("created_at"),
+      sb.from("survey_questions").select("id,label,sort,active,created_at,kind").neq("kind", "page").order("sort").order("created_at"),
       sb.from("survey_responses").select("id,created_at,duration_s,source,answers").order("created_at", { ascending: true }).limit(10000),
     ]);
     if (qs.error || rs.error) return text("hiba: " + (qs.error || rs.error)!.message, 500);

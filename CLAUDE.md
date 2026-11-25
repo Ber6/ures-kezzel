@@ -135,3 +135,4 @@ Fishing on Orfű, Sziget, VOLT, Balaton Sound, STRAND Fesztivál, EFOTT, Campus 
 Lásd README „Hamarosan-mód…” és `supabase/kerdoiv.sql`. Kulcsok a `settings` táblában: `booking_open`, `show_prices`, `survey_open`, `survey_discount`, `survey_title`, `survey_intro`.
 Táblák: `survey_questions`, `survey_responses` (válaszok a kérdés szövegével együtt mentve), `coupons`, `page_events`. RPC: `submit_survey`, `track`, `admin_coupons`, `resend_coupon_email`, `sheet_*` (csak service_role).
 Edge Functions: `booking-confirmation` (+ `kind: "coupon"`), `sheet-export` (Google Sheet IMPORTDATA, Vault: `sheet_token`). Biztonsági fejlécek: `vercel.json`.
+Kérdéstípusok (2026-11-25): `page` = oldaltörés (cím + szöveg, nem kérdés, a `submit_survey` kihagyja), `number` = egész szám, a mértékegység a `max_label` mezőben (alapból Ft). `shuffle` = véletlen válaszsorrend, a záró „Semmi/Nem…/Egyiket sem” a végén marad.

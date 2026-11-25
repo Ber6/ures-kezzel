@@ -142,6 +142,7 @@
     if (/email_not_confirmed/i.test(all)) return "Előbb erősítsd meg az e-mail-címed a regisztrációs levélben lévő linkkel.";
     if (/too_fast|bot_suspected/i.test(all)) return "Ez túl gyors volt. Kérjük, olvasd el a kérdéseket, és válaszolj rájuk.";
     if (/missing_required/i.test(all)) return "Néhány kötelező kérdésre még nem válaszoltál.";
+    if (/invalid_number/i.test(all)) return "A számos kérdéseknél csak egész számot írj.";
     if (/invalid_option|invalid_scale|invalid_answers/i.test(all)) return "Közben változtak a kérdések. Töltsd újra az oldalt, és küldd be újra.";
     if (/captcha/i.test(all)) return "Az ellenőrzés (nem vagy robot) nem sikerült. Pipáld ki újra, és próbáld meg ismét.";
     if (/row-level security|permission denied/i.test(all)) return "Ehhez nincs jogosultságod.";
@@ -731,7 +732,7 @@
 
   /* ---------- Kérdőív (#/kerdoiv) ---------- */
   var SV = { qs: [], byId: {}, started: 0, preview: false };
-  var KIND_LABEL = { text: "Rövid szöveges válasz", textarea: "Hosszú szöveges válasz", single: "Feleletválasztós (egy válasz)", multi: "Feleletválasztós (több válasz)", scale: "Csúszka (skála)" };
+  var KIND_LABEL = { text: "Rövid szöveges válasz", textarea: "Hosszú szöveges válasz", single: "Feleletválasztós (egy válasz)", multi: "Feleletválasztós (több válasz)", scale: "Csúszka (skála)", number: "Szám (forint)", page: "Új oldal (cím + szöveg, nem kérdés)" };
   function svShowDone(code){
     $("#form-survey").hidden = true;
     $("#sv-code").textContent = code || "";
@@ -759,17 +760,32 @@
     var r = await sb.from("survey_questions").select("*").eq("active", true).order("sort").order("created_at");
     if (r.error) return say($("#sv-msg"), huErr(r.error));
     if (!r.data.length) return say($("#sv-msg"), "Még nincs kérdés a kérdőívben.");
-    SV.qs = r.data; SV.byId = {}; SV.preview = preview; SV.started = Date.now();
-    r.data.forEach(function(q){ SV.byId[q.id] = q; });
-    $("#sv-questions").innerHTML = r.data.map(svQuestion).join("");
+    // oldaltörés ('page'): a következő kérdések új oldalra kerülnek, a címe és a szövege az oldal tetején látszik
+    var pages = [{ head: null, qs: [] }];
+    r.data.forEach(function(q){
+      if (q.kind === "page"){
+        var last = pages[pages.length - 1];
+        if (last.qs.length || last.head) pages.push({ head: q, qs: [] }); else last.head = q;
+      } else pages[pages.length - 1].qs.push(q);
+    });
+    pages = pages.filter(function(pg){ return pg.qs.length; });
+    SV.qs = r.data.filter(function(q){ return q.kind !== "page"; }); SV.byId = {}; SV.preview = preview; SV.started = Date.now();
+    SV.qs.forEach(function(q){ SV.byId[q.id] = q; });
+    var no = 0;
+    $("#sv-questions").innerHTML = pages.map(function(pg, pi){
+      return '<div class="sv-page" data-page="' + pi + '" hidden>' +
+        (pg.head ? '<div class="sv-pagehead"><h2>' + esc(pg.head.label) + "</h2>" + (pg.head.help ? "<p>" + esc(pg.head.help) + "</p>" : "") + "</div>" : "") +
+        pg.qs.map(function(q){ return svQuestion(q, no++); }).join("") + "</div>";
+    }).join("");
+    SV.pages = pages.length;
     $("#sv-consent").checked = false; $("#sv-hp").value = "";
     $("#sv-submit").disabled = preview;
     $("#form-survey").hidden = false;
-    svProgress();
+    svGo(0, true);
     if (!preview) TRACK.event("survey_view");
   }
   // véletlen sorrend (az elsőnek felsorolt válasz így nem kap előnyt); a záró „Semmi / Még nem tudom / Nem…” jellegű válasz a végén marad
-  var SV_TAIL = /^(semmi|egyik sem|még nem|nem tudom|nem |ilyet nem)/i;
+  var SV_TAIL = /^(semmi|egyik sem|egyiket sem|még nem|nem tudom|nem |ilyet nem)/i;
   function svShuffle(list){
     var a = list.slice(), tail = a.length && SV_TAIL.test(a[a.length - 1]) ? [a.pop()] : [];
     for (var k = a.length - 1; k > 0; k--){ var j = Math.floor(Math.random() * (k + 1)), t = a[k]; a[k] = a[j]; a[j] = t; }
@@ -799,6 +815,12 @@
         ((q.min_label || q.max_label) ? '<div class="sv-ends"><span>' + esc(q.min_label) + "</span><span>" + esc(q.max_label) + "</span></div>" : "") +
         "</div></div>";
     }
+    if (q.kind === "number"){
+      var unit = q.max_label || "Ft"; // a mértékegység a „jobb oldali felirat” mezőben (alapból Ft)
+      return '<div class="sv-q" data-q="' + q.id + '"><label class="sv-label" for="' + id + '">' + head + "</label>" + help +
+        '<div class="sv-num-wrap"><input type="text" id="' + id + '" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="' + (unit === "Ft" ? "pl. 15000" : "pl. 2") + '"><span>' + esc(unit) + "</span></div>" +
+        '<p class="hint sv-num-err" hidden>Csak egész számot írj' + (unit === "Ft" ? ", forintban (pl. 15000)" : "") + ".</p></div>";
+    }
     var input = q.kind === "textarea"
       ? '<textarea id="' + id + '" rows="4" maxlength="3000"></textarea>'
       : '<input type="text" id="' + id + '" maxlength="300" autocomplete="off">';
@@ -818,6 +840,10 @@
       } else if (q.kind === "scale"){
         var sc = $(".sv-scale", box);
         v = sc.classList.contains("untouched") ? null : Number($("input", box).value);
+      } else if (q.kind === "number"){
+        var raw = $("input", box).value.replace(/[\s.]/g, ""), okNum = /^\d{1,8}$/.test(raw);
+        $(".sv-num-err", box).hidden = !raw || okNum;
+        v = okNum ? raw : null;
       } else {
         v = $("input,textarea", box).value.trim() || null;
       }
@@ -833,8 +859,35 @@
   function svProgress(){
     var c = svCollect(), total = SV.qs.length;
     $("#sv-bar").style.width = (total ? Math.round(100 * c.answered / total) : 0) + "%";
-    $("#sv-count").textContent = c.answered + " / " + total + " kérdés megválaszolva" + (c.missing.length ? " · még " + c.missing.length + " kötelező" : " · minden kötelező kész");
+    $("#sv-count").textContent = ((SV.pages || 1) > 1 ? svPage() + 1 + ". / " + SV.pages + " oldal · " : "") + c.answered + " / " + total + " kérdés megválaszolva" + (c.missing.length ? " · még " + c.missing.length + " kötelező" : " · minden kötelező kész");
   }
+  function svPage(){ return SV.page || 0; }
+  function svGo(n, first){
+    SV.page = Math.max(0, Math.min((SV.pages || 1) - 1, n));
+    $$("#sv-questions .sv-page").forEach(function(pg){ pg.hidden = +pg.getAttribute("data-page") !== SV.page; });
+    var last = SV.page === (SV.pages || 1) - 1;
+    $("#sv-prev").hidden = SV.page === 0;
+    $("#sv-next").hidden = last;
+    $("#sv-final").hidden = !last;
+    $("#sv-submit").hidden = !last;
+    say($("#sv-form-msg"), "");
+    svProgress();
+    if (!first) $("#form-survey").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function svMissingHere(c){
+    var pg = $('#sv-questions .sv-page[data-page="' + svPage() + '"]');
+    return c.missing.filter(function(b){ return pg.contains(b); });
+  }
+  $("#sv-next").addEventListener("click", function(){
+    var miss = svMissingHere(svCollect());
+    if (miss.length){
+      miss.forEach(function(b){ b.classList.add("bad"); });
+      miss[0].scrollIntoView({ behavior: "smooth", block: "center" });
+      return say($("#sv-form-msg"), miss.length === 1 ? "Ezen az oldalon még egy kötelező kérdés hiányzik (pirossal jelöltük)." : "Ezen az oldalon még " + miss.length + " kötelező kérdés hiányzik (pirossal jelöltük).");
+    }
+    svGo(svPage() + 1);
+  });
+  $("#sv-prev").addEventListener("click", function(){ svGo(svPage() - 1); });
   function svTouch(e){
     var sc = e.target.closest && e.target.closest(".sv-scale");
     if (sc){
@@ -850,11 +903,14 @@
   });
   $("#form-survey").addEventListener("submit", function(e){
     e.preventDefault();
+    if (svPage() < (SV.pages || 1) - 1) return $("#sv-next").click(); // Enter egy korábbi oldalon = Tovább
     var msg = $("#sv-form-msg"); say(msg, "");
     if (SV.preview) return say(msg, "Előnézetben nem lehet beküldeni.");
     var c = svCollect();
     if (c.missing.length){
       c.missing.forEach(function(b){ b.classList.add("bad"); });
+      var mp = c.missing[0].closest(".sv-page");
+      if (mp && +mp.getAttribute("data-page") !== svPage()) svGo(+mp.getAttribute("data-page"), true);
       c.missing[0].scrollIntoView({ behavior: "smooth", block: "center" });
       return say(msg, c.missing.length === 1 ? "Még egy kötelező kérdés hiányzik (pirossal jelöltük)." : "Még " + c.missing.length + " kötelező kérdés hiányzik (pirossal jelöltük).");
     }
@@ -903,7 +959,7 @@
     var sent = (r[2].data || []).filter(function(c){ return c.email_sent_at; }).length;
     $("#sva-stats").textContent = (on ? "Bárki kitöltheti, aki regisztrált. " : "Csak előnézetben látod, a látogatóknak nem jelenik meg. ") +
       (r[1].count || 0) + " kitöltés · " + (r[2].data || []).length + " kupon, ebből " + sent + " e-mail elküldve · " +
-      SVA.qs.filter(function(q){ return q.active; }).length + " aktív kérdés";
+      SVA.qs.filter(function(q){ return q.active && q.kind !== "page"; }).length + " aktív kérdés";
     drawSurveyEditors();
   }
   function drawSurveyEditors(){
@@ -919,6 +975,7 @@
         '<div class="row2"><div class="field"><label>Típus<select name="kind">' + kinds + "</select></label></div>" +
         '<div class="field"><label>Segédszöveg (nem kötelező)<input name="help" maxlength="500" value="' + esc(q.help) + '"></label></div></div>' +
         '<div class="field" data-for="choice"' + (choice ? "" : " hidden") + '><label>Válaszlehetőségek, soronként egy<textarea name="options" rows="5">' + esc((q.options || []).join("\n")) + "</textarea></label></div>" +
+        (q.kind === "number" ? '<div class="field"><label>Mértékegység (pl. Ft, db)<input name="unit" maxlength="60" value="' + esc(q.max_label || "Ft") + '"></label></div>' : "") +
         '<div class="row2" data-for="scale"' + (q.kind === "scale" ? "" : " hidden") + '><div class="field"><label>Skála<select name="scale_max">' + scales + "</select></label></div>" +
         '<div class="field"><label>Felirat a bal végén<input name="min_label" maxlength="60" value="' + esc(q.min_label) + '" placeholder="pl. Egyáltalán nem"></label></div>' +
         '<div class="field"><label>Felirat a jobb végén<input name="max_label" maxlength="60" value="' + esc(q.max_label) + '" placeholder="pl. Nagyon"></label></div></div>' +
@@ -965,7 +1022,7 @@
       if ((kind === "single" || kind === "multi") && opts.length < 2 && !f("allow_other").checked) return say($("#admin-msg"), "Feleletválasztós kérdéshez legalább két válaszlehetőség kell.");
       if (opts.length > 30) return say($("#admin-msg"), "Legfeljebb 30 válaszlehetőség lehet.");
       var row = { label: label, kind: kind, help: f("help").value.trim(), options: opts, allow_other: f("allow_other").checked, shuffle: f("shuffle").checked,
-        scale_min: 1, scale_max: parseInt(f("scale_max").value, 10) || 10, min_label: f("min_label").value.trim(), max_label: f("max_label").value.trim(),
+        scale_min: 1, scale_max: parseInt(f("scale_max").value, 10) || 10, min_label: f("min_label").value.trim(), max_label: kind === "number" && f("unit") ? f("unit").value.trim() : f("max_label").value.trim(),
         required: f("required").checked, active: f("active").checked };
       var r = await sb.from("survey_questions").update(row).eq("id", id).select();
       if (r.error || !r.data.length) return say($("#admin-msg"), r.error ? huErr(r.error) : "Nem sikerült menteni.");

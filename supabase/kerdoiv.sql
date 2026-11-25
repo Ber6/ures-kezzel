@@ -8,7 +8,7 @@
 create table if not exists public.survey_questions (
   id uuid primary key default gen_random_uuid(),
   sort int not null default 0,
-  kind text not null check (kind in ('text','textarea','single','multi','scale')),
+  kind text not null check (kind in ('text','textarea','single','multi','scale','number','page')),
   label text not null check (char_length(label) between 1 and 300),
   help text not null default '' check (char_length(help) <= 500),
   options text[] not null default '{}' check (cardinality(options) <= 30),
@@ -92,7 +92,7 @@ begin
   if exists (select 1 from public.survey_responses where user_id = uid) then raise exception 'already_done'; end if;
   if p_answers is null or jsonb_typeof(p_answers) <> 'object' or length(p_answers::text) > 40000 then raise exception 'invalid_answers'; end if;
 
-  for q in select * from public.survey_questions where active order by sort, created_at loop
+  for q in select * from public.survey_questions where active and kind <> 'page' order by sort, created_at loop
     a := p_answers -> q.id::text;
     v := a -> 'value';
     other := left(btrim(coalesce(a ->> 'other', '')), 300);
@@ -117,6 +117,10 @@ begin
           end if;
         end loop;
         val := nullif(array_to_string(arr, '; '), '');
+      elsif q.kind = 'number' then
+        val := regexp_replace(v #>> '{}', '[\s.]', '', 'g');
+        if val !~ '^\d{1,8}$' then raise exception 'invalid_number'; end if;
+        val := (val::bigint)::text;
       elsif q.kind = 'scale' then
         if jsonb_typeof(v) <> 'number' then raise exception 'invalid_scale'; end if;
         n := round((v #>> '{}')::numeric)::int;
@@ -271,3 +275,7 @@ revoke execute on function public.booking_before_insert() from public, anon, aut
 
 -- 2026-11-24: meglévő adatbázisba
 alter table public.survey_questions add column if not exists shuffle boolean not null default false;
+
+-- 2026-11-25: oldaltörés ('page': címsor + szöveg, nem kérdés) és számmező ('number', egész Ft)
+alter table public.survey_questions drop constraint if exists survey_questions_kind_check;
+alter table public.survey_questions add constraint survey_questions_kind_check check (kind in ('text','textarea','single','multi','scale','number','page'));

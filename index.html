@@ -475,6 +475,13 @@ footer a:hover{color:var(--paper)}
 .sv-opt input{width:20px;height:20px;margin:0;accent-color:var(--lantern);flex:none}
 .sv-opt:has(input:checked){border-color:var(--lantern);background:rgba(242,194,48,.10)}
 .sv-other{margin-top:.5rem}
+.sv-pagehead{margin:0 0 1.25rem}
+.sv-pagehead h2{font-family:var(--display);font-size:clamp(1.4rem,3.2vw,1.9rem);margin:0 0 .4rem}
+.sv-pagehead p{margin:0;color:var(--paper);opacity:.85;line-height:1.5}
+.sv-num-wrap{display:flex;align-items:center;gap:.6rem;max-width:260px}
+.sv-num-wrap span{font-weight:700;color:var(--muted)}
+.sv-num-err{color:var(--ember);margin-top:.5rem!important}
+.sv-nav{margin-top:1rem}
 .sv-q input[type=text],.sv-q textarea{width:100%;min-height:48px;padding:.7rem 1rem;border-radius:14px;border:1.5px solid var(--line);background:rgba(15,22,51,.75);color:var(--paper);font:inherit;font-size:16px;box-sizing:border-box}
 .sv-q input[type=text]:focus,.sv-q textarea:focus{outline:none;border-color:var(--lantern);box-shadow:0 0 0 3px rgba(242,194,48,.2)}
 .sv-scale{padding:.25rem .25rem 0}
@@ -743,9 +750,15 @@ fieldset.sv-q > legend ~ *{clear:both}
               </div>
               <div id="sv-questions"></div>
               <div class="hp" aria-hidden="true"><label>Ezt a mezőt hagyd üresen<input id="sv-hp" type="text" tabindex="-1" autocomplete="off"></label></div>
+              <div id="sv-final" hidden>
               <label class="check"><input id="sv-consent" type="checkbox"><span>Hozzájárulok, hogy az Üres Kézzel csapat a válaszaimat a szolgáltatás fejlesztéséhez felhasználja az <a href="#/adatkezeles" target="_blank">adatkezelési tájékoztató</a> szerint. A hozzájárulást bármikor visszavonhatom.</span></label>
+              </div>
               <div id="sv-form-msg" class="msg" role="status" aria-live="polite" hidden></div>
-              <button class="btn btn-primary" type="submit" id="sv-submit">Beküldöm, és kérem a kupont</button>
+              <div class="btn-row sv-nav">
+                <button class="btn btn-ghost" type="button" id="sv-prev" hidden>Vissza</button>
+                <button class="btn btn-primary" type="button" id="sv-next">Tovább</button>
+                <button class="btn btn-primary" type="submit" id="sv-submit" form="form-survey" data-final>Beküldöm, és kérem a kupont</button>
+              </div>
             </form>
             <div id="sv-done" class="done" hidden>
               <h2 tabindex="-1">Köszönjük, sokat segítettél!</h2>
