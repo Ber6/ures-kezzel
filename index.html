@@ -461,6 +461,10 @@ footer a:hover{color:var(--paper)}
 /* ---------- nyilvános számláló (#/szamlalo) ---------- */
 .ctr-num{font-family:var(--display);font-weight:800;font-variation-settings:"wdth" 84,"opsz" 96;font-size:clamp(5rem,22vw,11rem);line-height:.9;color:var(--lantern);margin:0}
 .ctr-num small{font-size:.32em;color:var(--paper);opacity:.75;font-weight:700;margin-left:.15em}
+.ctr-cd{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.25rem 0 .25rem}
+.ctr-cd div{min-width:4.6rem;padding:.7rem .6rem .55rem;border-radius:16px;background:rgba(244,241,234,.07);border:1px solid rgba(244,241,234,.14);text-align:center}
+.ctr-cd b{display:block;font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1;color:var(--paper);font-variant-numeric:tabular-nums}
+.ctr-cd span{display:block;font-size:.8rem;color:var(--muted);margin-top:.3rem}
 .ctr-bar{height:18px;border-radius:999px;background:rgba(244,241,234,.12);overflow:hidden;margin:1.5rem 0 .5rem}
 .ctr-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lantern),var(--ember));border-radius:999px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
 /* ---------- hamarosan, kérdőív, kupon ---------- */
@@ -1192,6 +1196,13 @@ fieldset.sv-q > legend ~ *{clear:both}
             <p class="ctr-num" aria-live="polite"><span id="ctr-count">…</span><small id="ctr-goal"></small></p>
             <div class="ctr-bar" aria-hidden="true"><span id="ctr-bar"></span></div>
             <p class="hint" id="ctr-sub"></p>
+            <p class="hint" style="margin:1.25rem 0 0" id="ctr-cd-label">Még ennyi idő van hátra (dec. 1., 17:00):</p>
+            <div class="ctr-cd" id="ctr-cd" role="timer" aria-live="off">
+              <div><b id="cd-d">–</b><span>nap</span></div>
+              <div><b id="cd-h">–</b><span>óra</span></div>
+              <div><b id="cd-m">–</b><span>perc</span></div>
+              <div><b id="cd-s">–</b><span>mp</span></div>
+            </div>
             <div class="btn-row">
               <a class="btn btn-primary" href="#/kerdoiv" data-track="ctr_fill">Kitöltöm, 3 perc, −10% kupon</a>
               <button type="button" class="btn btn-ghost" id="ctr-share" data-track="ctr_share">Továbbküldöm</button>

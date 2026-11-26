@@ -1011,7 +1011,7 @@
 
   /* ---------- Nyilvános számláló (#/szamlalo): a kitöltések száma és a cél, belépés nélkül ----------
      Csak egy számot kér le (survey_progress RPC), személyes adatot nem. 20 mp-enként frissül, amíg nyitva van. */
-  var CTR = { timer: null };
+  var CTR = { timer: null, tick: null };
   async function ctrLoad(){
     if (!sb) return;
     var r = await sb.rpc("survey_progress");
@@ -1024,10 +1024,27 @@
       ? "Megvan a cél, köszönjük mindenkinek! Aki még nem töltötte ki, most is kitöltheti."
       : "A célunk " + goal + " kitöltés december 1-ig. Még " + (goal - n) + " hiányzik, segíts, hogy összejöjjön!";
   }
+  // határidő: 2026. dec. 1. 17:00 magyar idő (télen UTC+1)
+  var CTR_DEADLINE = Date.parse("2026-12-01T17:00:00+01:00");
+  function pad2(n){ return (n < 10 ? "0" : "") + n; }
+  function ctrTick(){
+    var left = Math.max(0, CTR_DEADLINE - Date.now()), sec = Math.floor(left / 1000);
+    $("#cd-d").textContent = Math.floor(sec / 86400);
+    $("#cd-h").textContent = pad2(Math.floor(sec % 86400 / 3600));
+    $("#cd-m").textContent = pad2(Math.floor(sec % 3600 / 60));
+    $("#cd-s").textContent = pad2(sec % 60);
+    if (!left) $("#ctr-cd-label").textContent = "Lejárt az idő (dec. 1., 17:00). Köszönjük mindenkinek!";
+    return left;
+  }
   function showCounter(){
     showBody("szamlalo");
     say($("#ctr-msg"), "");
     ctrLoad();
+    ctrTick();
+    clearInterval(CTR.tick);
+    CTR.tick = setInterval(function(){
+      if (state.view !== "szamlalo" || !ctrTick()){ clearInterval(CTR.tick); }
+    }, 1000);
     clearInterval(CTR.timer);
     CTR.timer = setInterval(function(){
       if (state.view !== "szamlalo"){ clearInterval(CTR.timer); return; }
