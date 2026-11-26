@@ -1074,7 +1074,10 @@ fieldset.sv-q > legend ~ *{clear:both}
                     <button type="button" class="btn btn-primary btn-sm" id="sva-toggle">Kérdőív indítása</button>
                   </div>
                 </div>
-                <form id="sva-texts" class="form" style="max-width:720px">
+                <h3 class="sub" style="margin-top:1.5rem">Honnan jöttek a kitöltők?</h3>
+                <p class="muted">Forrás = a link <code>utm_source</code> része (pl. <code>?utm_source=tiktok</code>), ha nincs, akkor az előző oldal domainje. A „Látogató” az oldalra érkezések száma abból a forrásból (a „Ne kövess” beállítású böngészők nélkül), az „Arány” a kitöltés / látogató.</p>
+                <div class="tbl-wrap" style="max-width:720px"><table class="tbl" id="sva-sources"><thead><tr><th>Forrás</th><th>Látogató</th><th>Kitöltés</th><th>Arány</th></tr></thead><tbody><tr><td colspan="4" class="muted">Betöltés…</td></tr></tbody></table></div>
+                <form id="sva-texts" class="form" style="max-width:720px;margin-top:2rem">
                   <div class="field"><label for="sva-title">Cím (a főoldalon és a kérdőív tetején)</label><input id="sva-title" maxlength="120"></div>
                   <div class="field"><label for="sva-intro">Bevezető szöveg</label><textarea id="sva-intro" rows="3" maxlength="600"></textarea></div>
                   <div class="field" style="max-width:260px"><label for="sva-discount">Kedvezmény a kitöltésért (%)</label><input id="sva-discount" type="number" min="1" max="50"><p class="hint">Csak az új kuponokra vonatkozik, a már kiküldötteket nem módosítja.</p></div>

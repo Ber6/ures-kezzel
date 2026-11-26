@@ -1086,6 +1086,36 @@
       (r[1].count || 0) + " kitöltés · " + (r[2].data || []).length + " kupon, ebből " + sent + " e-mail elküldve · " +
       SVA.qs.filter(function(q){ return q.active && q.kind !== "page"; }).length + " aktív kérdés";
     drawSurveyEditors();
+    renderSurveySources();
+  }
+  /* ---------- Honnan jöttek a kitöltők: survey_responses.source + belépő oldalletöltések forrása ---------- */
+  var SOURCE_LABEL = {
+    "": "Közvetlen / ismeretlen", tiktok: "TikTok (bio)", instagram_bio: "Instagram (bio)", instagram: "Instagram",
+    kuponlevel: "Kuponlevél gombja", tovabbkuldes: "Továbbküldött link", ajanlas: "Köszönőoldal megosztása",
+    szamlalo: "Számláló oldal", "l.instagram.com": "Instagram (link)", "instagram.com": "Instagram (link)",
+    "m.facebook.com": "Facebook / Messenger", "l.facebook.com": "Facebook / Messenger", "facebook.com": "Facebook / Messenger",
+    "lm.facebook.com": "Facebook / Messenger", "google.com": "Google keresés", "tiktok.com": "TikTok (link)"
+  };
+  function srcLabel(k){ return SOURCE_LABEL[k] || k; }
+  async function renderSurveySources(){
+    var body = $("#sva-sources tbody");
+    var r = await Promise.all([
+      sb.from("survey_responses").select("source").limit(10000),
+      sb.from("page_events").select("utm_source,referrer").eq("event", "pageview").eq("entry", true).limit(50000)
+    ]);
+    if (r[0].error) { body.innerHTML = '<tr><td colspan="4">' + esc(huErr(r[0].error)) + "</td></tr>"; return; }
+    var m = {};
+    function row(k){ var l = srcLabel(k); return m[l] || (m[l] = { label: l, visits: 0, done: 0 }); }
+    (r[0].data || []).forEach(function(x){ row(x.source || "").done++; });
+    (r[1].data || []).forEach(function(x){ row(x.utm_source || x.referrer || "").visits++; });
+    var rows = Object.keys(m).map(function(k){ return m[k]; })
+      .sort(function(a, b){ return b.done - a.done || b.visits - a.visits; });
+    var tot = rows.reduce(function(a, x){ a.v += x.visits; a.d += x.done; return a; }, { v: 0, d: 0 });
+    function pct(d, v){ return v ? Math.round(d / v * 100) + "%" : "–"; }
+    body.innerHTML = rows.length ? rows.map(function(x){
+      return "<tr><td>" + esc(x.label) + "</td><td>" + x.visits + "</td><td><b>" + x.done + "</b></td><td>" + pct(x.done, x.visits) + "</td></tr>";
+    }).join("") + "<tr><td><b>Összesen</b></td><td><b>" + tot.v + "</b></td><td><b>" + tot.d + "</b></td><td><b>" + pct(tot.d, tot.v) + "</b></td></tr>"
+      : '<tr><td colspan="4" class="muted">Még nincs kitöltés.</td></tr>';
   }
   function drawSurveyEditors(){
     $("#sva-list").innerHTML = SVA.qs.map(function(q, i){
